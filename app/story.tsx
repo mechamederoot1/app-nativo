@@ -16,7 +16,11 @@ import { useRouter } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import TopBar from '../frontend/components/TopBar';
 import BottomNav from '../frontend/components/BottomNav';
-import { Story, setStories, setActiveIndex } from '../frontend/contexts/StoryStore';
+import {
+  Story,
+  setStories,
+  setActiveIndex,
+} from '../frontend/contexts/StoryStore';
 
 const INITIAL: Story[] = [
   {
@@ -90,12 +94,19 @@ export default function StoryListScreen() {
       const ImagePicker: any = module;
       const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!perm.granted) {
-        Alert.alert('Permissão necessária', 'Precisamos de acesso à galeria para adicionar um story.');
+        Alert.alert(
+          'Permissão necessária',
+          'Precisamos de acesso à galeria para adicionar um story.',
+        );
         return;
       }
-      const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.All, quality: 0.8 });
+      const res = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        quality: 0.8,
+      });
       if (res.cancelled) return;
-      const uri = res.assets && res.assets[0] ? res.assets[0].uri : (res.uri as string);
+      const uri =
+        res.assets && res.assets[0] ? res.assets[0].uri : (res.uri as string);
       const newStory: Story = {
         id: String(Date.now()),
         user: 'Você',
@@ -107,7 +118,10 @@ export default function StoryListScreen() {
       setData((prev) => [newStory, ...prev]);
       setStories([newStory, ...data]);
     } catch (err) {
-      Alert.alert('Erro', "Não foi possível abrir a galeria. Instale 'expo-image-picker' e reinicie o app.");
+      Alert.alert(
+        'Erro',
+        "Não foi possível abrir a galeria. Instale 'expo-image-picker' e reinicie o app.",
+      );
     }
   }, [data]);
 
@@ -153,7 +167,11 @@ export default function StoryListScreen() {
         <View style={styles.metaRow}>
           <Text style={styles.meta}>Comentários: {item.comments.length}</Text>
           <Text style={styles.meta}>
-            Reações: {Object.values(item.reactions || {}).reduce((a, b) => a + (b || 0), 0)}
+            Reações:{' '}
+            {Object.values(item.reactions || {}).reduce(
+              (a, b) => a + (b || 0),
+              0,
+            )}
           </Text>
         </View>
       </TouchableOpacity>
@@ -166,7 +184,11 @@ export default function StoryListScreen() {
       <TopBar />
 
       <View style={styles.composerRow}>
-        <TouchableOpacity style={styles.addButton} onPress={pickMedia} accessibilityLabel="Adicionar story">
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={pickMedia}
+          accessibilityLabel="Adicionar story"
+        >
           <Plus size={20} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.addLabel}>Adicionar Story</Text>

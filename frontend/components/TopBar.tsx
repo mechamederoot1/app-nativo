@@ -26,8 +26,14 @@ export default function TopBar() {
 
   const messages = useMemo(
     () => [
-      { text: 'Paulo acabou de entrar', avatar: 'https://i.pravatar.cc/100?img=15' },
-      { text: 'Paulo te enviou uma mensagem', avatar: 'https://i.pravatar.cc/100?img=15' },
+      {
+        text: 'Paulo acabou de entrar',
+        avatar: 'https://i.pravatar.cc/100?img=15',
+      },
+      {
+        text: 'Paulo te enviou uma mensagem',
+        avatar: 'https://i.pravatar.cc/100?img=15',
+      },
     ],
     [],
   );
@@ -41,12 +47,20 @@ export default function TopBar() {
       setIdx((p) => (p + 1) % messages.length);
       setVisible(true);
       Animated.parallel([
-        Animated.timing(opacity, { toValue: 1, duration: 250, useNativeDriver: true }),
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
         Animated.spring(translateY, { toValue: 0, useNativeDriver: true }),
       ]).start(() => {
         setTimeout(() => {
           Animated.parallel([
-            Animated.timing(opacity, { toValue: 0, duration: 250, useNativeDriver: true }),
+            Animated.timing(opacity, {
+              toValue: 0,
+              duration: 250,
+              useNativeDriver: true,
+            }),
             Animated.spring(translateY, { toValue: -8, useNativeDriver: true }),
           ]).start(() => setVisible(false));
         }, 2200);
@@ -68,8 +82,13 @@ export default function TopBar() {
 
       <View style={styles.centerToastArea}>
         {visible ? (
-          <Animated.View style={[styles.toast, { opacity, transform: [{ translateY }] }]}>
-            <Image source={{ uri: messages[idx].avatar }} style={styles.toastAvatar} />
+          <Animated.View
+            style={[styles.toast, { opacity, transform: [{ translateY }] }]}
+          >
+            <Image
+              source={{ uri: messages[idx].avatar }}
+              style={styles.toastAvatar}
+            />
             <Text style={styles.toastText}>{messages[idx].text}</Text>
           </Animated.View>
         ) : null}
