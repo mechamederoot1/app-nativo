@@ -119,11 +119,13 @@ export default function FeedScreen() {
           contentContainerStyle={styles.postsList}
           ListHeaderComponent={
             <View style={styles.listHeader}>
-              <Text style={styles.feedTitle}>Feed personalizado</Text>
-              <Text style={styles.feedSubtitle}>
-                Acompanhe atualizações em tempo real das pessoas que você segue.
-              </Text>
               <CreatePost onCreate={handleCreate} />
+              <View>
+                <Text style={styles.feedTitle}>Feed</Text>
+                <Text style={styles.feedSubtitle}>
+                  Acompanhe atualizações em tempo real das pessoas que você segue.
+                </Text>
+              </View>
             </View>
           }
         />
@@ -148,13 +150,14 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   listHeader: {
-    gap: 12,
-    marginBottom: 16,
+    gap: 16,
+    marginBottom: 20,
   },
   feedTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: '#0f172a',
+    marginBottom: 4,
   },
   feedSubtitle: {
     fontSize: 14,
