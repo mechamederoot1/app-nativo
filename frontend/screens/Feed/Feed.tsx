@@ -135,24 +135,6 @@ export default function FeedScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <TopBar />
       <View style={styles.content}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Stories</Text>
-          <TouchableOpacity activeOpacity={0.8}>
-            <Text style={styles.sectionAction}>Ver tudo</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.storiesCard}>
-          <FlatList
-            data={stories}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.storiesList}
-            keyExtractor={(item) => item.id}
-            renderItem={renderStory}
-          />
-        </View>
-
         <CreatePost onCreate={handleCreate} />
 
         <FlatList
