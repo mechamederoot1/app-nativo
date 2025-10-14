@@ -8,7 +8,7 @@ import { useUnread } from '../contexts/UnreadContext';
 
 export default function TopBar() {
   const router = useRouter();
-  const { unreadNotifications, unreadVisits } = useUnread();
+  const { unreadVisits } = useUnread();
   const insets = useSafeAreaInsets();
 
   const paddingTop = Math.max(insets.top + 6, Platform.OS === 'android' ? 18 : 20);
