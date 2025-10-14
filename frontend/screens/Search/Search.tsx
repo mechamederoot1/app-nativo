@@ -76,9 +76,19 @@ function TagButton({ tag, selected, onSelect }: TagButtonProps) {
   );
 }
 
-function PersonRow({ person, onPress }: { person: Person; onPress: () => void }) {
+function PersonRow({
+  person,
+  onPress,
+}: {
+  person: Person;
+  onPress: () => void;
+}) {
   return (
-    <TouchableOpacity style={styles.personRow} onPress={onPress} activeOpacity={0.9}>
+    <TouchableOpacity
+      style={styles.personRow}
+      onPress={onPress}
+      activeOpacity={0.9}
+    >
       <View style={styles.personAvatar}>
         <Text style={styles.personInitial}>{person.name[0]}</Text>
       </View>
@@ -115,7 +125,9 @@ export default function SearchScreen() {
           interest.toLowerCase().includes(normalizedQuery),
         );
 
-      const matchesTag = selectedTag ? person.interests.includes(selectedTag) : true;
+      const matchesTag = selectedTag
+        ? person.interests.includes(selectedTag)
+        : true;
 
       return matchesQuery && matchesTag;
     });
@@ -160,14 +172,19 @@ export default function SearchScreen() {
           showsHorizontalScrollIndicator={false}
           style={{ marginBottom: 16 }}
           renderItem={({ item }) => (
-            <TagButton tag={item} selected={item === selectedTag} onSelect={handleSelectTag} />
+            <TagButton
+              tag={item}
+              selected={item === selectedTag}
+              onSelect={handleSelectTag}
+            />
           )}
         />
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Resultados</Text>
           <Text style={styles.resultCount}>
-            {filteredPeople.length} {filteredPeople.length === 1 ? 'resultado' : 'resultados'}
+            {filteredPeople.length}{' '}
+            {filteredPeople.length === 1 ? 'resultado' : 'resultados'}
           </Text>
         </View>
 
@@ -178,9 +195,12 @@ export default function SearchScreen() {
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Text style={styles.emptyStateTitle}>Nenhum perfil encontrado</Text>
+              <Text style={styles.emptyStateTitle}>
+                Nenhum perfil encontrado
+              </Text>
               <Text style={styles.emptyStateSubtitle}>
-                Ajuste os filtros ou tente um termo diferente para encontrar novas conexões.
+                Ajuste os filtros ou tente um termo diferente para encontrar
+                novas conexões.
               </Text>
             </View>
           }

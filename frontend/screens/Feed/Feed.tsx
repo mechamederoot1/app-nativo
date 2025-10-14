@@ -1,11 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import {
-  View,
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  Text,
-} from 'react-native';
+import { View, FlatList, RefreshControl, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import PostCard from '../../components/PostCard';
@@ -123,7 +117,8 @@ export default function FeedScreen() {
               <View>
                 <Text style={styles.feedTitle}>Feed</Text>
                 <Text style={styles.feedSubtitle}>
-                  Acompanhe atualizações em tempo real das pessoas que você segue.
+                  Acompanhe atualizações em tempo real das pessoas que você
+                  segue.
                 </Text>
               </View>
             </View>

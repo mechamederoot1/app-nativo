@@ -95,10 +95,7 @@ function NotificationCard({
 }
 
 export default function NotificationsScreen() {
-  const {
-    markNotificationsRead,
-    setUnreadNotifications,
-  } = useUnread();
+  const { markNotificationsRead, setUnreadNotifications } = useUnread();
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
 
   const unreadCount = useMemo(
@@ -127,7 +124,9 @@ export default function NotificationsScreen() {
   }, []);
 
   const handleMarkAllRead = useCallback(() => {
-    setNotifications((prev) => prev.map((notification) => ({ ...notification, read: true })));
+    setNotifications((prev) =>
+      prev.map((notification) => ({ ...notification, read: true })),
+    );
     markNotificationsRead();
   }, [markNotificationsRead]);
 
@@ -145,7 +144,10 @@ export default function NotificationsScreen() {
             </Text>
           </View>
           {unreadCount > 0 && (
-            <TouchableOpacity style={styles.markAllButton} onPress={handleMarkAllRead}>
+            <TouchableOpacity
+              style={styles.markAllButton}
+              onPress={handleMarkAllRead}
+            >
               <Text style={styles.markAllText}>Marcar tudo como lido</Text>
             </TouchableOpacity>
           )}

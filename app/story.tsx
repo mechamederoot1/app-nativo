@@ -67,8 +67,10 @@ const BASE_STORIES: Story[] = [
       company: 'Studio 42',
     },
     media: {
-      image: 'https://images.unsplash.com/photo-1527766833261-b09c3163a791?auto=format&fit=crop&w=900&q=80',
-      caption: 'Explorando novas referências para o próximo produto. Inspiração está em todo lugar! ✨',
+      image:
+        'https://images.unsplash.com/photo-1527766833261-b09c3163a791?auto=format&fit=crop&w=900&q=80',
+      caption:
+        'Explorando novas referências para o próximo produto. Inspiração está em todo lugar! ✨',
     },
     postedAt: 'há 2 horas',
     comments: [
@@ -113,8 +115,10 @@ const BASE_STORIES: Story[] = [
       company: 'OceanLab',
     },
     media: {
-      image: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=900&q=80',
-      caption: 'Lançamos hoje nossa nova funcionalidade! Obrigado a todo o time pelo esforço. 🚀',
+      image:
+        'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=900&q=80',
+      caption:
+        'Lançamos hoje nossa nova funcionalidade! Obrigado a todo o time pelo esforço. 🚀',
     },
     postedAt: 'há 5 horas',
     comments: [
@@ -150,8 +154,10 @@ const BASE_STORIES: Story[] = [
       company: 'Semente Digital',
     },
     media: {
-      image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80',
-      caption: 'Workshop de pesquisa com usuários rolando aqui na comunidade. Energia lá em cima! 🎤',
+      image:
+        'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80',
+      caption:
+        'Workshop de pesquisa com usuários rolando aqui na comunidade. Energia lá em cima! 🎤',
     },
     postedAt: 'ontem',
     comments: [
@@ -207,7 +213,10 @@ function StoryViewer({ story, onClose }: StoryViewerProps) {
       return sort === 'newest' ? -diff : diff;
     });
 
-    const groups = new Map<string, { author: CommentAuthor; comments: Comment[] }>();
+    const groups = new Map<
+      string,
+      { author: CommentAuthor; comments: Comment[] }
+    >();
 
     ordered.forEach((comment) => {
       const existing = groups.get(comment.author.name);
@@ -331,7 +340,9 @@ function StoryViewer({ story, onClose }: StoryViewerProps) {
                       source={{ uri: group.author.avatar }}
                       style={styles.commentAuthorAvatar}
                     />
-                    <Text style={styles.commentAuthorName}>{group.author.name}</Text>
+                    <Text style={styles.commentAuthorName}>
+                      {group.author.name}
+                    </Text>
                   </View>
                   {group.comments.map((comment) => (
                     <View key={comment.id} style={styles.commentCard}>
