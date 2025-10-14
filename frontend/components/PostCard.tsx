@@ -16,12 +16,20 @@ type Post = {
   comments?: Comment[];
 };
 
-export default function PostCard({ post, onLike }: { post: Post; onLike?: (id: string) => void }) {
+export default function PostCard({
+  post,
+  onLike,
+}: {
+  post: Post;
+  onLike?: (id: string) => void;
+}) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
         <View style={styles.avatarPlaceholder}>
-          <Text style={styles.avatarText}>{post.user.charAt(0).toUpperCase()}</Text>
+          <Text style={styles.avatarText}>
+            {post.user.charAt(0).toUpperCase()}
+          </Text>
         </View>
         <View style={{ marginLeft: 12, flex: 1 }}>
           <Text style={styles.user}>{post.user}</Text>
@@ -33,26 +41,37 @@ export default function PostCard({ post, onLike }: { post: Post; onLike?: (id: s
         <Text style={styles.content}>{post.content}</Text>
       </View>
 
-      {post.image ? <Image source={{ uri: post.image }} style={styles.image} /> : null}
+      {post.image ? (
+        <Image source={{ uri: post.image }} style={styles.image} />
+      ) : null}
 
       <View style={styles.actionsRow}>
-        <TouchableOpacity style={styles.action} onPress={() => onLike && onLike(post.id)}>
+        <TouchableOpacity
+          style={styles.action}
+          onPress={() => onLike && onLike(post.id)}
+        >
           <Heart size={18} color={post.liked ? '#e11d48' : '#6b7280'} />
-          <Text style={[styles.actionText, { marginLeft: 8 }]}>{post.likes ?? 0}</Text>
+          <Text style={[styles.actionText, { marginLeft: 8 }]}>
+            {post.likes ?? 0}
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.action}>
           <MessageCircle size={18} color="#6b7280" />
-          <Text style={[styles.actionText, { marginLeft: 8 }]}>{(post.comments || []).length}</Text>
+          <Text style={[styles.actionText, { marginLeft: 8 }]}>
+            {(post.comments || []).length}
+          </Text>
         </View>
 
         <View style={styles.action}>
           <Share2 size={18} color="#6b7280" />
-          <Text style={[styles.actionText, { marginLeft: 8 }]}>Compartilhar</Text>
+          <Text style={[styles.actionText, { marginLeft: 8 }]}>
+            Compartilhar
+          </Text>
         </View>
       </View>
 
-      {(post.comments || []).slice(0, 2).map(c => (
+      {(post.comments || []).slice(0, 2).map((c) => (
         <View key={c.id} style={styles.commentRow}>
           <Text style={styles.commentUser}>{c.user}</Text>
           <Text style={styles.commentText}> {c.text}</Text>
@@ -67,8 +86,8 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#fff',
     borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
+    padding: 10,
+    marginBottom: 10,
     shadowColor: '#000',
     shadowOpacity: 0.03,
     shadowRadius: 6,
@@ -79,9 +98,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatarPlaceholder: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#e6f0ff',
     alignItems: 'center',
     justifyContent: 'center',
@@ -100,20 +119,20 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   content: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 18,
     color: '#111827',
   },
   image: {
     width: '100%',
-    height: 260,
+    height: 200,
     borderRadius: 10,
-    marginTop: 12,
+    marginTop: 10,
   },
   actionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 10,
     justifyContent: 'space-between',
   },
   action: {

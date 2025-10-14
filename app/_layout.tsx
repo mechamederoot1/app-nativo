@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import { useFrameworkReady } from '../hooks/useFrameworkReady';
 import '../global.css';
 import { UnreadProvider } from '../frontend/contexts/UnreadContext';
 
@@ -18,6 +18,7 @@ export default function RootLayout() {
           <Stack.Screen name="messages" />
           <Stack.Screen name="visits" />
           <Stack.Screen name="profile" />
+          <Stack.Screen name="story" />
           <Stack.Screen name="create" />
           <Stack.Screen name="+not-found" />
         </Stack>
