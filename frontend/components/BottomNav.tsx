@@ -8,11 +8,17 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Home, Plus, Eye, User } from 'lucide-react-native';
+import { Home, Eye, User, Image as ImageIcon } from 'lucide-react-native';
 
 import { useUnread } from '../contexts/UnreadContext';
 
-type ActiveTab = 'feed' | 'create' | 'messages' | 'visits' | 'profile';
+type ActiveTab =
+  | 'feed'
+  | 'story'
+  | 'messages'
+  | 'visits'
+  | 'profile'
+  | 'create';
 
 type BottomNavProps = {
   active?: ActiveTab;
@@ -63,12 +69,15 @@ function BottomNavInner({
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.tab} onPress={go('/create')}>
+      <TouchableOpacity style={styles.tab} onPress={go('/story')}>
         <View style={styles.iconWrapper}>
-          <Plus size={20} color={active === 'create' ? '#0856d6' : '#6b7280'} />
+          <ImageIcon
+            size={20}
+            color={active === 'story' ? '#0856d6' : '#6b7280'}
+          />
         </View>
-        <Text style={[styles.label, active === 'create' && styles.active]}>
-          Criar
+        <Text style={[styles.label, active === 'story' && styles.active]}>
+          Story
         </Text>
       </TouchableOpacity>
 
