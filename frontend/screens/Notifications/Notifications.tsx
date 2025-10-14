@@ -151,7 +151,7 @@ export default function NotificationsScreen() {
           contentContainerStyle={{ paddingBottom: 120 }}
         />
       </View>
-      <BottomNav active="feed" />
+      <BottomNav />
     </SafeAreaView>
   );
 }
