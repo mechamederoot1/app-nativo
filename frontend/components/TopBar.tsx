@@ -18,15 +18,15 @@ export default function TopBar() {
   const insets = useSafeAreaInsets();
 
   const paddingTop = Math.max(
-    insets.top + 6,
-    Platform.OS === 'android' ? 18 : 20,
+    insets.top + 2,
+    Platform.OS === 'android' ? 12 : 14,
   );
 
   return (
     <View
       style={[
         styles.container,
-        { paddingTop, paddingBottom: Platform.OS === 'ios' ? 12 : 10 },
+        { paddingTop, paddingBottom: Platform.OS === 'ios' ? 8 : 6 },
       ]}
     >
       <TouchableOpacity onPress={() => router.push('/feed')}>
@@ -38,14 +38,14 @@ export default function TopBar() {
           onPress={() => router.push('/search')}
           style={styles.iconBtn}
         >
-          <Search size={18} color="#6b7280" />
+          <Search size={16} color="#6b7280" />
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => router.push('/notifications')}
           style={styles.iconBtn}
         >
-          <Bell size={18} color="#6b7280" />
+          <Bell size={16} color="#6b7280" />
           {unreadVisits > 0 && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{unreadVisits}</Text>
@@ -73,14 +73,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#fff',
   },
-  logo: { fontSize: 22, fontWeight: '800', color: '#0856d6' },
+  logo: { fontSize: 18, fontWeight: '800', color: '#0856d6' },
   rightRow: { flexDirection: 'row', alignItems: 'center' },
   iconBtn: { marginLeft: 12 },
   avatarPlaceholder: {
     marginLeft: 12,
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: '#e6f0ff',
     alignItems: 'center',
     justifyContent: 'center',
