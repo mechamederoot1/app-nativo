@@ -113,7 +113,12 @@ export default function FeedScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <TopBar />
       <View style={styles.content}>
-        <Text style={styles.heading}>Vibe</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Stories</Text>
+          <TouchableOpacity activeOpacity={0.8}>
+            <Text style={styles.sectionAction}>Ver tudo</Text>
+          </TouchableOpacity>
+        </View>
 
         <FlatList
           data={stories}
@@ -151,16 +156,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
   },
-  heading: {
-    fontSize: 22,
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
     fontWeight: '700',
-    marginBottom: 12,
-    color: '#111827',
+    color: '#0f172a',
+  },
+  sectionAction: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#0856d6',
   },
   storiesList: {
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    marginBottom: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    marginBottom: 16,
+    borderRadius: 18,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   storyItem: {
     alignItems: 'center',
