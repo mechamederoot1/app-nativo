@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, Plus, Eye, User } from 'lucide-react-native';
 
 import { useUnread } from '../contexts/UnreadContext';
@@ -28,10 +29,11 @@ function MessageBubble({ active }: { active?: boolean }) {
 
 function BottomNavInner({ active, unreadMessages = 0, unreadVisits = 0 }: BottomNavProps) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const go = useCallback((path: string) => () => router.push(path), [router]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom + 6, Platform.OS === 'android' ? 22 : 18) }]}>
       <TouchableOpacity style={styles.tab} onPress={go('/feed')}>
         <View style={styles.iconWrapper}>
           <Home size={20} color={active === 'feed' ? '#0856d6' : '#6b7280'} />
@@ -98,10 +100,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingVertical: Platform.OS === 'ios' ? 12 : 8,
+    paddingTop: Platform.OS === 'ios' ? 12 : 10,
     borderTopWidth: 1,
     borderColor: '#e5e7eb',
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
   },
   tab: {
     flex: 1,
