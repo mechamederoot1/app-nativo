@@ -113,9 +113,7 @@ export default function FeedScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <TopBar />
       <View style={styles.content}>
-        <Text style={styles.heading}>
-          <Text onPress={() => {}} style={styles.headingHighlight}>Vibe</Text>
-        </Text>
+        <Text style={styles.heading}>Vibe</Text>
 
         <FlatList
           data={stories}
@@ -158,9 +156,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 12,
     color: '#111827',
-  },
-  headingHighlight: {
-    color: '#0856d6',
   },
   storiesList: {
     paddingVertical: 8,
