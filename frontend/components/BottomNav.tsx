@@ -1,7 +1,29 @@
 import React, { useCallback } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Platform } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Platform,
+} from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, Plus, Eye, User } from 'lucide-react-native';
+
+import { useUnread } from '../contexts/UnreadContext';
+
+type ActiveTab = 'feed' | 'create' | 'messages' | 'visits' | 'profile';
+
+type BottomNavProps = {
+  active?: ActiveTab;
+  unreadMessages?: number;
+  unreadVisits?: number;
+};
+
+function formatBadgeValue(value?: number) {
+  if (!value) return '';
+  return value > 99 ? '99+' : String(value);
+}
 
 function MessageBubble({ active }: { active?: boolean }) {
   return (
@@ -11,71 +33,100 @@ function MessageBubble({ active }: { active?: boolean }) {
   );
 }
 
-function BottomNavInner({ active }: { active?: 'feed' | 'create' | 'messages' | 'visits' | 'profile' }) {
+function BottomNavInner({
+  active,
+  unreadMessages = 0,
+  unreadVisits = 0,
+}: BottomNavProps) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const go = useCallback((path: string) => () => router.push(path), [router]);
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingBottom: Math.max(
+            insets.bottom + 6,
+            Platform.OS === 'android' ? 22 : 18,
+          ),
+        },
+      ]}
+    >
       <TouchableOpacity style={styles.tab} onPress={go('/feed')}>
-        <Home size={20} color={active === 'feed' ? '#0856d6' : '#6b7280'} />
-        <Text style={[styles.label, active === 'feed' && styles.active]}>Feed</Text>
+        <View style={styles.iconWrapper}>
+          <Home size={20} color={active === 'feed' ? '#0856d6' : '#6b7280'} />
+        </View>
+        <Text style={[styles.label, active === 'feed' && styles.active]}>
+          Feed
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.tab} onPress={go('/create')}>
-        <Plus size={20} color={active === 'create' ? '#0856d6' : '#6b7280'} />
-        <Text style={[styles.label, active === 'create' && styles.active]}>Criar</Text>
+        <View style={styles.iconWrapper}>
+          <Plus size={20} color={active === 'create' ? '#0856d6' : '#6b7280'} />
+        </View>
+        <Text style={[styles.label, active === 'create' && styles.active]}>
+          Criar
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.tab} onPress={go('/messages')}>
-        <View>
+        <View style={styles.iconWrapper}>
           <MessageBubble active={active === 'messages'} />
-          {/* badge for unread messages */}
-          {/** will be filled via context at runtime by reading UnreadContext in a wrapper */}
+          {unreadMessages > 0 && (
+            <View style={[styles.badge, styles.badgeMessage]}>
+              <Text style={styles.badgeText}>
+                {formatBadgeValue(unreadMessages)}
+              </Text>
+            </View>
+          )}
         </View>
-        <Text style={[styles.label, active === 'messages' && styles.active]}>Mensagens</Text>
+        <Text style={[styles.label, active === 'messages' && styles.active]}>
+          Mensagens
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.tab} onPress={go('/visits')}>
-        <View>
+        <View style={styles.iconWrapper}>
           <Eye size={20} color={active === 'visits' ? '#0856d6' : '#6b7280'} />
+          {unreadVisits > 0 && (
+            <View style={[styles.badge, styles.badgeVisits]}>
+              <Text style={styles.badgeText}>
+                {formatBadgeValue(unreadVisits)}
+              </Text>
+            </View>
+          )}
         </View>
-        <Text style={[styles.label, active === 'visits' && styles.active]}>Visitas</Text>
+        <Text style={[styles.label, active === 'visits' && styles.active]}>
+          Visitas
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.tab} onPress={go('/profile')}>
-        <User size={20} color={active === 'profile' ? '#0856d6' : '#6b7280'} />
-        <Text style={[styles.label, active === 'profile' && styles.active]}>Perfil</Text>
+        <View style={styles.iconWrapper}>
+          <User
+            size={20}
+            color={active === 'profile' ? '#0856d6' : '#6b7280'}
+          />
+        </View>
+        <Text style={[styles.label, active === 'profile' && styles.active]}>
+          Perfil
+        </Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-import { useUnread } from '../contexts/UnreadContext';
-
-function BottomNavWithBadges(props: { active?: 'feed' | 'create' | 'messages' | 'visits' | 'profile' }) {
+function BottomNavWithBadges(props: { active?: ActiveTab }) {
   const { unreadMessages, unreadVisits } = useUnread();
-  // Render the inner nav but overlay badges by cloning structure
   return (
-    <View>
-      <BottomNavInner active={props.active} />
-      {/* Overlay badges positioned near tabs — simple absolute positioned badges */}
-      {/* Since BottomNavInner uses flex layout, we place badges absolutely relative to screen width */}
-      <View style={styles.badgeOverlay} pointerEvents="none">
-        {/* messages badge */}
-        {unreadMessages > 0 && (
-          <View style={[styles.overlayBadge, { left: '38%' }]}>
-            <Text style={styles.badgeTextSmall}>{unreadMessages}</Text>
-          </View>
-        )}
-        {/* visits badge */}
-        {unreadVisits > 0 && (
-          <View style={[styles.overlayBadge, { left: '68%' }]}>
-            <Text style={styles.badgeTextSmall}>{unreadVisits}</Text>
-          </View>
-        )}
-      </View>
-    </View>
+    <BottomNavInner
+      active={props.active}
+      unreadMessages={unreadMessages}
+      unreadVisits={unreadVisits}
+    />
   );
 }
 
@@ -86,14 +137,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingVertical: Platform.OS === 'ios' ? 12 : 8,
+    paddingTop: Platform.OS === 'ios' ? 12 : 10,
     borderTopWidth: 1,
     borderColor: '#e5e7eb',
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
   },
   tab: {
     flex: 1,
     alignItems: 'center',
+  },
+  iconWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 28,
+    minWidth: 28,
   },
   label: {
     color: '#374151',
@@ -105,9 +163,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   msgBubble: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: '#f1f5f9',
     alignItems: 'center',
     justifyContent: 'center',
@@ -116,34 +174,35 @@ const styles = StyleSheet.create({
     backgroundColor: '#0856d6',
   },
   msgInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: '#94a3b8',
   },
   msgInnerActive: {
     backgroundColor: '#fff',
   },
-  badgeOverlay: {
+  badge: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 48 : 44,
-    left: 0,
-    right: 0,
-    height: 0,
-  },
-  overlayBadge: {
-    position: 'absolute',
+    top: -6,
+    right: -10,
     backgroundColor: '#ef4444',
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 4,
   },
-  badgeTextSmall: {
+  badgeMessage: {
+    right: -8,
+  },
+  badgeVisits: {
+    right: -10,
+  },
+  badgeText: {
     color: '#fff',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
-  }
+  },
 });

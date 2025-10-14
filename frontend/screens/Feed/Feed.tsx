@@ -1,15 +1,33 @@
-import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, RefreshControl, SafeAreaView, Image } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  RefreshControl,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Plus } from 'lucide-react-native';
+
 import PostCard from '../../components/PostCard';
 import BottomNav from '../../components/BottomNav';
 import CreatePost from '../../components/CreatePost';
 import TopBar from '../../components/TopBar';
 
+type StoryItemType = {
+  id: string;
+  user?: string;
+  isAdd?: boolean;
+};
+
 const MOCK_POSTS = [
   {
     id: '1',
     user: 'Alice',
-    content: 'Olá, esta é minha primeira postagem! Adoro construir coisas com React Native ❤️',
+    content:
+      'Olá, esta é minha primeira postagem! Adoro construir coisas com React Native ❤️',
     time: '2h',
     image: 'https://picsum.photos/800/600?random=1',
     likes: 12,
@@ -23,7 +41,10 @@ const MOCK_POSTS = [
     time: '3h',
     likes: 4,
     liked: false,
-    comments: [{ id: 'c2', user: 'Alice', text: 'Bora!' }, { id: 'c3', user: 'Carla', text: 'Top' }],
+    comments: [
+      { id: 'c2', user: 'Alice', text: 'Bora!' },
+      { id: 'c3', user: 'Carla', text: 'Top' },
+    ],
   },
   {
     id: '3',
@@ -41,17 +62,37 @@ export default function FeedScreen() {
   const [posts, setPosts] = useState(MOCK_POSTS);
   const [refreshing, setRefreshing] = useState(false);
 
+  const stories = useMemo<StoryItemType[]>(
+    () => [
+      { id: 'add', user: 'Adicionar', isAdd: true },
+      { id: 's1', user: 'Alice' },
+      { id: 's2', user: 'Bruno' },
+      { id: 's3', user: 'Carla' },
+      { id: 's4', user: 'Diego' },
+    ],
+    [],
+  );
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    // Simulate network refresh
     setTimeout(() => {
-      setPosts(prev => [...prev]);
+      setPosts((prev) => [...prev]);
       setRefreshing(false);
     }, 800);
   }, []);
 
   const handleLike = (id: string) => {
-    setPosts(prev => prev.map(p => p.id === id ? { ...p, liked: !p.liked, likes: (p.liked ? (p.likes || 0) - 1 : (p.likes || 0) + 1) } : p));
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              liked: !p.liked,
+              likes: p.liked ? (p.likes || 0) - 1 : (p.likes || 0) + 1,
+            }
+          : p,
+      ),
+    );
   };
 
   const handleCreate = (content: string) => {
@@ -64,40 +105,67 @@ export default function FeedScreen() {
       liked: false,
       comments: [],
     };
-    setPosts(prev => [newPost, ...prev]);
+    setPosts((prev) => [newPost, ...prev]);
   };
 
-  return (
-    <SafeAreaView style={{ flex: 1 }} className="bg-white">
-      <TopBar />
-      <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 12 }}>
-        <Text style={{ fontSize: 22, fontWeight: '700', marginBottom: 12, color: '#111827' }}>
-          <Text onPress={() => { /* left logo navigation handled in header, keep for compatibility */ }} style={{color:'#0856d6'}}>Vibe</Text>
-        </Text>
+  const renderStory = useCallback(({ item }: { item: StoryItemType }) => {
+    if (item.isAdd) {
+      return (
+        <View style={styles.storyItem}>
+          <View style={styles.addStoryCircle}>
+            <Plus size={24} color="#0856d6" />
+          </View>
+          <Text style={styles.addStoryLabel}>Adicionar</Text>
+        </View>
+      );
+    }
 
-        {/* Stories horizontal strip */}
-        <FlatList
-          data={[{id:'s1',user:'Alice'},{id:'s2',user:'Bruno'},{id:'s3',user:'Carla'}]}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{paddingVertical:8,paddingHorizontal:4,marginBottom:8}}
-          keyExtractor={s=>s.id}
-          renderItem={({item})=> (
-            <View style={{alignItems:'center',marginRight:12}}>
-              <Image source={{uri:`https://i.pravatar.cc/100?u=${item.id}`}} style={{width:64,height:64,borderRadius:32,borderWidth:2,borderColor:'#0856d6'}} />
-              <Text style={{fontSize:12,marginTop:6}}>{item.user}</Text>
-            </View>
-          )}
+    return (
+      <TouchableOpacity style={styles.storyItem} activeOpacity={0.8}>
+        <Image
+          source={{ uri: `https://i.pravatar.cc/100?u=${item.id}` }}
+          style={styles.storyAvatar}
         />
+        <Text style={styles.storyLabel}>{item.user}</Text>
+      </TouchableOpacity>
+    );
+  }, []);
+
+  return (
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+      <TopBar />
+      <View style={styles.content}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Stories</Text>
+          <TouchableOpacity activeOpacity={0.8}>
+            <Text style={styles.sectionAction}>Ver tudo</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.storiesCard}>
+          <FlatList
+            data={stories}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.storiesList}
+            keyExtractor={(item) => item.id}
+            renderItem={renderStory}
+          />
+        </View>
 
         <CreatePost onCreate={handleCreate} />
 
         <FlatList
           data={posts}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => <PostCard post={item} onLike={handleLike} />}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <PostCard post={item} onLike={handleLike} />
+          )}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.postsList}
         />
       </View>
 
@@ -105,3 +173,86 @@ export default function FeedScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#f1f5f9',
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 18,
+    paddingTop: 18,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  sectionAction: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#0856d6',
+  },
+  storiesCard: {
+    backgroundColor: '#fff',
+    borderRadius: 22,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    shadowColor: '#0f172a',
+    shadowOpacity: 0.05,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 3,
+  },
+  storiesList: {
+    paddingRight: 6,
+  },
+  storyItem: {
+    alignItems: 'center',
+    marginRight: 16,
+    width: 70,
+  },
+  storyAvatar: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    borderWidth: 2,
+    borderColor: '#0856d6',
+  },
+  storyLabel: {
+    fontSize: 12,
+    marginTop: 6,
+    color: '#0f172a',
+    textAlign: 'center',
+  },
+  addStoryCircle: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    borderWidth: 2,
+    borderColor: '#0856d6',
+    borderStyle: 'dashed',
+    backgroundColor: '#f3f4ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addStoryLabel: {
+    fontSize: 12,
+    marginTop: 6,
+    color: '#0856d6',
+    fontWeight: '600',
+  },
+  postsList: {
+    paddingBottom: 160,
+  },
+});
