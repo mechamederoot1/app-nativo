@@ -60,20 +60,56 @@ export default function StoryListScreen() {
   const [data, setData] = useState<Story[]>(INITIAL);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  const onAddStory = useCallback(() => {
-    const text = composer.trim();
-    if (!text) return;
-    const newStory: Story = {
-      id: String(Date.now()),
-      user: 'Você',
-      text,
-      image: `https://picsum.photos/900/1600?random=${Math.floor(Math.random() * 1000)}`,
-      comments: [],
-      reactions: {},
-    };
-    setData((prev) => [newStory, ...prev]);
-    setComposer('');
-  }, [composer]);
+  const pickMedia = useCallback(async () => {
+    try {
+      if (Platform.OS === 'web') {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*,video/*';
+        input.onchange = () => {
+          const file = input.files && input.files[0];
+          if (!file) return;
+          const uri = URL.createObjectURL(file);
+          const newStory: Story = {
+            id: String(Date.now()),
+            user: 'Você',
+            text: '',
+            image: uri,
+            comments: [],
+            reactions: {},
+          };
+          setData((prev) => [newStory, ...prev]);
+          setStories([newStory, ...data]);
+        };
+        input.click();
+        return;
+      }
+
+      // Native: try to dynamically import expo-image-picker
+      const module = await import('expo-image-picker');
+      const ImagePicker: any = module;
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert('Permissão necessária', 'Precisamos de acesso à galeria para adicionar um story.');
+        return;
+      }
+      const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.All, quality: 0.8 });
+      if (res.cancelled) return;
+      const uri = res.assets && res.assets[0] ? res.assets[0].uri : (res.uri as string);
+      const newStory: Story = {
+        id: String(Date.now()),
+        user: 'Você',
+        text: '',
+        image: uri,
+        comments: [],
+        reactions: {},
+      };
+      setData((prev) => [newStory, ...prev]);
+      setStories([newStory, ...data]);
+    } catch (err) {
+      Alert.alert('Erro', "Não foi possível abrir a galeria. Instale 'expo-image-picker' e reinicie o app.");
+    }
+  }, [data]);
 
   const openViewer = useCallback(
     (idx: number) => {
@@ -129,16 +165,11 @@ export default function StoryListScreen() {
     <SafeAreaView style={{ flex: 1 }}>
       <TopBar />
 
-      <View style={styles.composer}>
-        <TextInput
-          placeholder="Adicionar novo story..."
-          value={composer}
-          onChangeText={setComposer}
-          style={styles.input}
-        />
-        <TouchableOpacity onPress={onAddStory} style={styles.btn}>
-          <Text style={styles.btnText}>Postar</Text>
+      <View style={styles.composerRow}>
+        <TouchableOpacity style={styles.addButton} onPress={pickMedia} accessibilityLabel="Adicionar story">
+          <Plus size={20} color="#fff" />
         </TouchableOpacity>
+        <Text style={styles.addLabel}>Adicionar Story</Text>
       </View>
 
       <FlatList
@@ -163,29 +194,26 @@ export default function StoryListScreen() {
 }
 
 const styles = StyleSheet.create({
-  composer: {
+  composerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 8,
+    paddingVertical: 12,
+    gap: 12,
   },
-  input: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-  },
-  btn: {
+  addButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: '#0856d6',
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  btnText: { color: '#fff', fontWeight: '700' },
+  addLabel: { marginLeft: 8, fontWeight: '700', color: '#0f172a' },
   card: {
     backgroundColor: '#fff',
     borderRadius: 12,
