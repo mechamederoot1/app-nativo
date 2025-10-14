@@ -55,14 +55,26 @@ export default function CreatePost({ onCreate }: CreatePostProps) {
 
   return (
     <View>
-      <View style={styles.container}>
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={openModal}
-          style={styles.promptInput}
-        >
-          <Text style={styles.promptText}>No que você está pensando?</Text>
-        </TouchableOpacity>
+      <View style={styles.card}>
+        <View style={styles.row}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarLetter}>V</Text>
+          </View>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={openModal}
+            style={styles.inputPill}
+          >
+            <Text style={styles.pillText}>No que você está pensando?</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.cardFooter}>
+          <Text style={styles.hintText}>Compartilhe fotos, vídeos ou histórias com a comunidade.</Text>
+          <TouchableOpacity onPress={openModal} activeOpacity={0.85} style={styles.composeButton}>
+            <Text style={styles.composeButtonText}>Criar</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Modal
@@ -127,23 +139,74 @@ export default function CreatePost({ onCreate }: CreatePostProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  card: {
     width: '100%',
     backgroundColor: '#fff',
-    paddingHorizontal: 0,
-    paddingVertical: 0,
+    borderRadius: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
     marginBottom: 20,
+    shadowColor: '#0f172a',
+    shadowOpacity: 0.05,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 3,
   },
-  promptInput: {
-    borderWidth: 0,
-    borderRadius: 0,
-    paddingHorizontal: 0,
-    paddingVertical: 0,
-    backgroundColor: 'transparent',
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  promptText: {
+  avatar: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#e0ecff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  avatarLetter: {
+    color: '#0856d6',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  inputPill: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  pillText: {
     color: '#6b7280',
     fontSize: 14,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 16,
+  },
+  hintText: {
+    color: '#64748b',
+    fontSize: 13,
+    flex: 1,
+    marginRight: 12,
+  },
+  composeButton: {
+    backgroundColor: '#0856d6',
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  composeButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 13,
   },
   modalOverlay: {
     flex: 1,
