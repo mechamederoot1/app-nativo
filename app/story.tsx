@@ -1,33 +1,21 @@
-import React, { useMemo, useRef, useState, useCallback } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   SafeAreaView,
   View,
   Text,
   FlatList,
-  Dimensions,
-  ImageBackground,
+  Image,
+  TouchableOpacity,
   StyleSheet,
   TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
+  ActivityIndicator,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import TopBar from '../frontend/components/TopBar';
 import BottomNav from '../frontend/components/BottomNav';
+import { Story, setStories, setActiveIndex } from '../frontend/contexts/StoryStore';
 
-const { width } = Dimensions.get('window');
-
-type Comment = { id: string; user: string; text: string };
-
-type Story = {
-  id: string;
-  user: string;
-  text?: string;
-  image?: string;
-  comments: Comment[];
-};
-
-const INITIAL_STORIES: Story[] = [
+const INITIAL: Story[] = [
   {
     id: 's1',
     user: 'Alice',
@@ -37,6 +25,7 @@ const INITIAL_STORIES: Story[] = [
       { id: 'c1', user: 'Bruno', text: 'Ficou massa!' },
       { id: 'c2', user: 'Carla', text: 'Adorei a ideia 👏' },
     ],
+    reactions: { '❤️': 3, '🔥': 2 },
   },
   {
     id: 's2',
@@ -44,215 +33,181 @@ const INITIAL_STORIES: Story[] = [
     image: 'https://picsum.photos/900/1600?random=22',
     text: 'Curtindo o dia 🌞',
     comments: [{ id: 'c3', user: 'Alice', text: 'Show!' }],
+    reactions: { '👍': 1 },
   },
 ];
 
-export default function StoryScreen() {
-  const [stories, setStories] = useState<Story[]>(INITIAL_STORIES);
-  const [activeIndex, setActiveIndex] = useState(0);
+function genMore(start: number, count = 10): Story[] {
+  return Array.from({ length: count }).map((_, i) => {
+    const idNum = start + i + 1;
+    return {
+      id: 's' + idNum,
+      user: 'Usuário ' + idNum,
+      text: 'Story #' + idNum,
+      image: `https://picsum.photos/900/1600?random=${100 + idNum}`,
+      comments: [],
+      reactions: {},
+    } as Story;
+  });
+}
+
+export default function StoryListScreen() {
+  const router = useRouter();
   const [composer, setComposer] = useState('');
-  const [commentText, setCommentText] = useState('');
-  const listRef = useRef<FlatList<Story>>(null);
+  const [data, setData] = useState<Story[]>(INITIAL);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
-    if (viewableItems && viewableItems.length > 0) {
-      setActiveIndex(viewableItems[0].index ?? 0);
-    }
-  }).current;
-
-  const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 60 });
-
-  const postStory = useCallback(() => {
+  const onAddStory = useCallback(() => {
     const text = composer.trim();
     if (!text) return;
     const newStory: Story = {
       id: String(Date.now()),
       user: 'Você',
       text,
-      image:
-        'https://picsum.photos/900/1600?random=' +
-        Math.floor(Math.random() * 1000),
+      image: `https://picsum.photos/900/1600?random=${Math.floor(Math.random() * 1000)}`,
       comments: [],
+      reactions: {},
     };
-    setStories((prev) => [newStory, ...prev]);
+    setData((prev) => [newStory, ...prev]);
     setComposer('');
-    // jump to first (new) story
-    setTimeout(
-      () => listRef.current?.scrollToOffset({ offset: 0, animated: true }),
-      0,
-    );
   }, [composer]);
 
-  const addComment = useCallback(() => {
-    const txt = commentText.trim();
-    if (!txt) return;
-    setStories((prev) =>
-      prev.map((s, idx) =>
-        idx === activeIndex
-          ? {
-              ...s,
-              comments: [
-                ...s.comments,
-                { id: String(Date.now()), user: 'Você', text: txt },
-              ],
-            }
-          : s,
-      ),
-    );
-    setCommentText('');
-  }, [activeIndex, commentText]);
+  const openViewer = useCallback(
+    (idx: number) => {
+      setStories(data);
+      setActiveIndex(idx);
+      const id = data[idx]?.id;
+      if (!id) return;
+      router.push(`/story/${id}`);
+    },
+    [data, router],
+  );
 
-  const renderItem = useCallback(({ item }: { item: Story }) => {
-    return (
-      <View style={{ width }}>
-        <ImageBackground
-          source={{ uri: item.image }}
-          style={styles.slide}
-          imageStyle={styles.slideImage}
-        >
-          <View style={styles.slideHeader}>
+  const loadMore = useCallback(() => {
+    if (loadingMore) return;
+    setLoadingMore(true);
+    setTimeout(() => {
+      setData((prev) => [...prev, ...genMore(prev.length, 8)]);
+      setLoadingMore(false);
+    }, 600);
+  }, [loadingMore]);
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: Story; index: number }) => (
+      <TouchableOpacity
+        onPress={() => openViewer(index)}
+        activeOpacity={0.85}
+        style={styles.card}
+      >
+        <View style={styles.row}>
+          <View style={styles.avatarPlaceholder}>
+            <Text style={styles.avatarText}>{item.user.charAt(0)}</Text>
+          </View>
+          <View style={{ marginLeft: 10, flex: 1 }}>
             <Text style={styles.user}>{item.user}</Text>
+            <Text style={styles.subtitle}>{item.text || 'Story'}</Text>
           </View>
-          {item.text ? (
-            <View style={styles.centerWrap}>
-              <Text style={styles.storyText}>{item.text}</Text>
-            </View>
-          ) : null}
-          <View style={styles.commentsWrap}>
-            <Text style={styles.commentsTitle}>Comentários</Text>
-            <FlatList
-              data={item.comments}
-              keyExtractor={(c) => c.id}
-              renderItem={({ item: c }) => (
-                <View style={styles.commentRow}>
-                  <Text style={styles.commentUser}>{c.user}</Text>
-                  <Text style={styles.commentText}> {c.text}</Text>
-                </View>
-              )}
-              style={{ maxHeight: 120 }}
-              showsVerticalScrollIndicator={false}
-            />
-          </View>
-        </ImageBackground>
-      </View>
-    );
-  }, []);
+        </View>
+        {item.image ? (
+          <Image source={{ uri: item.image }} style={styles.preview} />
+        ) : null}
+        <View style={styles.metaRow}>
+          <Text style={styles.meta}>Comentários: {item.comments.length}</Text>
+          <Text style={styles.meta}>
+            Reações: {Object.values(item.reactions || {}).reduce((a, b) => a + (b || 0), 0)}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    ),
+    [openViewer],
+  );
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1 }}
-    >
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
-        <TopBar />
+    <SafeAreaView style={{ flex: 1 }}>
+      <TopBar />
 
-        <View style={styles.composerCard}>
-          <TextInput
-            placeholder="Compartilhe um story..."
-            placeholderTextColor="#9aa0a6"
-            value={composer}
-            onChangeText={setComposer}
-            style={styles.composerInput}
-          />
-          <TouchableOpacity onPress={postStory} style={styles.composerBtn}>
-            <Text style={styles.composerBtnText}>Postar</Text>
-          </TouchableOpacity>
-        </View>
-
-        <FlatList
-          ref={listRef}
-          horizontal
-          pagingEnabled
-          data={stories}
-          keyExtractor={(s) => s.id}
-          renderItem={renderItem}
-          showsHorizontalScrollIndicator={false}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewConfigRef.current}
+      <View style={styles.composer}>
+        <TextInput
+          placeholder="Adicionar novo story..."
+          value={composer}
+          onChangeText={setComposer}
+          style={styles.input}
         />
+        <TouchableOpacity onPress={onAddStory} style={styles.btn}>
+          <Text style={styles.btnText}>Postar</Text>
+        </TouchableOpacity>
+      </View>
 
-        <View style={styles.commentBar}>
-          <TextInput
-            placeholder="Comentar neste story..."
-            placeholderTextColor="#9aa0a6"
-            value={commentText}
-            onChangeText={setCommentText}
-            style={styles.commentInput}
-          />
-          <TouchableOpacity onPress={addComment} style={styles.commentBtn}>
-            <Text style={styles.commentBtnText}>Enviar</Text>
-          </TouchableOpacity>
-        </View>
+      <FlatList
+        data={data}
+        keyExtractor={(s) => s.id}
+        renderItem={renderItem}
+        onEndReachedThreshold={0.4}
+        onEndReached={loadMore}
+        contentContainerStyle={{ padding: 16, paddingBottom: 110 }}
+        ListFooterComponent={
+          loadingMore ? (
+            <View style={{ paddingVertical: 16 }}>
+              <ActivityIndicator color="#0856d6" />
+            </View>
+          ) : null
+        }
+      />
 
-        <BottomNav active="story" />
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+      <BottomNav active="story" />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  slide: {
-    width,
-    height: 460,
-    justifyContent: 'space-between',
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginTop: 8,
-    marginBottom: 10,
-    alignSelf: 'center',
-  },
-  slideImage: { resizeMode: 'cover' },
-  slideHeader: { backgroundColor: 'rgba(0,0,0,0.3)', padding: 10 },
-  user: { color: '#fff', fontWeight: '800' },
-  centerWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  storyText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
-    textAlign: 'center',
+  composer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
-    textShadowColor: 'rgba(0,0,0,0.4)',
-    textShadowRadius: 4,
+    paddingVertical: 10,
+    gap: 8,
   },
-  commentsWrap: { backgroundColor: 'rgba(0,0,0,0.35)', padding: 10 },
-  commentsTitle: { color: '#fff', fontWeight: '700', marginBottom: 6 },
-  commentRow: { flexDirection: 'row', marginBottom: 4 },
-  commentUser: { color: '#fff', fontWeight: '700' },
-  commentText: { color: '#fff' },
-  composerCard: {
+  input: {
+    flex: 1,
     backgroundColor: '#fff',
-    marginHorizontal: 16,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  btn: {
+    backgroundColor: '#0856d6',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+  },
+  btnText: { color: '#fff', fontWeight: '700' },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  row: { flexDirection: 'row', alignItems: 'center' },
+  avatarPlaceholder: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#e6f0ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: { color: '#0856d6', fontWeight: '700' },
+  user: { fontWeight: '800', color: '#0f172a' },
+  subtitle: { color: '#6b7280', marginTop: 2 },
+  preview: { width: '100%', height: 200, borderRadius: 10, marginTop: 10 },
+  metaRow: {
     marginTop: 8,
-    borderRadius: 12,
-    padding: 10,
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  composerInput: { flex: 1, paddingVertical: 8, paddingHorizontal: 10 },
-  composerBtn: {
-    backgroundColor: '#0856d6',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginLeft: 8,
-  },
-  composerBtnText: { color: '#fff', fontWeight: '700' },
-  commentBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
-    borderRadius: 12,
-    padding: 10,
-    marginBottom: 6,
-  },
-  commentInput: { flex: 1, paddingVertical: 8, paddingHorizontal: 10 },
-  commentBtn: {
-    backgroundColor: '#0856d6',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginLeft: 8,
-  },
-  commentBtnText: { color: '#fff', fontWeight: '700' },
+  meta: { color: '#6b7280', fontSize: 12 },
 });
