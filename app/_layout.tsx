@@ -20,6 +20,8 @@ export default function RootLayout() {
           <Stack.Screen name="profile" />
           <Stack.Screen name="story" />
           <Stack.Screen name="create" />
+          <Stack.Screen name="search" />
+          <Stack.Screen name="notifications" />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="light" />
