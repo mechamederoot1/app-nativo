@@ -120,14 +120,16 @@ export default function FeedScreen() {
           </TouchableOpacity>
         </View>
 
-        <FlatList
-          data={stories}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.storiesList}
-          keyExtractor={item => item.id}
-          renderItem={renderStory}
-        />
+        <View style={styles.storiesCard}>
+          <FlatList
+            data={stories}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.storiesList}
+            keyExtractor={item => item.id}
+            renderItem={renderStory}
+          />
+        </View>
 
         <CreatePost onCreate={handleCreate} />
 
@@ -172,35 +174,45 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#0856d6',
   },
-  storiesList: {
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    marginBottom: 16,
-    borderRadius: 18,
-    backgroundColor: '#f8fafc',
+  storiesCard: {
+    backgroundColor: '#fff',
+    borderRadius: 22,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    marginBottom: 20,
     borderWidth: 1,
     borderColor: '#e2e8f0',
+    shadowColor: '#0f172a',
+    shadowOpacity: 0.05,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 3,
+  },
+  storiesList: {
+    paddingRight: 6,
   },
   storyItem: {
     alignItems: 'center',
-    marginRight: 14,
+    marginRight: 16,
+    width: 70,
   },
   storyAvatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     borderWidth: 2,
     borderColor: '#0856d6',
   },
   storyLabel: {
     fontSize: 12,
     marginTop: 6,
-    color: '#111827',
+    color: '#0f172a',
+    textAlign: 'center',
   },
   addStoryCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     borderWidth: 2,
     borderColor: '#0856d6',
     borderStyle: 'dashed',
