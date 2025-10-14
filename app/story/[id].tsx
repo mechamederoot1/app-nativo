@@ -12,9 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import BottomNav from '../../frontend/components/BottomNav';
-import TopBar from '../../frontend/components/TopBar';
+import { useLocalSearchParams } from 'expo-router';
 import {
   getStories,
   getActiveIndex,
@@ -23,11 +21,10 @@ import {
   Story,
 } from '../../frontend/contexts/StoryStore';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 export default function StoryViewerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
   const listRef = useRef<FlatList<Story>>(null);
 
   const initialData = useMemo(() => {
@@ -52,6 +49,7 @@ export default function StoryViewerScreen() {
     const idx = Math.max(getActiveIndex(), 0);
     return Math.min(idx, initialData.length - 1);
   });
+  const [showComments, setShowComments] = useState(false);
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
     if (viewableItems && viewableItems.length > 0) {
@@ -79,8 +77,22 @@ export default function StoryViewerScreen() {
           : s,
       ),
     );
+    // persist to store so list view sees it
+    setStories(
+      stories.map((s, idx) =>
+        idx === active
+          ? {
+              ...s,
+              comments: [
+                ...s.comments,
+                { id: String(Date.now()), user: 'Você', text: txt },
+              ],
+            }
+          : s,
+      ),
+    );
     setCommentText('');
-  }, [active, commentText]);
+  }, [active, commentText, stories]);
 
   const reactToStory = useCallback(
     (emoji: string) => {
@@ -97,27 +109,39 @@ export default function StoryViewerScreen() {
             : s,
         ),
       );
-      setStories(prev => prev.map((s, idx) => idx === active ? { ...s, reactions: { ...(s.reactions || {}), [emoji]: (s.reactions?.[emoji] || 0) + 1 } } : s));
+      setStories(
+        stories.map((s, idx) =>
+          idx === active
+            ? {
+                ...s,
+                reactions: {
+                  ...(s.reactions || {}),
+                  [emoji]: (s.reactions?.[emoji] || 0) + 1,
+                },
+              }
+            : s,
+        ),
+      );
     },
-    [active],
+    [active, stories],
   );
 
   const renderItem = useCallback(({ item }: { item: Story }) => {
     return (
-      <View style={{ width }}>
+      <View style={{ width, height }}>
         <ImageBackground
           source={{ uri: item.image }}
           style={styles.slide}
           imageStyle={styles.slideImage}
         >
-          <View style={styles.slideHeader}>
-            <Text style={styles.user}>{item.user}</Text>
-          </View>
+          <View style={styles.slideHeader} />
+
           {item.text ? (
             <View style={styles.centerWrap}>
               <Text style={styles.storyText}>{item.text}</Text>
             </View>
           ) : null}
+
           <View style={styles.reactionsBar}>
             {Object.entries(item.reactions || {}).map(([k, v]) => (
               <View key={k} style={styles.reactionChip}>
@@ -125,21 +149,14 @@ export default function StoryViewerScreen() {
               </View>
             ))}
           </View>
-          <View style={styles.commentsWrap}>
-            <Text style={styles.commentsTitle}>Comentários</Text>
-            <FlatList
-              data={item.comments}
-              keyExtractor={(c) => c.id}
-              renderItem={({ item: c }) => (
-                <View style={styles.commentRow}>
-                  <Text style={styles.commentUser}>{c.user}</Text>
-                  <Text style={styles.commentText}> {c.text}</Text>
-                </View>
-              )}
-              style={{ maxHeight: 120 }}
-              showsVerticalScrollIndicator={false}
-            />
-          </View>
+
+          <TouchableOpacity
+            style={styles.commentsPreview}
+            onPress={() => setShowComments(true)}
+            activeOpacity={0.9}
+          >
+            <Text style={styles.commentsPreviewText}>Comentários ({item.comments.length}) — tocar para ver</Text>
+          </TouchableOpacity>
         </ImageBackground>
       </View>
     );
@@ -148,49 +165,91 @@ export default function StoryViewerScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: '#000' }}
     >
       <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
-        <TopBar />
+        {/* Fullscreen story viewer (no TopBar / BottomNav to ensure true fullscreen) */}
 
         <FlatList
           ref={listRef}
           horizontal
           pagingEnabled
           data={stories}
-          initialScrollIndex={active}
+          initialScrollIndex={Math.min(active, stories.length - 1)}
           getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
           keyExtractor={(s) => s.id}
           renderItem={renderItem}
           showsHorizontalScrollIndicator={false}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewConfigRef.current}
+          style={{ flex: 1 }}
         />
 
-        <View style={styles.bottomBar}>
-          <View style={styles.reactionButtons}>
-            {['❤️', '🔥', '👍', '😂'].map((e) => (
-              <TouchableOpacity key={e} onPress={() => reactToStory(e)} style={styles.reactionBtn}>
-                <Text style={styles.reactionBtnText}>{e}</Text>
+        {/* Integrated comment / reaction bar matching story style */}
+        {!showComments ? (
+          <View style={styles.inlineControls}>
+            <View style={styles.reactionButtons}>
+              {['❤️', '🔥', '👍', '😂'].map((e) => (
+                <TouchableOpacity key={e} onPress={() => reactToStory(e)} style={styles.reactionBtn}>
+                  <Text style={styles.reactionBtnText}>{e}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <View style={styles.commentBarTranslucent}>
+              <TextInput
+                placeholder="Comentar neste story..."
+                placeholderTextColor="rgba(255,255,255,0.7)"
+                value={commentText}
+                onChangeText={setCommentText}
+                style={styles.commentInputTranslucent}
+              />
+              <TouchableOpacity onPress={() => setShowComments(true)} style={styles.commentBtnTranslucent}>
+                <Text style={styles.commentBtnText}>Comentar</Text>
               </TouchableOpacity>
-            ))}
+            </View>
           </View>
+        ) : null}
 
-          <View style={styles.commentBar}>
-            <TextInput
-              placeholder="Comentar neste story..."
-              placeholderTextColor="#9aa0a6"
-              value={commentText}
-              onChangeText={setCommentText}
-              style={styles.commentInput}
+        {/* Comments overlay — same styling as story (dark, translucent) and integrated list */}
+        {showComments ? (
+          <View style={styles.commentsOverlay}>
+            <View style={styles.commentsHeader}>
+              <Text style={styles.commentsHeaderText}>Comentários</Text>
+              <TouchableOpacity onPress={() => setShowComments(false)}>
+                <Text style={styles.commentsClose}>Fechar</Text>
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              data={stories[active]?.comments || []}
+              keyExtractor={(c) => c.id}
+              renderItem={({ item: c }) => (
+                <View style={styles.commentRowOverlay}>
+                  <Text style={styles.commentUserOverlay}>{c.user}</Text>
+                  <Text style={styles.commentTextOverlay}> {c.text}</Text>
+                </View>
+              )}
+              style={{ flex: 1, width: '100%' }}
+              contentContainerStyle={{ padding: 12 }}
+              showsVerticalScrollIndicator={false}
             />
-            <TouchableOpacity onPress={addComment} style={styles.commentBtn}>
-              <Text style={styles.commentBtnText}>Enviar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
 
-        <BottomNav active="story" />
+            <View style={styles.commentComposerOverlay}>
+              <TextInput
+                placeholder="Escreva um comentário..."
+                placeholderTextColor="rgba(255,255,255,0.7)"
+                value={commentText}
+                onChangeText={setCommentText}
+                style={styles.commentInputOverlay}
+              />
+              <TouchableOpacity onPress={addComment} style={styles.commentBtnOverlay}>
+                <Text style={styles.commentBtnText}>Enviar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : null}
+
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
@@ -199,64 +258,50 @@ export default function StoryViewerScreen() {
 const styles = StyleSheet.create({
   slide: {
     width,
-    height: 460,
-    justifyContent: 'space-between',
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginTop: 8,
-    marginBottom: 10,
-    alignSelf: 'center',
+    height,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   slideImage: { resizeMode: 'cover' },
-  slideHeader: { backgroundColor: 'rgba(0,0,0,0.3)', padding: 10 },
-  user: { color: '#fff', fontWeight: '800' },
-  centerWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  centerWrap: { position: 'absolute', top: '30%', left: 20, right: 20, alignItems: 'center' },
   storyText: {
     color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '800',
     textAlign: 'center',
-    paddingHorizontal: 16,
     textShadowColor: 'rgba(0,0,0,0.4)',
     textShadowRadius: 4,
   },
   reactionsBar: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    flexDirection: 'row',
+    top: 40,
+    right: 12,
+    flexDirection: 'column',
     gap: 6,
-    backgroundColor: 'rgba(0,0,0,0.25)',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 12,
   },
-  reactionChip: { backgroundColor: 'rgba(0,0,0,0.25)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10 },
+  reactionChip: { backgroundColor: 'rgba(0,0,0,0.45)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 18, marginBottom: 6 },
   reactionText: { color: '#fff', fontWeight: '700' },
-  commentsWrap: { backgroundColor: 'rgba(0,0,0,0.35)', padding: 10 },
-  commentsTitle: { color: '#fff', fontWeight: '700', marginBottom: 6 },
-  commentRow: { flexDirection: 'row', marginBottom: 4 },
-  commentUser: { color: '#fff', fontWeight: '700' },
-  commentText: { color: '#fff' },
-  bottomBar: { paddingHorizontal: 16, gap: 8 },
-  reactionButtons: { flexDirection: 'row', gap: 8, justifyContent: 'center' },
-  reactionBtn: { backgroundColor: '#fff', paddingVertical: 6, paddingHorizontal: 10, borderRadius: 16 },
+  commentsPreview: { position: 'absolute', bottom: 120, left: 20, right: 20, backgroundColor: 'rgba(0,0,0,0.45)', padding: 10, borderRadius: 12 },
+  commentsPreviewText: { color: '#fff', textAlign: 'center' },
+
+  inlineControls: { position: 'absolute', bottom: 24, left: 0, right: 0, alignItems: 'center' },
+  reactionButtons: { flexDirection: 'row', marginBottom: 8 },
+  reactionBtn: { backgroundColor: 'rgba(255,255,255,0.9)', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, marginHorizontal: 6 },
   reactionBtnText: { fontSize: 16 },
-  commentBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 10,
-    marginBottom: 6,
-  },
-  commentInput: { flex: 1, paddingVertical: 8, paddingHorizontal: 10 },
-  commentBtn: {
-    backgroundColor: '#0856d6',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginLeft: 8,
-  },
+
+  commentBarTranslucent: { flexDirection: 'row', alignItems: 'center', width: '92%', backgroundColor: 'rgba(0,0,0,0.45)', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 8 },
+  commentInputTranslucent: { flex: 1, color: '#fff', paddingVertical: 6, paddingHorizontal: 8 },
+  commentBtnTranslucent: { marginLeft: 8, backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 12 },
   commentBtnText: { color: '#fff', fontWeight: '700' },
+
+  commentsOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
+  commentsHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 12, borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.06)' },
+  commentsHeaderText: { color: '#fff', fontSize: 16, fontWeight: '800' },
+  commentsClose: { color: 'rgba(255,255,255,0.7)', fontWeight: '700' },
+  commentRowOverlay: { flexDirection: 'row', marginBottom: 12 },
+  commentUserOverlay: { color: '#fff', fontWeight: '800', marginRight: 8 },
+  commentTextOverlay: { color: '#fff', flex: 1 },
+  commentComposerOverlay: { flexDirection: 'row', alignItems: 'center', padding: 12, borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.06)' },
+  commentInputOverlay: { flex: 1, color: '#fff', paddingVertical: 10, paddingHorizontal: 12, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 10 },
+  commentBtnOverlay: { marginLeft: 8, backgroundColor: '#0856d6', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 10 },
 });
