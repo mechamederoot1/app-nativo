@@ -1,9 +1,18 @@
-import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, RefreshControl, SafeAreaView, Image } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, Text, FlatList, RefreshControl, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Plus } from 'lucide-react-native';
+
 import PostCard from '../../components/PostCard';
 import BottomNav from '../../components/BottomNav';
 import CreatePost from '../../components/CreatePost';
 import TopBar from '../../components/TopBar';
+
+type StoryItemType = {
+  id: string;
+  user?: string;
+  isAdd?: boolean;
+};
 
 const MOCK_POSTS = [
   {
@@ -41,9 +50,19 @@ export default function FeedScreen() {
   const [posts, setPosts] = useState(MOCK_POSTS);
   const [refreshing, setRefreshing] = useState(false);
 
+  const stories = useMemo<StoryItemType[]>(
+    () => [
+      { id: 'add', user: 'Adicionar', isAdd: true },
+      { id: 's1', user: 'Alice' },
+      { id: 's2', user: 'Bruno' },
+      { id: 's3', user: 'Carla' },
+      { id: 's4', user: 'Diego' },
+    ],
+    []
+  );
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    // Simulate network refresh
     setTimeout(() => {
       setPosts(prev => [...prev]);
       setRefreshing(false);
@@ -67,27 +86,44 @@ export default function FeedScreen() {
     setPosts(prev => [newPost, ...prev]);
   };
 
+  const renderStory = useCallback(({ item }: { item: StoryItemType }) => {
+    if (item.isAdd) {
+      return (
+        <View style={styles.storyItem}>
+          <View style={styles.addStoryCircle}>
+            <Plus size={24} color="#0856d6" />
+          </View>
+          <Text style={styles.addStoryLabel}>Adicionar</Text>
+        </View>
+      );
+    }
+
+    return (
+      <TouchableOpacity style={styles.storyItem} activeOpacity={0.8}>
+        <Image
+          source={{ uri: `https://i.pravatar.cc/100?u=${item.id}` }}
+          style={styles.storyAvatar}
+        />
+        <Text style={styles.storyLabel}>{item.user}</Text>
+      </TouchableOpacity>
+    );
+  }, []);
+
   return (
-    <SafeAreaView style={{ flex: 1 }} className="bg-white">
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <TopBar />
-      <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 12 }}>
-        <Text style={{ fontSize: 22, fontWeight: '700', marginBottom: 12, color: '#111827' }}>
-          <Text onPress={() => { /* left logo navigation handled in header, keep for compatibility */ }} style={{color:'#0856d6'}}>Vibe</Text>
+      <View style={styles.content}>
+        <Text style={styles.heading}>
+          <Text onPress={() => {}} style={styles.headingHighlight}>Vibe</Text>
         </Text>
 
-        {/* Stories horizontal strip */}
         <FlatList
-          data={[{id:'s1',user:'Alice'},{id:'s2',user:'Bruno'},{id:'s3',user:'Carla'}]}
+          data={stories}
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{paddingVertical:8,paddingHorizontal:4,marginBottom:8}}
-          keyExtractor={s=>s.id}
-          renderItem={({item})=> (
-            <View style={{alignItems:'center',marginRight:12}}>
-              <Image source={{uri:`https://i.pravatar.cc/100?u=${item.id}`}} style={{width:64,height:64,borderRadius:32,borderWidth:2,borderColor:'#0856d6'}} />
-              <Text style={{fontSize:12,marginTop:6}}>{item.user}</Text>
-            </View>
-          )}
+          contentContainerStyle={styles.storiesList}
+          keyExtractor={item => item.id}
+          renderItem={renderStory}
         />
 
         <CreatePost onCreate={handleCreate} />
@@ -98,6 +134,7 @@ export default function FeedScreen() {
           renderItem={({ item }) => <PostCard post={item} onLike={handleLike} />}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.postsList}
         />
       </View>
 
@@ -105,3 +142,65 @@ export default function FeedScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  heading: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 12,
+    color: '#111827',
+  },
+  headingHighlight: {
+    color: '#0856d6',
+  },
+  storiesList: {
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    marginBottom: 12,
+  },
+  storyItem: {
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  storyAvatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
+    borderColor: '#0856d6',
+  },
+  storyLabel: {
+    fontSize: 12,
+    marginTop: 6,
+    color: '#111827',
+  },
+  addStoryCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
+    borderColor: '#0856d6',
+    borderStyle: 'dashed',
+    backgroundColor: '#f3f4ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addStoryLabel: {
+    fontSize: 12,
+    marginTop: 6,
+    color: '#0856d6',
+    fontWeight: '600',
+  },
+  postsList: {
+    paddingBottom: 120,
+  },
+});
