@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { useRouter, Href } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, Eye, User, Image as ImageIcon } from 'lucide-react-native';
 
@@ -19,15 +19,6 @@ type ActiveTab =
   | 'visits'
   | 'profile'
   | 'create';
-
-type TabRoute = Href<
-  | '/feed'
-  | '/story'
-  | '/messages'
-  | '/visits'
-  | '/profile'
-  | '/create'
->;
 
 type BottomNavProps = {
   active?: ActiveTab;
@@ -54,6 +45,7 @@ function BottomNavInner({
   unreadVisits = 0,
 }: BottomNavProps) {
   const router = useRouter();
+  type TabRoute = Parameters<typeof router.push>[0];
   const insets = useSafeAreaInsets();
   const go = useCallback(
     (path: TabRoute) => () => router.push(path),
