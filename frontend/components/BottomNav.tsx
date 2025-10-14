@@ -45,8 +45,9 @@ function BottomNavInner({
   unreadVisits = 0,
 }: BottomNavProps) {
   const router = useRouter();
+  type TabRoute = Parameters<typeof router.push>[0];
   const insets = useSafeAreaInsets();
-  const go = useCallback((path: string) => () => router.push(path), [router]);
+  const go = useCallback((path: TabRoute) => () => router.push(path), [router]);
 
   return (
     <View
