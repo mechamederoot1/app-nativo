@@ -1,5 +1,17 @@
 import React, { useMemo, useRef, useState, useCallback } from 'react';
-import { SafeAreaView, View, Text, FlatList, Dimensions, ImageBackground, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  FlatList,
+  Dimensions,
+  ImageBackground,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import TopBar from '../frontend/components/TopBar';
 import BottomNav from '../frontend/components/BottomNav';
 
@@ -57,30 +69,55 @@ export default function StoryScreen() {
       id: String(Date.now()),
       user: 'Você',
       text,
-      image: 'https://picsum.photos/900/1600?random=' + Math.floor(Math.random()*1000),
+      image:
+        'https://picsum.photos/900/1600?random=' +
+        Math.floor(Math.random() * 1000),
       comments: [],
     };
     setStories((prev) => [newStory, ...prev]);
     setComposer('');
     // jump to first (new) story
-    setTimeout(() => listRef.current?.scrollToOffset({ offset: 0, animated: true }), 0);
+    setTimeout(
+      () => listRef.current?.scrollToOffset({ offset: 0, animated: true }),
+      0,
+    );
   }, [composer]);
 
   const addComment = useCallback(() => {
     const txt = commentText.trim();
     if (!txt) return;
-    setStories((prev) => prev.map((s, idx) => idx === activeIndex ? { ...s, comments: [...s.comments, { id: String(Date.now()), user: 'Você', text: txt }] } : s));
+    setStories((prev) =>
+      prev.map((s, idx) =>
+        idx === activeIndex
+          ? {
+              ...s,
+              comments: [
+                ...s.comments,
+                { id: String(Date.now()), user: 'Você', text: txt },
+              ],
+            }
+          : s,
+      ),
+    );
     setCommentText('');
   }, [activeIndex, commentText]);
 
   const renderItem = useCallback(({ item }: { item: Story }) => {
     return (
       <View style={{ width }}>
-        <ImageBackground source={{ uri: item.image }} style={styles.slide} imageStyle={styles.slideImage}>
+        <ImageBackground
+          source={{ uri: item.image }}
+          style={styles.slide}
+          imageStyle={styles.slideImage}
+        >
           <View style={styles.slideHeader}>
             <Text style={styles.user}>{item.user}</Text>
           </View>
-          {item.text ? <View style={styles.centerWrap}><Text style={styles.storyText}>{item.text}</Text></View> : null}
+          {item.text ? (
+            <View style={styles.centerWrap}>
+              <Text style={styles.storyText}>{item.text}</Text>
+            </View>
+          ) : null}
           <View style={styles.commentsWrap}>
             <Text style={styles.commentsTitle}>Comentários</Text>
             <FlatList
@@ -102,7 +139,10 @@ export default function StoryScreen() {
   }, []);
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}
+    >
       <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
         <TopBar />
 
@@ -165,18 +205,54 @@ const styles = StyleSheet.create({
   slideHeader: { backgroundColor: 'rgba(0,0,0,0.3)', padding: 10 },
   user: { color: '#fff', fontWeight: '800' },
   centerWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  storyText: { color: '#fff', fontSize: 18, fontWeight: '700', textAlign: 'center', paddingHorizontal: 16, textShadowColor: 'rgba(0,0,0,0.4)', textShadowRadius: 4 },
+  storyText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
+    paddingHorizontal: 16,
+    textShadowColor: 'rgba(0,0,0,0.4)',
+    textShadowRadius: 4,
+  },
   commentsWrap: { backgroundColor: 'rgba(0,0,0,0.35)', padding: 10 },
   commentsTitle: { color: '#fff', fontWeight: '700', marginBottom: 6 },
   commentRow: { flexDirection: 'row', marginBottom: 4 },
   commentUser: { color: '#fff', fontWeight: '700' },
   commentText: { color: '#fff' },
-  composerCard: { backgroundColor: '#fff', marginHorizontal: 16, marginTop: 8, borderRadius: 12, padding: 10, flexDirection: 'row', alignItems: 'center' },
+  composerCard: {
+    backgroundColor: '#fff',
+    marginHorizontal: 16,
+    marginTop: 8,
+    borderRadius: 12,
+    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   composerInput: { flex: 1, paddingVertical: 8, paddingHorizontal: 10 },
-  composerBtn: { backgroundColor: '#0856d6', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8, marginLeft: 8 },
+  composerBtn: {
+    backgroundColor: '#0856d6',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
   composerBtnText: { color: '#fff', fontWeight: '700' },
-  commentBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', marginHorizontal: 16, borderRadius: 12, padding: 10, marginBottom: 6 },
+  commentBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    marginHorizontal: 16,
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 6,
+  },
   commentInput: { flex: 1, paddingVertical: 8, paddingHorizontal: 10 },
-  commentBtn: { backgroundColor: '#0856d6', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8, marginLeft: 8 },
+  commentBtn: {
+    backgroundColor: '#0856d6',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
   commentBtnText: { color: '#fff', fontWeight: '700' },
 });

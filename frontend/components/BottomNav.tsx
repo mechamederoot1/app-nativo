@@ -12,7 +12,13 @@ import { Home, Eye, User, Image as ImageIcon } from 'lucide-react-native';
 
 import { useUnread } from '../contexts/UnreadContext';
 
-type ActiveTab = 'feed' | 'story' | 'messages' | 'visits' | 'profile' | 'create';
+type ActiveTab =
+  | 'feed'
+  | 'story'
+  | 'messages'
+  | 'visits'
+  | 'profile'
+  | 'create';
 
 type BottomNavProps = {
   active?: ActiveTab;
@@ -65,7 +71,10 @@ function BottomNavInner({
 
       <TouchableOpacity style={styles.tab} onPress={go('/story')}>
         <View style={styles.iconWrapper}>
-          <ImageIcon size={20} color={active === 'story' ? '#0856d6' : '#6b7280'} />
+          <ImageIcon
+            size={20}
+            color={active === 'story' ? '#0856d6' : '#6b7280'}
+          />
         </View>
         <Text style={[styles.label, active === 'story' && styles.active]}>
           Story

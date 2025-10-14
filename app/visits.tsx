@@ -1,13 +1,35 @@
 import React, { useEffect } from 'react';
-import { SafeAreaView, View, Text, FlatList, Image, StyleSheet } from 'react-native';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  FlatList,
+  Image,
+  StyleSheet,
+} from 'react-native';
 import TopBar from '../frontend/components/TopBar';
 import BottomNav from '../frontend/components/BottomNav';
 import { useUnread } from '../frontend/contexts/UnreadContext';
 
 const MOCK_VISITS = [
-  { id: 'v1', name: 'Marina', time: 'agora', avatar: 'https://i.pravatar.cc/100?img=11' },
-  { id: 'v2', name: 'Ricardo', time: '3h', avatar: 'https://i.pravatar.cc/100?img=22' },
-  { id: 'v3', name: 'Sara', time: 'ontem', avatar: 'https://i.pravatar.cc/100?img=33' },
+  {
+    id: 'v1',
+    name: 'Marina',
+    time: 'agora',
+    avatar: 'https://i.pravatar.cc/100?img=11',
+  },
+  {
+    id: 'v2',
+    name: 'Ricardo',
+    time: '3h',
+    avatar: 'https://i.pravatar.cc/100?img=22',
+  },
+  {
+    id: 'v3',
+    name: 'Sara',
+    time: 'ontem',
+    avatar: 'https://i.pravatar.cc/100?img=33',
+  },
 ];
 
 export default function VisitsScreen() {
@@ -43,7 +65,12 @@ export default function VisitsScreen() {
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 20, fontWeight: '700', marginBottom: 12, color: '#0f172a' },
+  title: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 12,
+    color: '#0f172a',
+  },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
