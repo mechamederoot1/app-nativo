@@ -51,10 +51,16 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   },
 ];
 
-const ICON_BY_TYPE: Record<NotificationType, JSX.Element> = {
-  visit: <Users size={18} color="#0856d6" />,
-  match: <Heart size={18} color="#d946ef" />,
-  event: <Calendar size={18} color="#22c55e" />,
+type NotificationVisual = {
+  Icon: React.ComponentType<{ size?: number; color?: string }>;
+  color: string;
+  background: string;
+};
+
+const ICON_META: Record<NotificationType, NotificationVisual> = {
+  visit: { Icon: Users, color: '#0856d6', background: '#eff6ff' },
+  match: { Icon: Heart, color: '#d946ef', background: '#fdf4ff' },
+  event: { Icon: Calendar, color: '#22c55e', background: '#f0fdf4' },
 };
 
 function NotificationCard({
@@ -64,13 +70,17 @@ function NotificationCard({
   item: NotificationItem;
   onToggleRead: (id: string) => void;
 }) {
+  const { Icon, color, background } = ICON_META[item.type];
+
   return (
     <TouchableOpacity
       style={[styles.card, !item.read && styles.cardUnread]}
       onPress={() => onToggleRead(item.id)}
       activeOpacity={0.85}
     >
-      <View style={styles.iconWrapper}>{ICON_BY_TYPE[item.type]}</View>
+      <View style={[styles.iconWrapper, { backgroundColor: background }]}>
+        <Icon size={18} color={color} />
+      </View>
       <View style={{ flex: 1 }}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>{item.title}</Text>
@@ -211,7 +221,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#eff6ff',
     alignItems: 'center',
     justifyContent: 'center',
   },
