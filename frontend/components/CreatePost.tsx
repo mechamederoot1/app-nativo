@@ -204,11 +204,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 23, 42, 0.55)',
     justifyContent: 'center',
     paddingHorizontal: 20,
+    position: 'relative',
   },
   modalBackdrop: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   modalWrapper: {
+    flex: 1,
     justifyContent: 'center',
   },
   modalCard: {
