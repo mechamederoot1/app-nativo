@@ -1,5 +1,11 @@
 import React, { useCallback } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Platform } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Platform,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, Plus, Eye, User } from 'lucide-react-native';
@@ -27,25 +33,43 @@ function MessageBubble({ active }: { active?: boolean }) {
   );
 }
 
-function BottomNavInner({ active, unreadMessages = 0, unreadVisits = 0 }: BottomNavProps) {
+function BottomNavInner({
+  active,
+  unreadMessages = 0,
+  unreadVisits = 0,
+}: BottomNavProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const go = useCallback((path: string) => () => router.push(path), [router]);
 
   return (
-    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom + 6, Platform.OS === 'android' ? 22 : 18) }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingBottom: Math.max(
+            insets.bottom + 6,
+            Platform.OS === 'android' ? 22 : 18,
+          ),
+        },
+      ]}
+    >
       <TouchableOpacity style={styles.tab} onPress={go('/feed')}>
         <View style={styles.iconWrapper}>
           <Home size={20} color={active === 'feed' ? '#0856d6' : '#6b7280'} />
         </View>
-        <Text style={[styles.label, active === 'feed' && styles.active]}>Feed</Text>
+        <Text style={[styles.label, active === 'feed' && styles.active]}>
+          Feed
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.tab} onPress={go('/create')}>
         <View style={styles.iconWrapper}>
           <Plus size={20} color={active === 'create' ? '#0856d6' : '#6b7280'} />
         </View>
-        <Text style={[styles.label, active === 'create' && styles.active]}>Criar</Text>
+        <Text style={[styles.label, active === 'create' && styles.active]}>
+          Criar
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.tab} onPress={go('/messages')}>
@@ -53,11 +77,15 @@ function BottomNavInner({ active, unreadMessages = 0, unreadVisits = 0 }: Bottom
           <MessageBubble active={active === 'messages'} />
           {unreadMessages > 0 && (
             <View style={[styles.badge, styles.badgeMessage]}>
-              <Text style={styles.badgeText}>{formatBadgeValue(unreadMessages)}</Text>
+              <Text style={styles.badgeText}>
+                {formatBadgeValue(unreadMessages)}
+              </Text>
             </View>
           )}
         </View>
-        <Text style={[styles.label, active === 'messages' && styles.active]}>Mensagens</Text>
+        <Text style={[styles.label, active === 'messages' && styles.active]}>
+          Mensagens
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.tab} onPress={go('/visits')}>
@@ -65,18 +93,27 @@ function BottomNavInner({ active, unreadMessages = 0, unreadVisits = 0 }: Bottom
           <Eye size={20} color={active === 'visits' ? '#0856d6' : '#6b7280'} />
           {unreadVisits > 0 && (
             <View style={[styles.badge, styles.badgeVisits]}>
-              <Text style={styles.badgeText}>{formatBadgeValue(unreadVisits)}</Text>
+              <Text style={styles.badgeText}>
+                {formatBadgeValue(unreadVisits)}
+              </Text>
             </View>
           )}
         </View>
-        <Text style={[styles.label, active === 'visits' && styles.active]}>Visitas</Text>
+        <Text style={[styles.label, active === 'visits' && styles.active]}>
+          Visitas
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.tab} onPress={go('/profile')}>
         <View style={styles.iconWrapper}>
-          <User size={20} color={active === 'profile' ? '#0856d6' : '#6b7280'} />
+          <User
+            size={20}
+            color={active === 'profile' ? '#0856d6' : '#6b7280'}
+          />
         </View>
-        <Text style={[styles.label, active === 'profile' && styles.active]}>Perfil</Text>
+        <Text style={[styles.label, active === 'profile' && styles.active]}>
+          Perfil
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -167,5 +204,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 10,
     fontWeight: '700',
-  }
+  },
 });

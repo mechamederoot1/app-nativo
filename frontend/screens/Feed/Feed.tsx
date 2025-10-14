@@ -1,5 +1,13 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, FlatList, RefreshControl, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  RefreshControl,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus } from 'lucide-react-native';
 
@@ -18,7 +26,8 @@ const MOCK_POSTS = [
   {
     id: '1',
     user: 'Alice',
-    content: 'Olá, esta é minha primeira postagem! Adoro construir coisas com React Native ❤️',
+    content:
+      'Olá, esta é minha primeira postagem! Adoro construir coisas com React Native ❤️',
     time: '2h',
     image: 'https://picsum.photos/800/600?random=1',
     likes: 12,
@@ -32,7 +41,10 @@ const MOCK_POSTS = [
     time: '3h',
     likes: 4,
     liked: false,
-    comments: [{ id: 'c2', user: 'Alice', text: 'Bora!' }, { id: 'c3', user: 'Carla', text: 'Top' }],
+    comments: [
+      { id: 'c2', user: 'Alice', text: 'Bora!' },
+      { id: 'c3', user: 'Carla', text: 'Top' },
+    ],
   },
   {
     id: '3',
@@ -58,19 +70,29 @@ export default function FeedScreen() {
       { id: 's3', user: 'Carla' },
       { id: 's4', user: 'Diego' },
     ],
-    []
+    [],
   );
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => {
-      setPosts(prev => [...prev]);
+      setPosts((prev) => [...prev]);
       setRefreshing(false);
     }, 800);
   }, []);
 
   const handleLike = (id: string) => {
-    setPosts(prev => prev.map(p => p.id === id ? { ...p, liked: !p.liked, likes: (p.liked ? (p.likes || 0) - 1 : (p.likes || 0) + 1) } : p));
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              liked: !p.liked,
+              likes: p.liked ? (p.likes || 0) - 1 : (p.likes || 0) + 1,
+            }
+          : p,
+      ),
+    );
   };
 
   const handleCreate = (content: string) => {
@@ -83,7 +105,7 @@ export default function FeedScreen() {
       liked: false,
       comments: [],
     };
-    setPosts(prev => [newPost, ...prev]);
+    setPosts((prev) => [newPost, ...prev]);
   };
 
   const renderStory = useCallback(({ item }: { item: StoryItemType }) => {
@@ -126,7 +148,7 @@ export default function FeedScreen() {
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.storiesList}
-            keyExtractor={item => item.id}
+            keyExtractor={(item) => item.id}
             renderItem={renderStory}
           />
         </View>
@@ -135,9 +157,13 @@ export default function FeedScreen() {
 
         <FlatList
           data={posts}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => <PostCard post={item} onLike={handleLike} />}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <PostCard post={item} onLike={handleLike} />
+          )}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.postsList}
         />

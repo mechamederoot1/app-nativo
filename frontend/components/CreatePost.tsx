@@ -10,7 +10,13 @@ import {
   Platform,
   Pressable,
 } from 'react-native';
-import { BarChart3, CalendarDays, Image as ImageIcon, Mic, X } from 'lucide-react-native';
+import {
+  BarChart3,
+  CalendarDays,
+  Image as ImageIcon,
+  Mic,
+  X,
+} from 'lucide-react-native';
 
 type CreatePostProps = {
   onCreate: (content: string) => void;
@@ -70,8 +76,14 @@ export default function CreatePost({ onCreate }: CreatePostProps) {
         </View>
 
         <View style={styles.cardFooter}>
-          <Text style={styles.hintText}>Compartilhe fotos, vídeos ou histórias com a comunidade.</Text>
-          <TouchableOpacity onPress={openModal} activeOpacity={0.85} style={styles.composeButton}>
+          <Text style={styles.hintText}>
+            Compartilhe fotos, vídeos ou histórias com a comunidade.
+          </Text>
+          <TouchableOpacity
+            onPress={openModal}
+            activeOpacity={0.85}
+            style={styles.composeButton}
+          >
             <Text style={styles.composeButtonText}>Criar</Text>
           </TouchableOpacity>
         </View>
@@ -92,11 +104,16 @@ export default function CreatePost({ onCreate }: CreatePostProps) {
             <View style={styles.modalCard}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>Criar publicação</Text>
-                <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+                <TouchableOpacity
+                  onPress={closeModal}
+                  style={styles.closeButton}
+                >
                   <X size={18} color="#6b7280" />
                 </TouchableOpacity>
               </View>
-              <Text style={styles.modalSubtitle}>Compartilhe seu momento com a comunidade.</Text>
+              <Text style={styles.modalSubtitle}>
+                Compartilhe seu momento com a comunidade.
+              </Text>
 
               <TextInput
                 style={styles.modalInput}
@@ -108,8 +125,12 @@ export default function CreatePost({ onCreate }: CreatePostProps) {
               />
 
               <View style={styles.modalActionsRow}>
-                {POST_ACTIONS.map(action => (
-                  <TouchableOpacity key={action.id} style={styles.modalAction} activeOpacity={0.9}>
+                {POST_ACTIONS.map((action) => (
+                  <TouchableOpacity
+                    key={action.id}
+                    style={styles.modalAction}
+                    activeOpacity={0.9}
+                  >
                     <View style={styles.modalActionIcon}>
                       <action.Icon size={18} color="#0856d6" />
                     </View>
@@ -119,12 +140,18 @@ export default function CreatePost({ onCreate }: CreatePostProps) {
               </View>
 
               <View style={styles.modalFooter}>
-                <TouchableOpacity onPress={closeModal} style={styles.cancelButton}>
+                <TouchableOpacity
+                  onPress={closeModal}
+                  style={styles.cancelButton}
+                >
                   <Text style={styles.cancelText}>Cancelar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handlePublish}
-                  style={[styles.publishButton, !canPublish && styles.publishButtonDisabled]}
+                  style={[
+                    styles.publishButton,
+                    !canPublish && styles.publishButtonDisabled,
+                  ]}
                   disabled={!canPublish}
                 >
                   <Text style={styles.publishText}>Publicar</Text>
