@@ -151,12 +151,12 @@ export default function FeedScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f1f5f9',
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingHorizontal: 18,
+    paddingTop: 18,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -227,6 +227,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   postsList: {
-    paddingBottom: 120,
+    paddingBottom: 160,
   },
 });
