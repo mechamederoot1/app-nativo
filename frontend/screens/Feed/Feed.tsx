@@ -1,28 +1,30 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
-  Text,
   FlatList,
   RefreshControl,
-  Image,
-  TouchableOpacity,
   StyleSheet,
+  Text,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus } from 'lucide-react-native';
 
 import PostCard from '../../components/PostCard';
 import BottomNav from '../../components/BottomNav';
 import CreatePost from '../../components/CreatePost';
 import TopBar from '../../components/TopBar';
 
-type StoryItemType = {
+type Post = {
   id: string;
-  user?: string;
-  isAdd?: boolean;
+  user: string;
+  content: string;
+  time: string;
+  image?: string;
+  likes?: number;
+  liked?: boolean;
+  comments: { id: string; user: string; text: string }[];
 };
 
-const MOCK_POSTS = [
+const MOCK_POSTS: Post[] = [
   {
     id: '1',
     user: 'Alice',
@@ -59,19 +61,8 @@ const MOCK_POSTS = [
 ];
 
 export default function FeedScreen() {
-  const [posts, setPosts] = useState(MOCK_POSTS);
+  const [posts, setPosts] = useState<Post[]>(MOCK_POSTS);
   const [refreshing, setRefreshing] = useState(false);
-
-  const stories = useMemo<StoryItemType[]>(
-    () => [
-      { id: 'add', user: 'Adicionar', isAdd: true },
-      { id: 's1', user: 'Alice' },
-      { id: 's2', user: 'Bruno' },
-      { id: 's3', user: 'Carla' },
-      { id: 's4', user: 'Diego' },
-    ],
-    [],
-  );
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -81,22 +72,24 @@ export default function FeedScreen() {
     }, 800);
   }, []);
 
-  const handleLike = (id: string) => {
+  const handleLike = useCallback((id: string) => {
     setPosts((prev) =>
-      prev.map((p) =>
-        p.id === id
+      prev.map((post) =>
+        post.id === id
           ? {
-              ...p,
-              liked: !p.liked,
-              likes: p.liked ? (p.likes || 0) - 1 : (p.likes || 0) + 1,
+              ...post,
+              liked: !post.liked,
+              likes: post.liked
+                ? Math.max((post.likes || 0) - 1, 0)
+                : (post.likes || 0) + 1,
             }
-          : p,
+          : post,
       ),
     );
-  };
+  }, []);
 
-  const handleCreate = (content: string) => {
-    const newPost = {
+  const handleCreate = useCallback((content: string) => {
+    const newPost: Post = {
       id: String(Date.now()),
       user: 'Você',
       content,
@@ -105,56 +98,14 @@ export default function FeedScreen() {
       liked: false,
       comments: [],
     };
+
     setPosts((prev) => [newPost, ...prev]);
-  };
-
-  const renderStory = useCallback(({ item }: { item: StoryItemType }) => {
-    if (item.isAdd) {
-      return (
-        <View style={styles.storyItem}>
-          <View style={styles.addStoryCircle}>
-            <Plus size={24} color="#0856d6" />
-          </View>
-          <Text style={styles.addStoryLabel}>Adicionar</Text>
-        </View>
-      );
-    }
-
-    return (
-      <TouchableOpacity style={styles.storyItem} activeOpacity={0.8}>
-        <Image
-          source={{ uri: `https://i.pravatar.cc/100?u=${item.id}` }}
-          style={styles.storyAvatar}
-        />
-        <Text style={styles.storyLabel}>{item.user}</Text>
-      </TouchableOpacity>
-    );
   }, []);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <TopBar />
       <View style={styles.content}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Stories</Text>
-          <TouchableOpacity activeOpacity={0.8}>
-            <Text style={styles.sectionAction}>Ver tudo</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.storiesCard}>
-          <FlatList
-            data={stories}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.storiesList}
-            keyExtractor={(item) => item.id}
-            renderItem={renderStory}
-          />
-        </View>
-
-        <CreatePost onCreate={handleCreate} />
-
         <FlatList
           data={posts}
           keyExtractor={(item) => item.id}
@@ -166,6 +117,15 @@ export default function FeedScreen() {
           }
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.postsList}
+          ListHeaderComponent={
+            <View style={styles.listHeader}>
+              <Text style={styles.feedTitle}>Feed personalizado</Text>
+              <Text style={styles.feedSubtitle}>
+                Acompanhe atualizações em tempo real das pessoas que você segue.
+              </Text>
+              <CreatePost onCreate={handleCreate} />
+            </View>
+          }
         />
       </View>
 
@@ -184,75 +144,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingTop: 10,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 4,
+  postsList: {
+    paddingBottom: 120,
   },
-  sectionTitle: {
-    fontSize: 16,
+  listHeader: {
+    gap: 12,
+    marginBottom: 16,
+  },
+  feedTitle: {
+    fontSize: 20,
     fontWeight: '700',
     color: '#0f172a',
   },
-  sectionAction: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#0856d6',
-  },
-  storiesCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#0f172a',
-    shadowOpacity: 0.05,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 3,
-  },
-  storiesList: {
-    paddingRight: 4,
-  },
-  storyItem: {
-    alignItems: 'center',
-    marginRight: 12,
-    width: 58,
-  },
-  storyAvatar: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    borderWidth: 2,
-    borderColor: '#0856d6',
-  },
-  storyLabel: {
-    fontSize: 11,
-    marginTop: 4,
-    color: '#0f172a',
-    textAlign: 'center',
-  },
-  addStoryCircle: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    borderWidth: 2,
-    borderColor: '#0856d6',
-    borderStyle: 'dashed',
-    backgroundColor: '#f3f4ff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addStoryLabel: {
-    fontSize: 11,
-    marginTop: 4,
-    color: '#0856d6',
-    fontWeight: '600',
-  },
-  postsList: {
-    paddingBottom: 120,
+  feedSubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#64748b',
   },
 });
