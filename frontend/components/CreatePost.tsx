@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -8,63 +8,50 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  TouchableWithoutFeedback,
+  Pressable,
 } from 'react-native';
 import { BarChart3, CalendarDays, Image as ImageIcon, Mic, X } from 'lucide-react-native';
 
-const POST_ACTIONS = [
+type CreatePostProps = {
+  onCreate: (content: string) => void;
+};
+
+type ActionItem = {
+  id: string;
+  label: string;
+  Icon: React.ComponentType<{ size?: number; color?: string }>;
+};
+
+const POST_ACTIONS: ActionItem[] = [
   { id: 'media', label: 'Fotos & Vídeos', Icon: ImageIcon },
   { id: 'audio', label: 'Áudio', Icon: Mic },
   { id: 'poll', label: 'Enquete', Icon: BarChart3 },
   { id: 'event', label: 'Acontecimento', Icon: CalendarDays },
 ];
 
-type CreatePostProps = {
-  onCreate: (content: string) => void;
-};
-
-type ActionItem = typeof POST_ACTIONS[number];
-
 export default function CreatePost({ onCreate }: CreatePostProps) {
   const [modalVisible, setModalVisible] = useState(false);
   const [text, setText] = useState('');
 
-  const canPublish = text.trim().length > 0;
-
-  const openModal = () => {
+  const openModal = useCallback(() => {
     setModalVisible(true);
-  };
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setModalVisible(false);
     setText('');
-  };
+  }, []);
 
-  const handlePublish = () => {
-    if (!canPublish) {
+  const handlePublish = useCallback(() => {
+    const trimmed = text.trim();
+    if (!trimmed) {
       return;
     }
-    onCreate(text.trim());
+    onCreate(trimmed);
     closeModal();
-  };
+  }, [closeModal, onCreate, text]);
 
-  const renderActionPreview = useMemo(
-    () =>
-      POST_ACTIONS.map(action => (
-        <TouchableOpacity
-          key={action.id}
-          onPress={openModal}
-          activeOpacity={0.85}
-          style={styles.previewAction}
-        >
-          <View style={styles.previewIconCircle}>
-            <action.Icon size={16} color="#0856d6" />
-          </View>
-          <Text style={styles.previewActionLabel}>{action.label}</Text>
-        </TouchableOpacity>
-      )),
-    []
-  );
+  const canPublish = text.trim().length > 0;
 
   return (
     <View>
@@ -77,7 +64,21 @@ export default function CreatePost({ onCreate }: CreatePostProps) {
           <Text style={styles.promptText}>No que você está pensando?</Text>
         </TouchableOpacity>
 
-        <View style={styles.previewActions}>{renderActionPreview}</View>
+        <View style={styles.previewActions}>
+          {POST_ACTIONS.map(action => (
+            <TouchableOpacity
+              key={action.id}
+              activeOpacity={0.85}
+              onPress={openModal}
+              style={styles.previewAction}
+            >
+              <View style={styles.previewIconCircle}>
+                <action.Icon size={16} color="#0856d6" />
+              </View>
+              <Text style={styles.previewActionLabel}>{action.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
       <Modal
@@ -86,59 +87,56 @@ export default function CreatePost({ onCreate }: CreatePostProps) {
         transparent
         onRequestClose={closeModal}
       >
-        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback>
-              <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                style={styles.modalWrapper}
-              >
-                <View style={styles.modalCard}>
-                  <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>Criar publicação</Text>
-                    <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-                      <X size={18} color="#6b7280" />
-                    </TouchableOpacity>
-                  </View>
-                  <Text style={styles.modalSubtitle}>Compartilhe seu momento com a comunidade.</Text>
+        <View style={styles.modalOverlay}>
+          <Pressable style={styles.modalBackdrop} onPress={closeModal} />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={styles.modalWrapper}
+          >
+            <View style={styles.modalCard}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Criar publicação</Text>
+                <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+                  <X size={18} color="#6b7280" />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.modalSubtitle}>Compartilhe seu momento com a comunidade.</Text>
 
-                  <TextInput
-                    style={styles.modalInput}
-                    placeholder="Escreva sua mensagem aqui..."
-                    placeholderTextColor="#9aa0a6"
-                    multiline
-                    value={text}
-                    onChangeText={setText}
-                  />
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Escreva sua mensagem aqui..."
+                placeholderTextColor="#9aa0a6"
+                multiline
+                value={text}
+                onChangeText={setText}
+              />
 
-                  <View style={styles.modalActionsRow}>
-                    {POST_ACTIONS.map((action: ActionItem) => (
-                      <TouchableOpacity key={action.id} style={styles.modalAction} activeOpacity={0.9}>
-                        <View style={styles.modalActionIcon}>
-                          <action.Icon size={18} color="#0856d6" />
-                        </View>
-                        <Text style={styles.modalActionLabel}>{action.label}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+              <View style={styles.modalActionsRow}>
+                {POST_ACTIONS.map(action => (
+                  <TouchableOpacity key={action.id} style={styles.modalAction} activeOpacity={0.9}>
+                    <View style={styles.modalActionIcon}>
+                      <action.Icon size={18} color="#0856d6" />
+                    </View>
+                    <Text style={styles.modalActionLabel}>{action.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
-                  <View style={styles.modalFooter}>
-                    <TouchableOpacity onPress={closeModal} style={styles.cancelButton}>
-                      <Text style={styles.cancelText}>Cancelar</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={handlePublish}
-                      style={[styles.publishButton, !canPublish && styles.publishButtonDisabled]}
-                      disabled={!canPublish}
-                    >
-                      <Text style={styles.publishText}>Publicar</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </KeyboardAvoidingView>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
+              <View style={styles.modalFooter}>
+                <TouchableOpacity onPress={closeModal} style={styles.cancelButton}>
+                  <Text style={styles.cancelText}>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handlePublish}
+                  style={[styles.publishButton, !canPublish && styles.publishButtonDisabled]}
+                  disabled={!canPublish}
+                >
+                  <Text style={styles.publishText}>Publicar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
       </Modal>
     </View>
   );
@@ -176,7 +174,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginTop: 14,
-    rowGap: 10,
   },
   previewAction: {
     width: '48%',
@@ -186,6 +183,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 12,
     backgroundColor: '#eef2ff',
+    marginBottom: 10,
   },
   previewIconCircle: {
     width: 28,
@@ -207,8 +205,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
   modalWrapper: {
-    flex: 1,
     justifyContent: 'center',
   },
   modalCard: {
@@ -253,7 +253,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginTop: 18,
-    rowGap: 12,
   },
   modalAction: {
     width: '48%',
@@ -265,6 +264,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f8faff',
+    marginBottom: 12,
   },
   modalActionIcon: {
     width: 34,
