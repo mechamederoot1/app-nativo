@@ -216,11 +216,14 @@ const styles = StyleSheet.create({
   modalWrapper: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   modalCard: {
     backgroundColor: '#fff',
     borderRadius: 20,
     padding: 20,
+    width: '100%',
+    maxWidth: 520,
   },
   modalHeader: {
     flexDirection: 'row',
