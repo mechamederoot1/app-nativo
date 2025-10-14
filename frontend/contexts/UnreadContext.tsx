@@ -6,8 +6,10 @@ type UnreadContextType = {
   unreadNotifications: number;
   markMessagesRead: () => void;
   markVisitsRead: () => void;
+  markNotificationsRead: () => void;
   setUnreadMessages: (n: number) => void;
   setUnreadVisits: (n: number) => void;
+  setUnreadNotifications: (n: number) => void;
 };
 
 const UnreadContext = createContext<UnreadContextType | undefined>(undefined);
@@ -16,10 +18,12 @@ export function UnreadProvider({ children }: { children: React.ReactNode }) {
   // mock initial counts
   const [unreadMessages, setUnreadMessagesState] = useState<number>(2);
   const [unreadVisits, setUnreadVisitsState] = useState<number>(1);
-  const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
+  const [unreadNotifications, setUnreadNotificationsState] =
+    useState<number>(3);
 
   const markMessagesRead = () => setUnreadMessagesState(0);
   const markVisitsRead = () => setUnreadVisitsState(0);
+  const markNotificationsRead = () => setUnreadNotificationsState(0);
 
   return (
     <UnreadContext.Provider
@@ -29,8 +33,10 @@ export function UnreadProvider({ children }: { children: React.ReactNode }) {
         unreadNotifications,
         markMessagesRead,
         markVisitsRead,
+        markNotificationsRead,
         setUnreadMessages: setUnreadMessagesState,
         setUnreadVisits: setUnreadVisitsState,
+        setUnreadNotifications: setUnreadNotificationsState,
       }}
     >
       {children}
