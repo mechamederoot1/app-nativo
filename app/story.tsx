@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#111827',
     borderWidth: 1,
-    borderColor: '#0f172a0f'.replace('0f', ''),
+    borderColor: 'rgba(15, 23, 42, 0.12)',
   },
   storyCardImage: {
     height: 280,
