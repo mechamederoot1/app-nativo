@@ -51,6 +51,7 @@ export default function StoryViewerScreen() {
     return Math.min(idx, initialData.length - 1);
   });
   const [showComments, setShowComments] = useState(false);
+  const [overlayWhite, setOverlayWhite] = useState(false);
   const insets = useSafeAreaInsets();
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
@@ -63,43 +64,32 @@ export default function StoryViewerScreen() {
 
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 60 });
 
-  const addComment = useCallback(() => {
-    const txt = commentText.trim();
-    if (!txt) return;
-    setData((prev) =>
-      prev.map((s, idx) =>
+  const addComment = useCallback((textParam?: string) => {
+    const txt = (textParam ?? commentText).trim();
+    if (!txt) return false;
+    const newComment = { id: String(Date.now()), user: 'Você', text: txt };
+
+    setData((prev) => {
+      const next = prev.map((s, idx) =>
         idx === active
           ? {
               ...s,
-              comments: [
-                ...s.comments,
-                { id: String(Date.now()), user: 'Você', text: txt },
-              ],
+              comments: [...s.comments, newComment],
             }
           : s,
-      ),
-    );
-    // persist to store so list view sees it
-    setStories(
-      stories.map((s, idx) =>
-        idx === active
-          ? {
-              ...s,
-              comments: [
-                ...s.comments,
-                { id: String(Date.now()), user: 'Você', text: txt },
-              ],
-            }
-          : s,
-      ),
-    );
+      );
+      setStories(next);
+      return next;
+    });
+
     setCommentText('');
-  }, [active, commentText, stories]);
+    return true;
+  }, [active, commentText]);
 
   const reactToStory = useCallback(
     (emoji: string) => {
-      setData((prev) =>
-        prev.map((s, idx) =>
+      setData((prev) => {
+        const next = prev.map((s, idx) =>
           idx === active
             ? {
                 ...s,
@@ -109,23 +99,12 @@ export default function StoryViewerScreen() {
                 },
               }
             : s,
-        ),
-      );
-      setStories(
-        stories.map((s, idx) =>
-          idx === active
-            ? {
-                ...s,
-                reactions: {
-                  ...(s.reactions || {}),
-                  [emoji]: (s.reactions?.[emoji] || 0) + 1,
-                },
-              }
-            : s,
-        ),
-      );
+        );
+        setStories(next);
+        return next;
+      });
     },
-    [active, stories],
+    [active],
   );
 
   const renderItem = useCallback(({ item }: { item: Story }) => {
@@ -206,7 +185,16 @@ export default function StoryViewerScreen() {
                 onChangeText={setCommentText}
                 style={styles.commentInputTranslucent}
               />
-              <TouchableOpacity onPress={() => setShowComments(true)} style={styles.commentBtnTranslucent}>
+              <TouchableOpacity
+                onPress={() => {
+                  const sent = addComment();
+                  if (sent) {
+                    setOverlayWhite(true);
+                    setShowComments(true);
+                  }
+                }}
+                style={styles.commentBtnTranslucent}
+              >
                 <Text style={styles.commentBtnText}>Comentar</Text>
               </TouchableOpacity>
             </View>
@@ -215,11 +203,11 @@ export default function StoryViewerScreen() {
 
         {/* Comments overlay — same styling as story (dark, translucent) and integrated list */}
         {showComments ? (
-          <View style={styles.commentsOverlay}>
+          <View style={[styles.commentsOverlay, overlayWhite ? styles.commentsOverlayWhite : null]}>
             <View style={styles.commentsHeader}>
-              <Text style={styles.commentsHeaderText}>Comentários</Text>
-              <TouchableOpacity onPress={() => setShowComments(false)}>
-                <Text style={styles.commentsClose}>Fechar</Text>
+              <Text style={[styles.commentsHeaderText, overlayWhite ? styles.commentsHeaderTextWhite : null]}>Comentários</Text>
+              <TouchableOpacity onPress={() => { setShowComments(false); setOverlayWhite(false); }}>
+                <Text style={[styles.commentsClose, overlayWhite ? styles.commentsCloseWhite : null]}>Fechar</Text>
               </TouchableOpacity>
             </View>
 
@@ -228,8 +216,8 @@ export default function StoryViewerScreen() {
               keyExtractor={(c) => c.id}
               renderItem={({ item: c }) => (
                 <View style={styles.commentRowOverlay}>
-                  <Text style={styles.commentUserOverlay}>{c.user}</Text>
-                  <Text style={styles.commentTextOverlay}> {c.text}</Text>
+                  <Text style={[styles.commentUserOverlay, overlayWhite ? styles.commentUserOverlayWhite : null]}>{c.user}</Text>
+                  <Text style={[styles.commentTextOverlay, overlayWhite ? styles.commentTextOverlayWhite : null]}> {c.text}</Text>
                 </View>
               )}
               style={{ flex: 1, width: '100%' }}
@@ -240,12 +228,12 @@ export default function StoryViewerScreen() {
             <View style={[styles.commentComposerOverlay, { paddingBottom: insets.bottom ? insets.bottom + 20 : 24 }]}>
               <TextInput
                 placeholder="Escreva um comentário..."
-                placeholderTextColor="rgba(255,255,255,0.7)"
+                placeholderTextColor={overlayWhite ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.7)'}
                 value={commentText}
                 onChangeText={setCommentText}
-                style={styles.commentInputOverlay}
+                style={[styles.commentInputOverlay, overlayWhite ? styles.commentInputOverlayWhite : null]}
               />
-              <TouchableOpacity onPress={addComment} style={styles.commentBtnOverlay}>
+              <TouchableOpacity onPress={() => { const sent = addComment(); if (sent) { setOverlayWhite(true); } }} style={styles.commentBtnOverlay}>
                 <Text style={styles.commentBtnText}>Enviar</Text>
               </TouchableOpacity>
             </View>
@@ -297,13 +285,19 @@ const styles = StyleSheet.create({
   commentBtnText: { color: '#fff', fontWeight: '700' },
 
   commentsOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
+  commentsOverlayWhite: { backgroundColor: '#fff', justifyContent: 'flex-start' },
   commentsHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 12, borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.06)' },
   commentsHeaderText: { color: '#fff', fontSize: 16, fontWeight: '800' },
+  commentsHeaderTextWhite: { color: '#0f172a' },
   commentsClose: { color: 'rgba(255,255,255,0.7)', fontWeight: '700' },
+  commentsCloseWhite: { color: '#6b7280' },
   commentRowOverlay: { flexDirection: 'row', marginBottom: 12 },
   commentUserOverlay: { color: '#fff', fontWeight: '800', marginRight: 8 },
+  commentUserOverlayWhite: { color: '#0f172a' },
   commentTextOverlay: { color: '#fff', flex: 1 },
+  commentTextOverlayWhite: { color: '#374151' },
   commentComposerOverlay: { flexDirection: 'row', alignItems: 'center', padding: 12, borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.06)' },
   commentInputOverlay: { flex: 1, color: '#fff', paddingVertical: 10, paddingHorizontal: 12, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 10 },
+  commentInputOverlayWhite: { color: '#0f172a', backgroundColor: '#f8fafc' },
   commentBtnOverlay: { marginLeft: 8, backgroundColor: '#0856d6', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 10 },
 });
