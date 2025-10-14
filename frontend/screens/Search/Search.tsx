@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import type { ListRenderItem } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Search as SearchIcon } from 'lucide-react-native';
@@ -124,8 +125,8 @@ export default function SearchScreen() {
     setSelectedTag((current) => (current === tag ? null : tag));
   }, []);
 
-  const renderPerson = useCallback(
-    ({ item }: { item: Person }) => (
+  const renderPerson = useCallback<ListRenderItem<Person>>(
+    ({ item }) => (
       <PersonRow person={item} onPress={() => router.push('/profile')} />
     ),
     [router],
@@ -151,7 +152,7 @@ export default function SearchScreen() {
           <Text style={styles.sectionTitle}>Tendências para você</Text>
         </View>
 
-        <FlatList
+        <FlatList<string>
           data={ALL_TAGS}
           horizontal
           keyExtractor={(tag) => tag}
@@ -170,7 +171,7 @@ export default function SearchScreen() {
           </Text>
         </View>
 
-        <FlatList
+        <FlatList<Person>
           data={filteredPeople}
           keyExtractor={(person) => person.id}
           renderItem={renderPerson}
