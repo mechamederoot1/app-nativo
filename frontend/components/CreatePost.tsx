@@ -63,22 +63,6 @@ export default function CreatePost({ onCreate }: CreatePostProps) {
         >
           <Text style={styles.promptText}>No que você está pensando?</Text>
         </TouchableOpacity>
-
-        <View style={styles.previewActions}>
-          {POST_ACTIONS.map(action => (
-            <TouchableOpacity
-              key={action.id}
-              activeOpacity={0.85}
-              onPress={openModal}
-              style={styles.previewAction}
-            >
-              <View style={styles.previewIconCircle}>
-                <action.Icon size={16} color="#0856d6" />
-              </View>
-              <Text style={styles.previewActionLabel}>{action.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
       </View>
 
       <Modal
@@ -168,36 +152,6 @@ const styles = StyleSheet.create({
   promptText: {
     color: '#6b7280',
     fontSize: 14,
-  },
-  previewActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginTop: 14,
-  },
-  previewAction: {
-    width: '48%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-    backgroundColor: '#eef2ff',
-    marginBottom: 10,
-  },
-  previewIconCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#dbe8ff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,
-  },
-  previewActionLabel: {
-    fontSize: 12,
-    color: '#1f2937',
-    fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
