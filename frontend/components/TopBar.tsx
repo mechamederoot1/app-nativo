@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   Platform,
+  Animated,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Bell, Search } from 'lucide-react-native';
@@ -22,6 +24,37 @@ export default function TopBar() {
     Platform.OS === 'android' ? 12 : 14,
   );
 
+  const messages = useMemo(
+    () => [
+      { text: 'Paulo acabou de entrar', avatar: 'https://i.pravatar.cc/100?img=15' },
+      { text: 'Paulo te enviou uma mensagem', avatar: 'https://i.pravatar.cc/100?img=15' },
+    ],
+    [],
+  );
+  const [idx, setIdx] = useState(0);
+  const [visible, setVisible] = useState(false);
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(-8)).current;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIdx((p) => (p + 1) % messages.length);
+      setVisible(true);
+      Animated.parallel([
+        Animated.timing(opacity, { toValue: 1, duration: 250, useNativeDriver: true }),
+        Animated.spring(translateY, { toValue: 0, useNativeDriver: true }),
+      ]).start(() => {
+        setTimeout(() => {
+          Animated.parallel([
+            Animated.timing(opacity, { toValue: 0, duration: 250, useNativeDriver: true }),
+            Animated.spring(translateY, { toValue: -8, useNativeDriver: true }),
+          ]).start(() => setVisible(false));
+        }, 2200);
+      });
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [messages.length, opacity, translateY]);
+
   return (
     <View
       style={[
@@ -32,6 +65,15 @@ export default function TopBar() {
       <TouchableOpacity onPress={() => router.push('/feed')}>
         <Text style={styles.logo}>Vibe</Text>
       </TouchableOpacity>
+
+      <View style={styles.centerToastArea}>
+        {visible ? (
+          <Animated.View style={[styles.toast, { opacity, transform: [{ translateY }] }]}>
+            <Image source={{ uri: messages[idx].avatar }} style={styles.toastAvatar} />
+            <Text style={styles.toastText}>{messages[idx].text}</Text>
+          </Animated.View>
+        ) : null}
+      </View>
 
       <View style={styles.rightRow}>
         <TouchableOpacity
@@ -74,6 +116,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   logo: { fontSize: 18, fontWeight: '800', color: '#0856d6' },
+  centerToastArea: { flex: 1, alignItems: 'center' },
+  toast: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0f172a',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  toastAvatar: { width: 18, height: 18, borderRadius: 9, marginRight: 6 },
+  toastText: { color: '#fff', fontSize: 12 },
   rightRow: { flexDirection: 'row', alignItems: 'center' },
   iconBtn: { marginLeft: 12 },
   avatarPlaceholder: {
