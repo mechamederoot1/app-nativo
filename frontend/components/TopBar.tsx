@@ -14,7 +14,7 @@ import { useUnread } from '../contexts/UnreadContext';
 
 export default function TopBar() {
   const router = useRouter();
-  const { unreadVisits } = useUnread();
+  const { unreadNotifications } = useUnread();
   const insets = useSafeAreaInsets();
 
   const paddingTop = Math.max(
@@ -46,9 +46,11 @@ export default function TopBar() {
           style={styles.iconBtn}
         >
           <Bell size={16} color="#6b7280" />
-          {unreadVisits > 0 && (
+          {unreadNotifications > 0 && (
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{unreadVisits}</Text>
+              <Text style={styles.badgeText}>
+                {unreadNotifications > 99 ? '99+' : unreadNotifications}
+              </Text>
             </View>
           )}
         </TouchableOpacity>
