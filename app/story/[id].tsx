@@ -13,6 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   getStories,
   getActiveIndex,
@@ -50,6 +51,7 @@ export default function StoryViewerScreen() {
     return Math.min(idx, initialData.length - 1);
   });
   const [showComments, setShowComments] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
     if (viewableItems && viewableItems.length > 0) {
@@ -187,7 +189,7 @@ export default function StoryViewerScreen() {
 
         {/* Integrated comment / reaction bar matching story style */}
         {!showComments ? (
-          <View style={styles.inlineControls}>
+          <View style={[styles.inlineControls, { bottom: insets.bottom + 24 }]}>
             <View style={styles.reactionButtons}>
               {['❤️', '🔥', '👍', '😂'].map((e) => (
                 <TouchableOpacity key={e} onPress={() => reactToStory(e)} style={styles.reactionBtn}>
@@ -235,7 +237,7 @@ export default function StoryViewerScreen() {
               showsVerticalScrollIndicator={false}
             />
 
-            <View style={styles.commentComposerOverlay}>
+            <View style={[styles.commentComposerOverlay, { paddingBottom: insets.bottom ? insets.bottom + 8 : 12 }]}>
               <TextInput
                 placeholder="Escreva um comentário..."
                 placeholderTextColor="rgba(255,255,255,0.7)"
