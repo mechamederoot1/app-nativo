@@ -2,14 +2,19 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Bell, Search } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { useUnread } from '../contexts/UnreadContext';
 
 export default function TopBar() {
   const router = useRouter();
   const { unreadNotifications, unreadVisits } = useUnread();
+  const insets = useSafeAreaInsets();
+
+  const paddingTop = Math.max(insets.top + 6, Platform.OS === 'android' ? 18 : 20);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop, paddingBottom: Platform.OS === 'ios' ? 12 : 10 }]}>
       <TouchableOpacity onPress={() => router.push('/feed')}>
         <Text style={styles.logo}>Vibe</Text>
       </TouchableOpacity>
@@ -27,7 +32,7 @@ export default function TopBar() {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push('/profile')} style={styles.avatarPlaceholder}>
-          <Text style={{color:'#0856d6'}}>U</Text>
+          <Text style={{ color: '#0856d6' }}>U</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -38,10 +43,10 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     paddingHorizontal: 16,
-    paddingVertical: Platform.OS === 'ios' ? 14 : 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    backgroundColor: '#fff',
   },
   logo: { fontSize: 22, fontWeight: '800', color: '#0856d6' },
   rightRow: { flexDirection: 'row', alignItems: 'center' },
