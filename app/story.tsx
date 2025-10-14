@@ -9,8 +9,11 @@ import {
   StyleSheet,
   TextInput,
   ActivityIndicator,
+  Platform,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Plus } from 'lucide-react-native';
 import TopBar from '../frontend/components/TopBar';
 import BottomNav from '../frontend/components/BottomNav';
 import { Story, setStories, setActiveIndex } from '../frontend/contexts/StoryStore';
