@@ -189,7 +189,7 @@ export default function StoryViewerScreen() {
 
         {/* Integrated comment / reaction bar matching story style */}
         {!showComments ? (
-          <View style={[styles.inlineControls, { bottom: insets.bottom + 24 }]}>
+          <View style={[styles.inlineControls, { bottom: insets.bottom + 48 }]}>
             <View style={styles.reactionButtons}>
               {['❤️', '🔥', '👍', '😂'].map((e) => (
                 <TouchableOpacity key={e} onPress={() => reactToStory(e)} style={styles.reactionBtn}>
@@ -237,7 +237,7 @@ export default function StoryViewerScreen() {
               showsVerticalScrollIndicator={false}
             />
 
-            <View style={[styles.commentComposerOverlay, { paddingBottom: insets.bottom ? insets.bottom + 8 : 12 }]}>
+            <View style={[styles.commentComposerOverlay, { paddingBottom: insets.bottom ? insets.bottom + 20 : 24 }]}>
               <TextInput
                 placeholder="Escreva um comentário..."
                 placeholderTextColor="rgba(255,255,255,0.7)"
