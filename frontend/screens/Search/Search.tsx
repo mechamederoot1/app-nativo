@@ -48,7 +48,7 @@ const PEOPLE = [
     interests: ['Comunidade', 'Networking', 'Design'],
     mutualCount: 5,
   },
-] as const;
+];
 
 const ALL_TAGS = Array.from(
   new Set(PEOPLE.flatMap((person) => person.interests)),
