@@ -122,7 +122,7 @@ export default function StoryScreen() {
 
   const itemWidth = width;
   const cardWidth = width - 40;
-  const cardHeight = Math.min(height * 0.75, 720);
+  const cardHeight = Math.min(height - 180, 600);
 
   const renderItem = useCallback(
     ({ item }: { item: StoryItem }) => (
