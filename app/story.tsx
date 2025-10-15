@@ -179,6 +179,7 @@ export default function StoryScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <TopBar />
+      {listHeader}
       <FlatList
         ref={listRef}
         data={STORIES}
@@ -191,9 +192,7 @@ export default function StoryScreen() {
         snapToInterval={itemWidth}
         snapToAlignment="start"
         getItemLayout={(_, index) => ({ length: itemWidth, offset: itemWidth * index, index })}
-        contentContainerStyle={{ paddingBottom: 0 }}
-        ListHeaderComponent={listHeader}
-        ListFooterComponent={<View style={{ width: itemWidth, height: 120 }} />}
+        contentContainerStyle={{ paddingBottom: 120 }}
       />
       <BottomNav active="story" />
 
