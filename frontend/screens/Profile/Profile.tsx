@@ -14,7 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import BottomNav from '../../components/BottomNav';
 import PostCard from '../../components/PostCard';
 import TopBar from '../../components/TopBar';
-import { Heart, Home, MapPin, Briefcase, Users, ChevronRight } from 'lucide-react-native';
+import { Heart, Home, MapPin, Briefcase, Users, ChevronRight, FileText } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { profileData } from './Data';
 import { getPosts, subscribe, toggleLike } from '../../store/posts';
@@ -61,8 +61,8 @@ export default function ProfileScreen() {
           </View>
 
           <View style={styles.headerStatsRow}>
-            <StatPill label="Posts" value={postCount} />
-            <StatPill label="Conexões" value={connectionsCount} />
+            <StatPill icon={FileText} label="Posts" value={postCount} />
+            <StatPill icon={Users} label="Conexões" value={connectionsCount} />
             <Pressable onPress={() => router.push('/profile/about')} style={styles.aboutPill}>
               <Text style={styles.aboutPillText}>Sobre</Text>
               <ChevronRight size={14} color="#111827" />
@@ -140,10 +140,15 @@ export default function ProfileScreen() {
   );
 }
 
-function StatPill({ label, value }: { label: string; value: number }) {
+function StatPill({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number; color?: string }>; label: string; value: number }) {
   return (
     <View style={styles.statPill}>
-      <Text style={styles.statValue}>{value}</Text>
+      <View style={styles.pillRow}>
+        <View style={styles.pillIconWrap}>
+          <Icon size={14} color="#64748b" />
+        </View>
+        <Text style={styles.statValue}>{value}</Text>
+      </View>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
@@ -190,6 +195,8 @@ const styles = StyleSheet.create({
   tagline: { color: '#64748b', marginTop: 8, paddingHorizontal: 24, textAlign: 'center' },
   headerStatsRow: { flexDirection: 'row', justifyContent: 'center', gap: 10 as unknown as number, marginTop: 14, paddingHorizontal: 16 },
   statPill: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#e5e7eb', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 999, alignItems: 'center' },
+  pillRow: { flexDirection: 'row', alignItems: 'center' },
+  pillIconWrap: { width: 22, height: 22, borderRadius: 11, backgroundColor: '#eef2f7', borderWidth: 1, borderColor: '#e5e7eb', alignItems: 'center', justifyContent: 'center', marginRight: 8 },
   statValue: { color: '#0f172a', fontWeight: '800' },
   statLabel: { color: '#64748b', fontSize: 12, marginTop: 2 },
   aboutPill: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#e5e7eb', borderWidth: 1, borderColor: '#e5e7eb', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 999 },
