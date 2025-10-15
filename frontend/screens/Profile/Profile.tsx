@@ -1,75 +1,159 @@
-import React from 'react';
-import { View, Text, Image, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, Image, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity, Pressable } from 'react-native';
 import BottomNav from '../../components/BottomNav';
 import PostCard from '../../components/PostCard';
 import TopBar from '../../components/TopBar';
+import { Heart } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { profileData } from './Data';
+import { getPosts, subscribe, toggleLike } from '../../store/posts';
 
-const MOCK_POSTS = [
-  { id: 'p1', user: 'Você', content: 'Primeiro post no meu perfil!', time: '1d', likes: 5, comments: [] },
-  { id: 'p2', user: 'Você', content: 'Adorei a experiência aqui.', time: '3d', likes: 2, comments: [] },
-];
+export default function ProfileScreen() {
+  const router = useRouter();
+  const p = profileData;
+  const [tab, setTab] = useState<'posts' | 'testimonials'>('posts');
+  const [posts, setPosts] = useState(getPosts());
 
-export default function ProfileScreen(){
+  useEffect(() => {
+    const unsub = subscribe(() => setPosts(getPosts()));
+    return unsub;
+  }, []);
+
+  const myPosts = useMemo(() => posts.filter((x) => x.user === 'Você'), [posts]);
+  const postCount = myPosts.length;
+  const connectionsCount = p.connectionsCount;
+
   return (
-    <SafeAreaView style={{flex:1}}>
+    <SafeAreaView style={{ flex: 1 }}>
       <TopBar />
-      <ScrollView contentContainerStyle={{paddingBottom: 80}}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+        {/* Cover and avatar */}
         <View style={styles.coverWrap}>
-          <Image source={{uri: 'https://picsum.photos/900/300?random=5'}} style={styles.cover} />
+          <Image source={{ uri: p.cover }} style={styles.cover} />
         </View>
 
         <View style={styles.metaWrap}>
           <View style={styles.avatarWrap}>
-            <Image source={{uri: 'https://i.pravatar.cc/150?img=56'}} style={styles.avatar} />
+            <Image source={{ uri: p.avatar }} style={styles.avatar} />
           </View>
-          <View style={{alignItems: 'center', marginTop: 8}}>
-            <Text style={styles.name}>Nome do Usuário</Text>
-            <Text style={styles.handle}>@seuusuario</Text>
+          <View style={{ alignItems: 'center', marginTop: 8 }}>
+            <Text style={styles.name}>{p.name}</Text>
+            <Text style={styles.handle}>@{p.username}</Text>
           </View>
         </View>
 
+        {/* Counters and About */}
         <View style={styles.infoCard}>
-          <Text style={styles.sectionTitle}>Sobre</Text>
-          <Text style={styles.bio}>Esta é a minha bio — desenvolvedor, amante de tecnologia e café. Aqui compartilho minhas ideias e projetos.</Text>
+          <Text style={styles.bio}>{p.bio}</Text>
 
           <View style={styles.rowStats}>
-            <View style={styles.stat}><Text style={styles.statNumber}>120</Text><Text style={styles.statLabel}>Posts</Text></View>
-            <View style={styles.stat}><Text style={styles.statNumber}>2.4k</Text><Text style={styles.statLabel}>Seguidores</Text></View>
-            <View style={styles.stat}><Text style={styles.statNumber}>320</Text><Text style={styles.statLabel}>Seguindo</Text></View>
+            <View style={styles.stat}><Text style={styles.statNumber}>{postCount}</Text><Text style={styles.statLabel}>Posts</Text></View>
+            <View style={styles.stat}><Text style={styles.statNumber}>{connectionsCount}</Text><Text style={styles.statLabel}>Conexões</Text></View>
+            <Pressable onPress={() => router.push('/profile/about')} style={styles.aboutBtn}>
+              <Text style={styles.aboutText}>Sobre</Text>
+            </Pressable>
           </View>
         </View>
 
-        <View style={{paddingHorizontal:16, marginTop:12}}>
-          <Text style={{fontSize:18,fontWeight:'700',marginBottom:8}}>Depoimentos</Text>
-          <View style={{backgroundColor:'#fff', padding:12, borderRadius:8}}>
-            <Text style={{color:'#374151'}}>“Ótimo profissional, recomendo!” — Maria</Text>
-          </View>
+        {/* Highlights */}
+        <View style={{ paddingHorizontal: 16, marginTop: 10 }}>
+          <Text style={styles.sectionTitle}>Destaques</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10 }}>
+            {p.highlights.map((h, i) => (
+              <View key={`${h}-${i}`} style={styles.highlightItem}>
+                <Image source={{ uri: h }} style={styles.highlight} />
+              </View>
+            ))}
+          </ScrollView>
         </View>
 
-        <View style={{paddingHorizontal:16, marginTop:12}}>
-          <Text style={{fontSize:18,fontWeight:'700',marginBottom:8}}>Posts</Text>
-          {MOCK_POSTS.map(p => <PostCard key={p.id} post={p} />)}
+        {/* Quick Info */}
+        <View style={styles.quickInfoCard}>
+          <InfoRow label="Cidade natal" value={p.hometown} />
+          <InfoRow label="Cidade atual" value={p.currentCity} />
+          <InfoRow label="Relacionamento" value={p.relationshipStatus} />
+          <InfoRow label="Trabalho" value={p.workplace} />
+        </View>
+
+        {/* Tabs */}
+        <View style={styles.tabsRow}>
+          <TouchableOpacity style={[styles.tabBtn, tab === 'posts' && styles.tabActive]} onPress={() => setTab('posts')}>
+            <Text style={[styles.tabText, tab === 'posts' && styles.tabTextActive]}>Posts</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.tabBtn, tab === 'testimonials' && styles.tabActive]} onPress={() => setTab('testimonials')}>
+            <Heart size={16} color={tab === 'testimonials' ? '#0856d6' : '#6b7280'} />
+            <Text style={[styles.tabText, { marginLeft: 6 }, tab === 'testimonials' && styles.tabTextActive]}>Depoimentos</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Content */}
+        <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
+          {tab === 'posts' ? (
+            myPosts.length === 0 ? (
+              <View style={styles.emptyBox}><Text style={styles.emptyText}>Nenhum post ainda.</Text></View>
+            ) : (
+              myPosts.map((p) => (
+                <PostCard key={p.id} post={p} onLike={() => toggleLike(p.id)} />
+              ))
+            )
+          ) : (
+            <View>
+              {profileData.testimonials.map((t) => (
+                <View key={t.id} style={styles.testimonialCard}>
+                  <Text style={styles.testimonialText}>“{t.text}”</Text>
+                  <Text style={styles.testimonialAuthor}>— {t.author} · {t.date}</Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
       </ScrollView>
 
       <BottomNav active="profile" />
     </SafeAreaView>
-  )
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.infoRow}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value}</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  coverWrap:{width:'100%',height:140,backgroundColor:'#f3f4f6'},
-  cover:{width:'100%',height:140},
-  metaWrap:{alignItems:'center', marginTop:-40},
-  avatarWrap:{width:96,height:96,borderRadius:48,overflow:'hidden',borderWidth:4,borderColor:'#fff',backgroundColor:'#fff'},
-  avatar:{width:96,height:96},
-  name:{fontSize:20,fontWeight:'800',color:'#111827'},
-  handle:{color:'#6b7280'},
-  infoCard:{backgroundColor:'#fff',marginTop:12,padding:16,paddingBottom:20,borderRadius:8,marginHorizontal:16},
-  sectionTitle:{fontSize:16,fontWeight:'700',marginBottom:8},
-  bio:{color:'#374151',lineHeight:20},
-  rowStats:{flexDirection:'row',justifyContent:'space-between',marginTop:12},
-  stat:{alignItems:'center'},
-  statNumber:{fontWeight:'700',fontSize:16},
-  statLabel:{color:'#6b7280'}
+  coverWrap: { width: '100%', height: 140, backgroundColor: '#f3f4f6' },
+  cover: { width: '100%', height: 140 },
+  metaWrap: { alignItems: 'center', marginTop: -40 },
+  avatarWrap: { width: 96, height: 96, borderRadius: 48, overflow: 'hidden', borderWidth: 4, borderColor: '#fff', backgroundColor: '#fff' },
+  avatar: { width: 96, height: 96 },
+  name: { fontSize: 20, fontWeight: '800', color: '#111827' },
+  handle: { color: '#6b7280' },
+  infoCard: { backgroundColor: '#fff', marginTop: 12, padding: 16, paddingBottom: 16, borderRadius: 8, marginHorizontal: 16 },
+  bio: { color: '#374151', lineHeight: 20 },
+  rowStats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
+  stat: { alignItems: 'center', flex: 1 },
+  statNumber: { fontWeight: '700', fontSize: 16 },
+  statLabel: { color: '#6b7280' },
+  aboutBtn: { paddingVertical: 10, paddingHorizontal: 14, backgroundColor: '#0856d6', borderRadius: 8 },
+  aboutText: { color: '#fff', fontWeight: '700' },
+  sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 8 },
+  highlightItem: { marginRight: 10 },
+  highlight: { width: 64, height: 64, borderRadius: 32 },
+  quickInfoCard: { backgroundColor: '#fff', marginHorizontal: 16, marginTop: 10, padding: 16, borderRadius: 8 },
+  infoRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  infoLabel: { color: '#6b7280' },
+  infoValue: { color: '#111827', fontWeight: '600' },
+  tabsRow: { flexDirection: 'row', marginTop: 14, paddingHorizontal: 16 },
+  tabBtn: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 12, backgroundColor: '#f3f4f6', borderRadius: 999, marginRight: 10 },
+  tabActive: { backgroundColor: '#e6f0ff' },
+  tabText: { color: '#6b7280', fontWeight: '600' },
+  tabTextActive: { color: '#0856d6' },
+  emptyBox: { backgroundColor: '#fff', padding: 20, borderRadius: 8 },
+  emptyText: { color: '#6b7280' },
+  testimonialCard: { backgroundColor: '#fff', padding: 14, borderRadius: 8, marginBottom: 10 },
+  testimonialText: { color: '#111827' },
+  testimonialAuthor: { marginTop: 6, color: '#6b7280' },
 });
