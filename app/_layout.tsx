@@ -18,7 +18,14 @@ export default function RootLayout() {
           <Stack.Screen name="messages" />
           <Stack.Screen name="visits" />
           <Stack.Screen name="profile" />
+          <Stack.Screen name="profile/[id]" />
           <Stack.Screen name="story" />
+          <Stack.Screen name="story/[id]" />
+          <Stack.Screen name="post" />
+          <Stack.Screen name="post/[id]" />
+          <Stack.Screen name="photo/[id]" />
+          <Stack.Screen name="video/[id]" />
+          <Stack.Screen name="cover/[id]" />
           <Stack.Screen name="create" />
           <Stack.Screen name="search" />
           <Stack.Screen name="notifications" />

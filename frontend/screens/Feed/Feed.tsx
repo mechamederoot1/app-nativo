@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, FlatList, RefreshControl, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -6,94 +6,41 @@ import PostCard from '../../components/PostCard';
 import BottomNav from '../../components/BottomNav';
 import CreatePost from '../../components/CreatePost';
 import TopBar from '../../components/TopBar';
+import { useRouter } from 'expo-router';
+import {
+  getPosts,
+  subscribe,
+  toggleLike,
+  addPost,
+  Post as StorePost,
+} from '../../store/posts';
 
-type Post = {
-  id: string;
-  user: string;
-  content: string;
-  time: string;
-  image?: string;
-  likes?: number;
-  liked?: boolean;
-  comments: { id: string; user: string; text: string }[];
-};
-
-const MOCK_POSTS: Post[] = [
-  {
-    id: '1',
-    user: 'Alice',
-    content:
-      'Olá, esta é minha primeira postagem! Adoro construir coisas com React Native ❤️',
-    time: '2h',
-    image: 'https://picsum.photos/800/600?random=1',
-    likes: 12,
-    liked: false,
-    comments: [{ id: 'c1', user: 'Bruno', text: 'Que massa!' }],
-  },
-  {
-    id: '2',
-    user: 'Bruno',
-    content: 'Curtindo o dia e construindo um app incrível. #dev',
-    time: '3h',
-    likes: 4,
-    liked: false,
-    comments: [
-      { id: 'c2', user: 'Alice', text: 'Bora!' },
-      { id: 'c3', user: 'Carla', text: 'Top' },
-    ],
-  },
-  {
-    id: '3',
-    user: 'Carla',
-    content: 'Compartilhando uma foto do meu café ☕️',
-    time: '4h',
-    image: 'https://picsum.photos/800/600?random=2',
-    likes: 21,
-    liked: false,
-    comments: [],
-  },
-];
+type Post = StorePost;
 
 export default function FeedScreen() {
-  const [posts, setPosts] = useState<Post[]>(MOCK_POSTS);
+  const router = useRouter();
+  const [posts, setPosts] = useState<Post[]>(getPosts());
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    const unsub = subscribe(() => setPosts(getPosts()));
+    return unsub;
+  }, []);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => {
-      setPosts((prev) => [...prev]);
+      setPosts(getPosts());
       setRefreshing(false);
-    }, 800);
+    }, 400);
   }, []);
 
   const handleLike = useCallback((id: string) => {
-    setPosts((prev) =>
-      prev.map((post) =>
-        post.id === id
-          ? {
-              ...post,
-              liked: !post.liked,
-              likes: post.liked
-                ? Math.max((post.likes || 0) - 1, 0)
-                : (post.likes || 0) + 1,
-            }
-          : post,
-      ),
-    );
+    toggleLike(id);
   }, []);
 
   const handleCreate = useCallback((content: string) => {
-    const newPost: Post = {
-      id: String(Date.now()),
-      user: 'Você',
-      content,
-      time: 'agora',
-      likes: 0,
-      liked: false,
-      comments: [],
-    };
-
-    setPosts((prev) => [newPost, ...prev]);
+    addPost(content);
   }, []);
 
   return (
@@ -104,7 +51,11 @@ export default function FeedScreen() {
           data={posts}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <PostCard post={item} onLike={handleLike} />
+            <PostCard
+              post={item}
+              onLike={handleLike}
+              onOpen={(id) => router.push(`/post/${id}`)}
+            />
           )}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

@@ -19,13 +19,19 @@ type Post = {
 export default function PostCard({
   post,
   onLike,
+  onOpen,
 }: {
   post: Post;
   onLike?: (id: string) => void;
+  onOpen?: (id: string) => void;
 }) {
   return (
     <View style={styles.card}>
-      <View style={styles.header}>
+      <TouchableOpacity
+        style={styles.header}
+        activeOpacity={0.85}
+        onPress={() => onOpen && onOpen(post.id)}
+      >
         <View style={styles.avatarPlaceholder}>
           <Text style={styles.avatarText}>
             {post.user.charAt(0).toUpperCase()}
@@ -35,14 +41,23 @@ export default function PostCard({
           <Text style={styles.user}>{post.user}</Text>
           <Text style={styles.time}>{post.time}</Text>
         </View>
-      </View>
+      </TouchableOpacity>
 
-      <View style={{ marginTop: 10 }}>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={() => onOpen && onOpen(post.id)}
+        style={{ marginTop: 10 }}
+      >
         <Text style={styles.content}>{post.content}</Text>
-      </View>
+      </TouchableOpacity>
 
       {post.image ? (
-        <Image source={{ uri: post.image }} style={styles.image} />
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => onOpen && onOpen(post.id)}
+        >
+          <Image source={{ uri: post.image }} style={styles.image} />
+        </TouchableOpacity>
       ) : null}
 
       <View style={styles.actionsRow}>
