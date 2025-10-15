@@ -19,6 +19,7 @@ export default function RootLayout() {
           <Stack.Screen name="visits" />
           <Stack.Screen name="profile" />
           <Stack.Screen name="profile/[id]" />
+          <Stack.Screen name="profile/about" />
           <Stack.Screen name="story" />
           <Stack.Screen name="story/[id]" />
           <Stack.Screen name="post" />
