@@ -1,8 +1,23 @@
-export type Position = { company: string; title: string; start: string; end?: string };
-export type Education = { institution: string; degree: string; start: string; end?: string };
+export type Position = {
+  company: string;
+  title: string;
+  start: string;
+  end?: string;
+};
+export type Education = {
+  institution: string;
+  degree: string;
+  start: string;
+  end?: string;
+};
 export type Group = { id: string; name: string; members: number };
 export type Friend = { id: string; name: string; avatar: string };
-export type Testimonial = { id: string; author: string; text: string; date: string };
+export type Testimonial = {
+  id: string;
+  author: string;
+  text: string;
+  date: string;
+};
 
 export type UserProfile = {
   name: string;
@@ -39,27 +54,64 @@ export const profileData: UserProfile = {
     'https://picsum.photos/200?random=32',
     'https://picsum.photos/200?random=33',
     'https://picsum.photos/200?random=34',
-    'https://picsum.photos/200?random=35'
+    'https://picsum.photos/200?random=35',
   ],
   positions: [
-    { company: 'Vibe', title: 'Engenheira de Software', start: '2023', end: 'Presente' },
-    { company: 'TechSpark', title: 'Desenvolvedora Mobile', start: '2021', end: '2023' }
+    {
+      company: 'Vibe',
+      title: 'Engenheira de Software',
+      start: '2023',
+      end: 'Presente',
+    },
+    {
+      company: 'TechSpark',
+      title: 'Desenvolvedora Mobile',
+      start: '2021',
+      end: '2023',
+    },
   ],
   education: [
-    { institution: 'UFMG', degree: 'Sistemas de Informação', start: '2017', end: '2021' }
+    {
+      institution: 'UFMG',
+      degree: 'Sistemas de Informação',
+      start: '2017',
+      end: '2021',
+    },
   ],
   groups: [
     { id: 'g1', name: 'React Native Brasil', members: 12340 },
     { id: 'g2', name: 'Design Systems', members: 6421 },
-    { id: 'g3', name: 'Café e Código', members: 2204 }
+    { id: 'g3', name: 'Café e Código', members: 2204 },
   ],
   recentFriends: [
-    { id: 'f1', name: 'Bruno Lima', avatar: 'https://i.pravatar.cc/100?img=12' },
-    { id: 'f2', name: 'Carla Mendes', avatar: 'https://i.pravatar.cc/100?img=23' },
-    { id: 'f3', name: 'Diego Rocha', avatar: 'https://i.pravatar.cc/100?img=34' }
+    {
+      id: 'f1',
+      name: 'Bruno Lima',
+      avatar: 'https://i.pravatar.cc/100?img=12',
+    },
+    {
+      id: 'f2',
+      name: 'Carla Mendes',
+      avatar: 'https://i.pravatar.cc/100?img=23',
+    },
+    {
+      id: 'f3',
+      name: 'Diego Rocha',
+      avatar: 'https://i.pravatar.cc/100?img=34',
+    },
   ],
   testimonials: [
-    { id: 't1', author: 'Bruno Lima', text: 'Profissional excepcional, entrega sempre com qualidade!', date: '2 sem' },
-    { id: 't2', author: 'Carla Mendes', text: 'Trabalhar com a Ana é incrível, muita atenção aos detalhes.', date: '3 sem' }
-  ]
+    {
+      id: 't1',
+      author: 'Bruno Lima',
+      text: 'Profissional excepcional, entrega sempre com qualidade!',
+      date: '2 sem',
+    },
+    {
+      id: 't2',
+      author: 'Carla Mendes',
+      text: 'Trabalhar com a Ana é incrível, muita atenção aos detalhes.',
+      date: '3 sem',
+    },
+  ],
 };

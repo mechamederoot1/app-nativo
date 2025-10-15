@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ScrollView,
+  SafeAreaView,
+} from 'react-native';
 import TopBar from '../../components/TopBar';
 import BottomNav from '../../components/BottomNav';
 import { profileData } from './Data';
@@ -29,9 +36,17 @@ export default function AboutScreen() {
           <Text style={styles.cardTitle}>Informações pessoais</Text>
           <InfoRow icon={Home} label="Cidade natal" value={p.hometown} />
           <InfoRow icon={MapPin} label="Cidade atual" value={p.currentCity} />
-          <InfoRow icon={Heart} label="Relacionamento" value={p.relationshipStatus} />
+          <InfoRow
+            icon={Heart}
+            label="Relacionamento"
+            value={p.relationshipStatus}
+          />
           <InfoRow icon={Briefcase} label="Trabalho" value={p.workplace} />
-          <InfoRow icon={Heart} label="Conexões" value={`${p.connectionsCount}`} />
+          <InfoRow
+            icon={Heart}
+            label="Conexões"
+            value={`${p.connectionsCount}`}
+          />
         </View>
 
         <View style={styles.card}>
@@ -42,7 +57,9 @@ export default function AboutScreen() {
                 <Text style={styles.itemTitle}>{pos.title}</Text>
                 <Text style={styles.itemSub}>{pos.company}</Text>
               </View>
-              <Text style={styles.itemTime}>{pos.start} — {pos.end || 'Presente'}</Text>
+              <Text style={styles.itemTime}>
+                {pos.start} — {pos.end || 'Presente'}
+              </Text>
             </View>
           ))}
         </View>
@@ -55,7 +72,9 @@ export default function AboutScreen() {
                 <Text style={styles.itemTitle}>{e.degree}</Text>
                 <Text style={styles.itemSub}>{e.institution}</Text>
               </View>
-              <Text style={styles.itemTime}>{e.start} — {e.end || 'Presente'}</Text>
+              <Text style={styles.itemTime}>
+                {e.start} — {e.end || 'Presente'}
+              </Text>
             </View>
           ))}
         </View>
@@ -87,11 +106,29 @@ export default function AboutScreen() {
   );
 }
 
-function InfoRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number; color?: string }>; label: string; value: string }) {
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ size?: number; color?: string }>;
+  label: string;
+  value: string;
+}) {
   return (
     <View style={styles.infoRow}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#e9eef8', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
+        <View
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: 12,
+            backgroundColor: '#e9eef8',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: 8,
+          }}
+        >
           <Icon size={14} color="#64748b" />
         </View>
         <Text style={styles.infoLabel}>{label}</Text>
@@ -103,22 +140,61 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ siz
 
 const styles = StyleSheet.create({
   cover: { width: '100%', height: 140 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', padding: 16, marginTop: -32 },
-  avatar: { width: 72, height: 72, borderRadius: 36, borderWidth: 3, borderColor: '#fff' },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    marginTop: -32,
+  },
+  avatar: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 3,
+    borderColor: '#fff',
+  },
   name: { fontSize: 20, fontWeight: '800', color: '#111827' },
   handle: { color: '#6b7280', marginTop: 2 },
-  card: { backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e5edf6', marginHorizontal: 16, marginBottom: 12, padding: 16, borderRadius: 12 },
-  cardTitle: { fontSize: 16, fontWeight: '800', marginBottom: 10, color: '#111827' },
+  card: {
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e5edf6',
+    marginHorizontal: 16,
+    marginBottom: 12,
+    padding: 16,
+    borderRadius: 12,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 10,
+    color: '#111827',
+  },
   text: { color: '#374151', lineHeight: 20 },
-  infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   infoLabel: { color: '#6b7280' },
   infoValue: { color: '#111827', fontWeight: '600' },
-  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
+  rowBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
   itemTitle: { color: '#111827', fontWeight: '700' },
   itemSub: { color: '#6b7280' },
   itemTime: { color: '#6b7280' },
   friendsRow: { flexDirection: 'row', flexWrap: 'wrap' },
   friendItem: { width: '33.33%', alignItems: 'center', marginBottom: 12 },
   friendAvatar: { width: 64, height: 64, borderRadius: 32 },
-  friendName: { marginTop: 6, color: '#111827', fontSize: 12, textAlign: 'center' },
+  friendName: {
+    marginTop: 6,
+    color: '#111827',
+    fontSize: 12,
+    textAlign: 'center',
+  },
 });

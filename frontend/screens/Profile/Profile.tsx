@@ -14,7 +14,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import BottomNav from '../../components/BottomNav';
 import PostCard from '../../components/PostCard';
 import TopBar from '../../components/TopBar';
-import { Heart, Home, MapPin, Briefcase, Users, ChevronRight, FileText } from 'lucide-react-native';
+import {
+  Heart,
+  Home,
+  MapPin,
+  Briefcase,
+  Users,
+  ChevronRight,
+  FileText,
+} from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { profileData } from './Data';
 import { getPosts, subscribe, toggleLike } from '../../store/posts';
@@ -30,7 +38,10 @@ export default function ProfileScreen() {
     return unsub;
   }, []);
 
-  const myPosts = useMemo(() => posts.filter((x) => x.user === 'Você'), [posts]);
+  const myPosts = useMemo(
+    () => posts.filter((x) => x.user === 'Você'),
+    [posts],
+  );
   const postCount = myPosts.length;
   const connectionsCount = p.connectionsCount;
 
@@ -52,13 +63,18 @@ export default function ProfileScreen() {
           <View style={styles.headerNames}>
             <Text style={styles.name}>{p.name}</Text>
             <Text style={styles.username}>@{p.username}</Text>
-            <Text numberOfLines={2} style={styles.tagline}>{p.bio}</Text>
+            <Text numberOfLines={2} style={styles.tagline}>
+              {p.bio}
+            </Text>
           </View>
 
           <View style={styles.headerStatsRow}>
             <StatPill icon={FileText} label="Posts" value={postCount} />
             <StatPill icon={Users} label="Conexões" value={connectionsCount} />
-            <Pressable onPress={() => router.push('/profile/about')} style={styles.aboutPill}>
+            <Pressable
+              onPress={() => router.push('/profile/about')}
+              style={styles.aboutPill}
+            >
               <Text style={styles.aboutPillText}>Sobre</Text>
               <ChevronRight size={14} color="#111827" />
             </Pressable>
@@ -68,11 +84,17 @@ export default function ProfileScreen() {
         {/* HIGHLIGHTS */}
         <View style={styles.sectionWrap}>
           <Text style={styles.sectionTitle}>Destaques</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10 }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingVertical: 10 }}
+          >
             {p.highlights.map((h, i) => (
               <View key={`${h}-${i}`} style={styles.highlightCircleWrap}>
                 <Image source={{ uri: h }} style={styles.highlightCircle} />
-                <Text style={styles.highlightCircleLabel}>Destaque {i + 1}</Text>
+                <Text style={styles.highlightCircleLabel}>
+                  Destaque {i + 1}
+                </Text>
               </View>
             ))}
           </ScrollView>
@@ -85,20 +107,31 @@ export default function ProfileScreen() {
           <InfoRow icon={Briefcase} value={p.workplace} divider />
           <InfoRow icon={MapPin} value={p.currentCity} divider />
           <InfoRow icon={Home} value={p.hometown} divider />
-          <InfoRow icon={Users} value={`${p.connectionsCount} conexões`} divider />
+          <InfoRow
+            icon={Users}
+            value={`${p.connectionsCount} conexões`}
+            divider
+          />
         </View>
 
         {/* FRIENDS PREVIEW GRID */}
         <View style={styles.sectionWrap}>
           <View style={styles.sectionCard}>
-            <View style={styles.cardHeaderRow}><Text style={styles.cardHeaderTitle}>Amigos</Text></View>
+            <View style={styles.cardHeaderRow}>
+              <Text style={styles.cardHeaderTitle}>Amigos</Text>
+            </View>
             <View style={styles.friendsGrid}>
-            {p.recentFriends.map((f) => (
-              <View key={f.id} style={styles.friendItem}>
-                <Image source={{ uri: f.avatar }} style={styles.friendAvatar} />
-                <Text numberOfLines={1} style={styles.friendName}>{f.name}</Text>
-              </View>
-            ))}
+              {p.recentFriends.map((f) => (
+                <View key={f.id} style={styles.friendItem}>
+                  <Image
+                    source={{ uri: f.avatar }}
+                    style={styles.friendAvatar}
+                  />
+                  <Text numberOfLines={1} style={styles.friendName}>
+                    {f.name}
+                  </Text>
+                </View>
+              ))}
             </View>
           </View>
         </View>
@@ -112,10 +145,16 @@ export default function ProfileScreen() {
         <View style={{ paddingHorizontal: 16, marginTop: 10 }}>
           {tab === 'posts' ? (
             myPosts.length === 0 ? (
-              <View style={styles.emptyBox}><Text style={styles.emptyText}>Nenhum post ainda.</Text></View>
+              <View style={styles.emptyBox}>
+                <Text style={styles.emptyText}>Nenhum post ainda.</Text>
+              </View>
             ) : (
               myPosts.map((pp) => (
-                <PostCard key={pp.id} post={pp} onLike={() => toggleLike(pp.id)} />
+                <PostCard
+                  key={pp.id}
+                  post={pp}
+                  onLike={() => toggleLike(pp.id)}
+                />
               ))
             )
           ) : (
@@ -123,7 +162,9 @@ export default function ProfileScreen() {
               {p.testimonials.map((t) => (
                 <View key={t.id} style={styles.testimonialCard}>
                   <Text style={styles.testimonialQuote}>“{t.text}”</Text>
-                  <Text style={styles.testimonialMeta}>— {t.author} · {t.date}</Text>
+                  <Text style={styles.testimonialMeta}>
+                    — {t.author} · {t.date}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -136,7 +177,15 @@ export default function ProfileScreen() {
   );
 }
 
-function StatPill({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number; color?: string }>; label: string; value: number }) {
+function StatPill({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ size?: number; color?: string }>;
+  label: string;
+  value: number;
+}) {
   return (
     <View style={styles.statPill}>
       <View style={styles.pillRow}>
@@ -150,21 +199,62 @@ function StatPill({ icon: Icon, label, value }: { icon: React.ComponentType<{ si
   );
 }
 
-function Segmented({ tab, setTab }: { tab: 'posts' | 'testimonials'; setTab: (t: 'posts' | 'testimonials') => void }) {
+function Segmented({
+  tab,
+  setTab,
+}: {
+  tab: 'posts' | 'testimonials';
+  setTab: (t: 'posts' | 'testimonials') => void;
+}) {
   return (
     <View style={styles.segment}>
-      <Pressable onPress={() => setTab('posts')} style={[styles.segmentBtn, tab === 'posts' && styles.segmentActive]}>
-        <Text style={[styles.segmentText, tab === 'posts' && styles.segmentTextActive]}>Posts</Text>
+      <Pressable
+        onPress={() => setTab('posts')}
+        style={[styles.segmentBtn, tab === 'posts' && styles.segmentActive]}
+      >
+        <Text
+          style={[
+            styles.segmentText,
+            tab === 'posts' && styles.segmentTextActive,
+          ]}
+        >
+          Posts
+        </Text>
       </Pressable>
-      <Pressable onPress={() => setTab('testimonials')} style={[styles.segmentBtn, tab === 'testimonials' && styles.segmentActive]}>
-        <Heart size={14} color={tab === 'testimonials' ? '#0856d6' : '#9aa4b2'} />
-        <Text style={[styles.segmentText, { marginLeft: 6 }, tab === 'testimonials' && styles.segmentTextActive]}>Depoimentos</Text>
+      <Pressable
+        onPress={() => setTab('testimonials')}
+        style={[
+          styles.segmentBtn,
+          tab === 'testimonials' && styles.segmentActive,
+        ]}
+      >
+        <Heart
+          size={14}
+          color={tab === 'testimonials' ? '#0856d6' : '#9aa4b2'}
+        />
+        <Text
+          style={[
+            styles.segmentText,
+            { marginLeft: 6 },
+            tab === 'testimonials' && styles.segmentTextActive,
+          ]}
+        >
+          Depoimentos
+        </Text>
       </Pressable>
     </View>
   );
 }
 
-function InfoRow({ icon: Icon, value, divider }: { icon: React.ComponentType<{ size?: number; color?: string }>; value: string; divider?: boolean }) {
+function InfoRow({
+  icon: Icon,
+  value,
+  divider,
+}: {
+  icon: React.ComponentType<{ size?: number; color?: string }>;
+  value: string;
+  divider?: boolean;
+}) {
   return (
     <View style={[styles.infoRow, divider && styles.infoRowDivider]}>
       <View style={styles.infoIconWrap}>
@@ -176,53 +266,176 @@ function InfoRow({ icon: Icon, value, divider }: { icon: React.ComponentType<{ s
 }
 
 const styles = StyleSheet.create({
-  headerWrap: { position: 'relative', paddingBottom: 70, backgroundColor: '#f1f5f9' },
+  headerWrap: {
+    position: 'relative',
+    paddingBottom: 70,
+    backgroundColor: '#f1f5f9',
+  },
   headerCover: { width: '100%', height: 180 },
-  avatarCenterWrap: { position: 'absolute', left: 0, right: 0, top: 110, alignItems: 'center' },
-  avatarShadow: { width: 112, height: 112, borderRadius: 56, borderWidth: 4, borderColor: '#ffffff', backgroundColor: '#ffffff', overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 },
+  avatarCenterWrap: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 110,
+    alignItems: 'center',
+  },
+  avatarShadow: {
+    width: 112,
+    height: 112,
+    borderRadius: 56,
+    borderWidth: 4,
+    borderColor: '#ffffff',
+    backgroundColor: '#ffffff',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
   avatar: { width: '100%', height: '100%' },
   headerNames: { alignItems: 'center', marginTop: 64 },
   name: { color: '#111827', fontSize: 22, fontWeight: '800' },
   username: { color: '#6b7280', marginTop: 2 },
-  tagline: { color: '#64748b', marginTop: 8, paddingHorizontal: 24, textAlign: 'center' },
-  headerStatsRow: { flexDirection: 'row', justifyContent: 'center', gap: 10 as unknown as number, marginTop: 14, paddingHorizontal: 16 },
-  statPill: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#e5e7eb', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 999, alignItems: 'center' },
+  tagline: {
+    color: '#64748b',
+    marginTop: 8,
+    paddingHorizontal: 24,
+    textAlign: 'center',
+  },
+  headerStatsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10 as unknown as number,
+    marginTop: 14,
+    paddingHorizontal: 16,
+  },
+  statPill: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    alignItems: 'center',
+  },
   pillRow: { flexDirection: 'row', alignItems: 'center' },
-  pillIconWrap: { width: 22, height: 22, borderRadius: 11, backgroundColor: '#eef2f7', borderWidth: 1, borderColor: '#e5e7eb', alignItems: 'center', justifyContent: 'center', marginRight: 8 },
+  pillIconWrap: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#eef2f7',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
   statValue: { color: '#0f172a', fontWeight: '800' },
   statLabel: { color: '#64748b', fontSize: 12, marginTop: 2 },
-  aboutPill: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#e5e7eb', borderWidth: 1, borderColor: '#e5e7eb', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 999 },
+  aboutPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e5e7eb',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+  },
   aboutPillText: { color: '#0f172a', fontWeight: '700', marginRight: 6 },
 
   sectionWrap: { paddingHorizontal: 16, marginTop: 18 },
   sectionTitle: { color: '#0f172a', fontSize: 16, fontWeight: '800' },
   highlightCircleWrap: { width: 84, alignItems: 'center', marginRight: 14 },
-  highlightCircle: { width: 72, height: 72, borderRadius: 36, borderWidth: 2, borderColor: '#ffffff', backgroundColor: '#e5e7eb' },
+  highlightCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 2,
+    borderColor: '#ffffff',
+    backgroundColor: '#e5e7eb',
+  },
   highlightCircleLabel: { marginTop: 6, color: '#0f172a', fontSize: 12 },
 
-  infoCard: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#e5e7eb', marginHorizontal: 16, marginTop: 16, padding: 16, borderRadius: 14 },
-  infoTitle: { color: '#0f172a', fontSize: 14, fontWeight: '800', marginBottom: 8 },
+  infoCard: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    marginHorizontal: 16,
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 14,
+  },
+  infoTitle: {
+    color: '#0f172a',
+    fontSize: 14,
+    fontWeight: '800',
+    marginBottom: 8,
+  },
   infoRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
   infoRowDivider: { borderTopWidth: 1, borderColor: '#e5e7eb' },
-  infoIconWrap: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#eef2f7', borderWidth: 1, borderColor: '#e5e7eb', alignItems: 'center', justifyContent: 'center', marginRight: 10 },
+  infoIconWrap: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#eef2f7',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
   infoValue: { color: '#0f172a', fontWeight: '600' },
 
   friendsGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 10 },
   friendItem: { width: '25%', alignItems: 'center', marginBottom: 12 },
   friendAvatar: { width: 64, height: 64, borderRadius: 32 },
-  friendName: { color: '#0f172a', marginTop: 6, fontSize: 12, paddingHorizontal: 4, textAlign: 'center' },
+  friendName: {
+    color: '#0f172a',
+    marginTop: 6,
+    fontSize: 12,
+    paddingHorizontal: 4,
+    textAlign: 'center',
+  },
 
   segmentWrap: { paddingHorizontal: 16, marginTop: 14 },
-  segment: { flexDirection: 'row', backgroundColor: '#eef2f7', borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 999, padding: 4 },
-  segmentBtn: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 10, borderRadius: 999 },
+  segment: {
+    flexDirection: 'row',
+    backgroundColor: '#eef2f7',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 999,
+    padding: 4,
+  },
+  segmentBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderRadius: 999,
+  },
   segmentActive: { backgroundColor: '#dbeafe' },
   segmentText: { color: '#6b7280', fontWeight: '700' },
   segmentTextActive: { color: '#0856d6' },
 
-  emptyBox: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#e5e7eb', padding: 20, borderRadius: 12 },
+  emptyBox: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    padding: 20,
+    borderRadius: 12,
+  },
   emptyText: { color: '#6b7280' },
 
-  testimonialCard: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#e5e7eb', padding: 16, borderRadius: 12, marginBottom: 10 },
+  testimonialCard: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
   testimonialQuote: { color: '#0f172a' },
   testimonialMeta: { marginTop: 6, color: '#6b7280' },
 });
