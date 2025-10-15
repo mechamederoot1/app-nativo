@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   Modal,
   Platform,
@@ -103,7 +109,11 @@ export default function StoryViewer({
       {/* Media full-bleed */}
       <View style={styles.mediaWrapperFull}>
         {current?.type === 'image' ? (
-          <Image source={{ uri: current.uri }} resizeMode="cover" style={styles.media} />
+          <Image
+            source={{ uri: current.uri }}
+            resizeMode="cover"
+            style={styles.media}
+          />
         ) : (
           <Video
             ref={(r) => (videoRef.current = r)}
@@ -117,7 +127,10 @@ export default function StoryViewer({
               const st = s as AVPlaybackStatusSuccess;
               if (!('isLoaded' in st) || !st.isLoaded) return;
               if (st.durationMillis && st.positionMillis >= 0) {
-                const ratio = Math.min(1, st.positionMillis / Math.max(st.durationMillis, 1));
+                const ratio = Math.min(
+                  1,
+                  st.positionMillis / Math.max(st.durationMillis, 1),
+                );
                 progress.setValue(ratio);
               }
               if (st.didJustFinish) {
@@ -143,7 +156,12 @@ export default function StoryViewer({
                 <Animated.View
                   style={[
                     styles.progressActive,
-                    { width: progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) },
+                    {
+                      width: progress.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0%', '100%'],
+                      }),
+                    },
                   ]}
                 />
               ) : null}
@@ -166,7 +184,12 @@ export default function StoryViewer({
   if (mode === 'inline') return Body;
 
   return (
-    <Modal visible={!!visible} animationType="fade" presentationStyle="fullScreen" onRequestClose={onClose}>
+    <Modal
+      visible={!!visible}
+      animationType="fade"
+      presentationStyle="fullScreen"
+      onRequestClose={onClose}
+    >
       <View style={[styles.modalSizer, { width, height }]}>{Body}</View>
     </Modal>
   );
@@ -175,7 +198,10 @@ export default function StoryViewer({
 const styles = StyleSheet.create({
   modalSizer: { flex: 1 },
   container: { flex: 1, backgroundColor: '#000000' },
-  mediaWrapperFull: { ...StyleSheet.absoluteFillObject, backgroundColor: '#000' },
+  mediaWrapperFull: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#000',
+  },
   media: { width: '100%', height: '100%' },
   safeTop: {
     position: 'absolute',
@@ -214,5 +240,11 @@ const styles = StyleSheet.create({
   userName: { color: '#ffffff', fontSize: 14, fontWeight: '700' },
   closeBtn: { padding: 4 },
   leftZone: { position: 'absolute', top: 0, left: 0, bottom: 0, width: '35%' },
-  rightZone: { position: 'absolute', top: 0, right: 0, bottom: 0, width: '35%' },
+  rightZone: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    width: '35%',
+  },
 });

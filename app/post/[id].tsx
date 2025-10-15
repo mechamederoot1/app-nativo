@@ -63,7 +63,10 @@ export default function PostDetail() {
                 <Text style={styles.commentText}> {item.text}</Text>
               </View>
             )}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 120 }}
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingBottom: 120,
+            }}
             showsVerticalScrollIndicator={false}
           />
 

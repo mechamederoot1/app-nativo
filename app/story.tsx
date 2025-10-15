@@ -131,13 +131,21 @@ export default function StoryScreen() {
           <View style={styles.storyCard}>
             <ImageBackground
               source={{ uri: item.cover }}
-              style={{ height: cardHeight, width: cardWidth, alignSelf: 'center', justifyContent: 'flex-end' }}
+              style={{
+                height: cardHeight,
+                width: cardWidth,
+                alignSelf: 'center',
+                justifyContent: 'flex-end',
+              }}
               imageStyle={styles.storyImageInner}
             >
               <View style={styles.storyOverlay} />
               <View style={styles.storyContent}>
                 <View style={styles.storyHeader}>
-                  <Image source={{ uri: item.user.avatar }} style={styles.storyAvatar} />
+                  <Image
+                    source={{ uri: item.user.avatar }}
+                    style={styles.storyAvatar}
+                  />
                   <View>
                     <Text style={styles.storyName}>{item.user.name}</Text>
                     <Text style={styles.storyTime}>{item.postedAt}</Text>
@@ -162,13 +170,19 @@ export default function StoryScreen() {
         <Text style={styles.listSubtitle}>
           Deslize para o lado para ver outros. Toque para abrir em tela cheia.
         </Text>
-        <TouchableOpacity activeOpacity={0.85} onPress={() => {}} style={styles.addCard}>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => {}}
+          style={styles.addCard}
+        >
           <View style={styles.addCircle}>
             <Plus size={28} color="#0856d6" />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.addTitle}>Adicionar novo story</Text>
-            <Text style={styles.addSubtitle}>Compartilhe um momento especial com quem te acompanha.</Text>
+            <Text style={styles.addSubtitle}>
+              Compartilhe um momento especial com quem te acompanha.
+            </Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -191,13 +205,22 @@ export default function StoryScreen() {
         decelerationRate="fast"
         snapToInterval={itemWidth}
         snapToAlignment="start"
-        getItemLayout={(_, index) => ({ length: itemWidth, offset: itemWidth * index, index })}
+        getItemLayout={(_, index) => ({
+          length: itemWidth,
+          offset: itemWidth * index,
+          index,
+        })}
         contentContainerStyle={{ paddingBottom: 120 }}
       />
       <BottomNav active="story" />
 
       {active ? (
-        <StoryViewer visible user={active.user} segments={active.segments} onClose={close} />
+        <StoryViewer
+          visible
+          user={active.user}
+          segments={active.segments}
+          onClose={close}
+        />
       ) : null}
     </SafeAreaView>
   );
