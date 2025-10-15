@@ -1,15 +1,11 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   SafeAreaView,
   View,
-  Text,
   FlatList,
-  ImageBackground,
+  useWindowDimensions,
   StyleSheet,
-  TouchableOpacity,
-  Image,
 } from 'react-native';
-import { Plus } from 'lucide-react-native';
 import TopBar from '../frontend/components/TopBar';
 import BottomNav from '../frontend/components/BottomNav';
 import StoryViewer, {
@@ -22,7 +18,7 @@ export type StoryItem = {
   user: StoryUser;
   postedAt: string;
   caption: string;
-  cover: string; // cover image for the card
+  cover: string;
   segments: StorySegment[];
 };
 
@@ -112,122 +108,44 @@ const STORIES: StoryItem[] = [
 ];
 
 export default function StoryScreen() {
-  const [stories, setStories] = useState<StoryItem[]>(STORIES);
-  const [active, setActive] = useState<StoryItem | null>(null);
+  const { width } = useWindowDimensions();
+  const listRef = useRef<FlatList<StoryItem>>(null);
 
-  const open = useCallback((s: StoryItem) => setActive(s), []);
-  const close = useCallback(() => setActive(null), []);
-
-  const addStory = useCallback(() => {
-    const id = String(Date.now());
-    const me: StoryItem = {
-      id,
-      user: { name: 'Você', avatar: 'https://i.pravatar.cc/160?u=voce' },
-      postedAt: 'agora mesmo',
-      caption: 'Novo story compartilhado com a comunidade! ✨',
-      cover: `https://picsum.photos/900/1600?random=${Math.floor(Math.random() * 1000)}`,
-      segments: [
-        {
-          id: `${id}-1`,
-          type: 'image',
-          uri: `https://picsum.photos/900/1600?random=${Math.floor(Math.random() * 1000)}`,
-          durationMs: 4500,
-        },
-        {
-          id: `${id}-2`,
-          type: 'image',
-          uri: `https://picsum.photos/900/1600?random=${Math.floor(Math.random() * 1000)}`,
-          durationMs: 4500,
-        },
-      ],
-    };
-    setStories((prev) => [me, ...prev]);
-    setActive(me);
-  }, []);
-
-  const renderItem = useCallback(
-    ({ item }: { item: StoryItem }) => (
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPress={() => open(item)}
-        style={styles.storyCard}
-      >
-        <ImageBackground
-          source={{ uri: item.cover }}
-          style={styles.storyImage}
-          imageStyle={styles.storyImageInner}
-        >
-          <View style={styles.storyOverlay} />
-          <View style={styles.storyContent}>
-            <View style={styles.storyHeader}>
-              <Image
-                source={{ uri: item.user.avatar }}
-                style={styles.storyAvatar}
-              />
-              <View>
-                <Text style={styles.storyName}>{item.user.name}</Text>
-                <Text style={styles.storyTime}>{item.postedAt}</Text>
-              </View>
-            </View>
-            <Text style={styles.storyCaption}>{item.caption}</Text>
-          </View>
-        </ImageBackground>
-      </TouchableOpacity>
-    ),
-    [open],
-  );
-
-  const listHeader = useMemo(
-    () => (
-      <View style={styles.listHeader}>
-        <Text style={styles.listTitle}>Stories</Text>
-        <Text style={styles.listSubtitle}>
-          Role para descobrir e toque para ver em tela cheia. Stories avançam
-          automaticamente.
-        </Text>
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={addStory}
-          style={styles.addCard}
-        >
-          <View style={styles.addCircle}>
-            <Plus size={28} color="#0856d6" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.addTitle}>Adicionar novo story</Text>
-            <Text style={styles.addSubtitle}>
-              Compartilhe um momento especial com quem te acompanha.
-            </Text>
-          </View>
-        </TouchableOpacity>
+  const renderItem = useCallback(({ item }: { item: StoryItem }) => {
+    return (
+      <View style={{ width, flex: 1 }}>
+        <StoryViewer
+          mode="inline"
+          visible
+          user={item.user}
+          segments={item.segments}
+          onClose={() => {}}
+        />
       </View>
-    ),
-    [addStory],
-  );
+    );
+  }, [width]);
+
+  const keyExtractor = useCallback((i: StoryItem) => i.id, []);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <TopBar />
-      <FlatList
-        data={stories}
-        keyExtractor={(i) => i.id}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-        ListHeaderComponent={listHeader}
-        ListFooterComponent={<View style={{ height: 120 }} />}
-      />
-      <BottomNav active="story" />
-
-      {active ? (
-        <StoryViewer
-          visible
-          user={active.user}
-          segments={active.segments}
-          onClose={close}
+      <View style={styles.container}>
+        <FlatList
+          ref={listRef}
+          data={STORIES}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          decelerationRate="fast"
+          snapToInterval={width}
+          snapToAlignment="start"
+          getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
         />
-      ) : null}
+      </View>
+      <BottomNav active="story" />
     </SafeAreaView>
   );
 }
@@ -235,101 +153,10 @@ export default function StoryScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#000',
   },
-  listContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 0,
-    paddingTop: 16,
-  },
-  listHeader: {
-    marginBottom: 20,
-    gap: 16,
-  },
-  listTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#0f172a',
-  },
-  listSubtitle: {
-    fontSize: 14,
-    color: '#64748b',
-    lineHeight: 20,
-  },
-  addCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    padding: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    gap: 16,
-  },
-  addCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: '#0856d6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#e0f2fe',
-  },
-  addTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#0f172a',
-    marginBottom: 4,
-  },
-  addSubtitle: {
-    fontSize: 13,
-    color: '#64748b',
-  },
-  storyCard: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    backgroundColor: '#111827',
-    borderWidth: 1,
-    borderColor: 'rgba(15, 23, 42, 0.12)',
-  },
-  storyImage: {
-    height: 280,
-    justifyContent: 'flex-end',
-  },
-  storyImageInner: { resizeMode: 'cover' },
-  storyOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(10, 15, 30, 0.35)',
-  },
-  storyContent: {
-    padding: 20,
-    gap: 16,
-  },
-  storyHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  storyAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: '#ffffff',
-  },
-  storyName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  storyTime: {
-    fontSize: 12,
-    color: '#e2e8f0',
-  },
-  storyCaption: {
-    fontSize: 15,
-    color: '#f8fafc',
-    lineHeight: 22,
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
   },
 });
