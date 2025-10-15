@@ -31,6 +31,7 @@ export type StorySegment = {
 export type StoryUser = {
   name: string;
   avatar: string;
+  online?: boolean;
 };
 
 export type StoryViewerProps = {

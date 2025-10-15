@@ -30,7 +30,7 @@ export type StoryItem = {
 const STORIES: StoryItem[] = [
   {
     id: 'alice',
-    user: { name: 'Alice Martins', avatar: 'https://i.pravatar.cc/160?img=21' },
+    user: { name: 'Alice Martins', avatar: 'https://i.pravatar.cc/160?img=21', online: true },
     postedAt: 'há 2 horas',
     caption: 'Explorando novas referências para o próximo produto. ✨',
     cover:
@@ -57,7 +57,7 @@ const STORIES: StoryItem[] = [
   },
   {
     id: 'diego',
-    user: { name: 'Diego Andrade', avatar: 'https://i.pravatar.cc/160?img=12' },
+    user: { name: 'Diego Andrade', avatar: 'https://i.pravatar.cc/160?img=12', online: false },
     postedAt: 'há 5 horas',
     caption: 'Lançamos hoje nossa nova funcionalidade! 🚀',
     cover:
@@ -84,7 +84,7 @@ const STORIES: StoryItem[] = [
   },
   {
     id: 'carla',
-    user: { name: 'Carla Sousa', avatar: 'https://i.pravatar.cc/160?img=48' },
+    user: { name: 'Carla Sousa', avatar: 'https://i.pravatar.cc/160?img=48', online: true },
     postedAt: 'ontem',
     caption: 'Workshop de pesquisa na comunidade. 🎤',
     cover:
@@ -125,7 +125,7 @@ export default function StoryScreen() {
   const itemWidth = cardWidth + 40;
 
   const screenWidth = width;
-  const compactWidth = Math.min(200, Math.max(170, Math.floor(width * 0.52)));
+  const compactWidth = Math.min(220, Math.max(180, Math.floor(width * 0.56)));
   const compactItemWidth = screenWidth;
 
   const renderItem = useCallback(
@@ -209,7 +209,10 @@ export default function StoryScreen() {
               <View style={{ width: compactWidth, gap: 10 }}>
                 <View style={styles.compactInfoCard}>
                   <View style={styles.compactHeader}>
+                    <View style={styles.compactAvatarWrap}>
                     <Image source={{ uri: s.user.avatar }} style={styles.compactAvatar} />
+                    {s.user.online ? <View style={styles.onlineDot} /> : null}
+                  </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.compactName}>{s.user.name}</Text>
                       <Text style={styles.compactTime}>{s.postedAt}</Text>
@@ -363,17 +366,28 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   compactInfoCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f1f5f9',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#dde6f2',
     padding: 12,
     gap: 10,
+    shadowColor: '#000000',
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   compactHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  compactAvatarWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    position: 'relative',
   },
   compactAvatar: {
     width: 36,
@@ -392,6 +406,17 @@ const styles = StyleSheet.create({
   compactOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.18)',
+  },
+  onlineDot: {
+    position: 'absolute',
+    right: -1,
+    bottom: -1,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#22c55e',
+    borderWidth: 2,
+    borderColor: '#ffffff',
   },
   compactMedia: {
     width: '100%',
