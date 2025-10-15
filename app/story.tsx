@@ -125,7 +125,7 @@ export default function StoryScreen() {
   const itemWidth = cardWidth + 40;
 
   const screenWidth = width;
-  const compactWidth = Math.min(180, Math.max(150, Math.floor(width * 0.48)));
+  const compactWidth = Math.min(200, Math.max(170, Math.floor(width * 0.52)));
   const compactItemWidth = screenWidth;
 
   const renderItem = useCallback(
@@ -204,14 +204,16 @@ export default function StoryScreen() {
             <TouchableOpacity
               activeOpacity={0.9}
               onPress={() => setActive(s)}
-              style={{ width: screenWidth, alignItems: 'center' }}
+              style={{ width: screenWidth, alignItems: 'center', paddingHorizontal: 20 }}
             >
-              <View style={[styles.compactCard, { width: compactWidth }]}>
-                <View style={styles.compactHeader}>
-                  <Image source={{ uri: s.user.avatar }} style={styles.compactAvatar} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.compactName}>{s.user.name}</Text>
-                    <Text style={styles.compactTime}>{s.postedAt}</Text>
+              <View style={{ width: compactWidth, gap: 10 }}>
+                <View style={styles.compactInfoCard}>
+                  <View style={styles.compactHeader}>
+                    <Image source={{ uri: s.user.avatar }} style={styles.compactAvatar} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.compactName}>{s.user.name}</Text>
+                      <Text style={styles.compactTime}>{s.postedAt}</Text>
+                    </View>
                   </View>
                 </View>
                 <ImageBackground
@@ -360,16 +362,13 @@ const styles = StyleSheet.create({
     color: '#f8fafc',
     lineHeight: 22,
   },
-  compactCard: {
+  compactInfoCard: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#e2e8f0',
     padding: 12,
     gap: 10,
-    width: '100%',
-    maxWidth: 220,
-    alignSelf: 'center',
   },
   compactHeader: {
     flexDirection: 'row',
