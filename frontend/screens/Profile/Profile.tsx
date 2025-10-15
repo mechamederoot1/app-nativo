@@ -24,7 +24,7 @@ export default function ProfileScreen() {
   const connectionsCount = p.connectionsCount;
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f1f5f9' }}>
       <TopBar />
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Cover and avatar */}
@@ -44,6 +44,7 @@ export default function ProfileScreen() {
 
         {/* Counters and About */}
         <View style={styles.infoCard}>
+          <Text style={styles.sectionTitle}>Biografia</Text>
           <Text style={styles.bio}>{p.bio}</Text>
 
           <View style={styles.rowStats}>
@@ -131,14 +132,14 @@ const styles = StyleSheet.create({
   avatar: { width: 96, height: 96 },
   name: { fontSize: 20, fontWeight: '800', color: '#111827' },
   handle: { color: '#6b7280' },
-  infoCard: { backgroundColor: '#fff', marginTop: 12, padding: 16, paddingBottom: 16, borderRadius: 8, marginHorizontal: 16 },
+  infoCard: { backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e5edf6', marginTop: 12, padding: 16, paddingBottom: 16, borderRadius: 12, marginHorizontal: 16 },
   bio: { color: '#374151', lineHeight: 20 },
   rowStats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
   stat: { alignItems: 'center', flex: 1 },
   statNumber: { fontWeight: '700', fontSize: 16 },
   statLabel: { color: '#6b7280' },
-  aboutBtn: { paddingVertical: 10, paddingHorizontal: 14, backgroundColor: '#0856d6', borderRadius: 8 },
-  aboutText: { color: '#fff', fontWeight: '700' },
+  aboutBtn: { paddingVertical: 10, paddingHorizontal: 14, backgroundColor: '#e2e8f0', borderRadius: 999 },
+  aboutText: { color: '#0f172a', fontWeight: '700' },
   sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 8 },
   highlightItem: { marginRight: 10 },
   highlight: { width: 64, height: 64, borderRadius: 32 },
