@@ -1,5 +1,21 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, useWindowDimensions, View, Image } from 'react-native';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  Modal,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+  Image,
+} from 'react-native';
 import { Video, ResizeMode, AVPlaybackStatusSuccess } from 'expo-av';
 import { X } from 'lucide-react-native';
 
@@ -22,7 +38,12 @@ export type StoryViewerProps = {
   onClose: () => void;
 };
 
-export default function StoryViewer({ visible, user, segments, onClose }: StoryViewerProps) {
+export default function StoryViewer({
+  visible,
+  user,
+  segments,
+  onClose,
+}: StoryViewerProps) {
   const { width, height } = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const videoRef = useRef<Video | null>(null);
@@ -47,7 +68,10 @@ export default function StoryViewer({ visible, user, segments, onClose }: StoryV
     if (!visible) return;
     if (!current) return;
     if (current.type !== 'image') return;
-    const timeout = setTimeout(goNext, Math.max(1500, current.durationMs ?? 5000));
+    const timeout = setTimeout(
+      goNext,
+      Math.max(1500, current.durationMs ?? 5000),
+    );
     return () => clearTimeout(timeout);
   }, [visible, current, goNext]);
 
@@ -70,14 +94,25 @@ export default function StoryViewer({ visible, user, segments, onClose }: StoryV
   }, [segments, index]);
 
   return (
-    <Modal visible={visible} animationType="fade" presentationStyle="fullScreen" onRequestClose={onClose}>
-      <View style={[styles.container, { width, height }]}> 
+    <Modal
+      visible={visible}
+      animationType="fade"
+      presentationStyle="fullScreen"
+      onRequestClose={onClose}
+    >
+      <View style={[styles.container, { width, height }]}>
         {/* Top Overlay: progress and header */}
         <SafeAreaView style={styles.safeTop}>
           <View style={styles.progressRow}>
             {progressItems.map((p, i) => (
               <View key={i} style={styles.progressTrack}>
-                <View style={[styles.progressFill, p.filled && styles.progressFilled, p.active && styles.progressActive]} />
+                <View
+                  style={[
+                    styles.progressFill,
+                    p.filled && styles.progressFilled,
+                    p.active && styles.progressActive,
+                  ]}
+                />
               </View>
             ))}
           </View>
@@ -100,7 +135,11 @@ export default function StoryViewer({ visible, user, segments, onClose }: StoryV
           {/* Media */}
           <View style={styles.mediaWrapper}>
             {current?.type === 'image' ? (
-              <Image source={{ uri: current.uri }} resizeMode="cover" style={{ width, height }} />
+              <Image
+                source={{ uri: current.uri }}
+                resizeMode="cover"
+                style={{ width, height }}
+              />
             ) : (
               <Video
                 ref={(r) => (videoRef.current = r)}

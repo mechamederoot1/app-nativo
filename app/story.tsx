@@ -1,9 +1,21 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { SafeAreaView, View, Text, FlatList, ImageBackground, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  FlatList,
+  ImageBackground,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
 import { Plus } from 'lucide-react-native';
 import TopBar from '../frontend/components/TopBar';
 import BottomNav from '../frontend/components/BottomNav';
-import StoryViewer, { StorySegment, StoryUser } from '../frontend/components/StoryViewer';
+import StoryViewer, {
+  StorySegment,
+  StoryUser,
+} from '../frontend/components/StoryViewer';
 
 export type StoryItem = {
   id: string;
@@ -20,11 +32,26 @@ const STORIES: StoryItem[] = [
     user: { name: 'Alice Martins', avatar: 'https://i.pravatar.cc/160?img=21' },
     postedAt: 'há 2 horas',
     caption: 'Explorando novas referências para o próximo produto. ✨',
-    cover: 'https://images.unsplash.com/photo-1527766833261-b09c3163a791?auto=format&fit=crop&w=1200&q=80',
+    cover:
+      'https://images.unsplash.com/photo-1527766833261-b09c3163a791?auto=format&fit=crop&w=1200&q=80',
     segments: [
-      { id: 'a1', type: 'image', uri: 'https://images.unsplash.com/photo-1527766833261-b09c3163a791?auto=format&fit=crop&w=1600&q=80', durationMs: 4500 },
-      { id: 'a2', type: 'image', uri: 'https://images.unsplash.com/photo-1520975568316-9f2b98d1a0d9?auto=format&fit=crop&w=1600&q=80', durationMs: 4500 },
-      { id: 'a3', type: 'video', uri: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4' },
+      {
+        id: 'a1',
+        type: 'image',
+        uri: 'https://images.unsplash.com/photo-1527766833261-b09c3163a791?auto=format&fit=crop&w=1600&q=80',
+        durationMs: 4500,
+      },
+      {
+        id: 'a2',
+        type: 'image',
+        uri: 'https://images.unsplash.com/photo-1520975568316-9f2b98d1a0d9?auto=format&fit=crop&w=1600&q=80',
+        durationMs: 4500,
+      },
+      {
+        id: 'a3',
+        type: 'video',
+        uri: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+      },
     ],
   },
   {
@@ -32,11 +59,26 @@ const STORIES: StoryItem[] = [
     user: { name: 'Diego Andrade', avatar: 'https://i.pravatar.cc/160?img=12' },
     postedAt: 'há 5 horas',
     caption: 'Lançamos hoje nossa nova funcionalidade! 🚀',
-    cover: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1200&q=80',
+    cover:
+      'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1200&q=80',
     segments: [
-      { id: 'd1', type: 'image', uri: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1600&q=80', durationMs: 4000 },
-      { id: 'd2', type: 'video', uri: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm' },
-      { id: 'd3', type: 'image', uri: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1600&q=80', durationMs: 5000 },
+      {
+        id: 'd1',
+        type: 'image',
+        uri: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1600&q=80',
+        durationMs: 4000,
+      },
+      {
+        id: 'd2',
+        type: 'video',
+        uri: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm',
+      },
+      {
+        id: 'd3',
+        type: 'image',
+        uri: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1600&q=80',
+        durationMs: 5000,
+      },
     ],
   },
   {
@@ -44,11 +86,27 @@ const STORIES: StoryItem[] = [
     user: { name: 'Carla Sousa', avatar: 'https://i.pravatar.cc/160?img=48' },
     postedAt: 'ontem',
     caption: 'Workshop de pesquisa na comunidade. 🎤',
-    cover: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
+    cover:
+      'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
     segments: [
-      { id: 'c1', type: 'image', uri: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80', durationMs: 4500 },
-      { id: 'c2', type: 'image', uri: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1600&q=80', durationMs: 4500 },
-      { id: 'c3', type: 'image', uri: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1600&q=80', durationMs: 4500 },
+      {
+        id: 'c1',
+        type: 'image',
+        uri: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80',
+        durationMs: 4500,
+      },
+      {
+        id: 'c2',
+        type: 'image',
+        uri: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1600&q=80',
+        durationMs: 4500,
+      },
+      {
+        id: 'c3',
+        type: 'image',
+        uri: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1600&q=80',
+        durationMs: 4500,
+      },
     ],
   },
 ];
@@ -69,47 +127,83 @@ export default function StoryScreen() {
       caption: 'Novo story compartilhado com a comunidade! ✨',
       cover: `https://picsum.photos/900/1600?random=${Math.floor(Math.random() * 1000)}`,
       segments: [
-        { id: `${id}-1`, type: 'image', uri: `https://picsum.photos/900/1600?random=${Math.floor(Math.random() * 1000)}`, durationMs: 4500 },
-        { id: `${id}-2`, type: 'image', uri: `https://picsum.photos/900/1600?random=${Math.floor(Math.random() * 1000)}`, durationMs: 4500 },
+        {
+          id: `${id}-1`,
+          type: 'image',
+          uri: `https://picsum.photos/900/1600?random=${Math.floor(Math.random() * 1000)}`,
+          durationMs: 4500,
+        },
+        {
+          id: `${id}-2`,
+          type: 'image',
+          uri: `https://picsum.photos/900/1600?random=${Math.floor(Math.random() * 1000)}`,
+          durationMs: 4500,
+        },
       ],
     };
     setStories((prev) => [me, ...prev]);
     setActive(me);
   }, []);
 
-  const renderItem = useCallback(({ item }: { item: StoryItem }) => (
-    <TouchableOpacity activeOpacity={0.9} onPress={() => open(item)} style={styles.storyCard}>
-      <ImageBackground source={{ uri: item.cover }} style={styles.storyImage} imageStyle={styles.storyImageInner}>
-        <View style={styles.storyOverlay} />
-        <View style={styles.storyContent}>
-          <View style={styles.storyHeader}>
-            <Image source={{ uri: item.user.avatar }} style={styles.storyAvatar} />
-            <View>
-              <Text style={styles.storyName}>{item.user.name}</Text>
-              <Text style={styles.storyTime}>{item.postedAt}</Text>
+  const renderItem = useCallback(
+    ({ item }: { item: StoryItem }) => (
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => open(item)}
+        style={styles.storyCard}
+      >
+        <ImageBackground
+          source={{ uri: item.cover }}
+          style={styles.storyImage}
+          imageStyle={styles.storyImageInner}
+        >
+          <View style={styles.storyOverlay} />
+          <View style={styles.storyContent}>
+            <View style={styles.storyHeader}>
+              <Image
+                source={{ uri: item.user.avatar }}
+                style={styles.storyAvatar}
+              />
+              <View>
+                <Text style={styles.storyName}>{item.user.name}</Text>
+                <Text style={styles.storyTime}>{item.postedAt}</Text>
+              </View>
             </View>
+            <Text style={styles.storyCaption}>{item.caption}</Text>
           </View>
-          <Text style={styles.storyCaption}>{item.caption}</Text>
-        </View>
-      </ImageBackground>
-    </TouchableOpacity>
-  ), [open]);
-
-  const listHeader = useMemo(() => (
-    <View style={styles.listHeader}>
-      <Text style={styles.listTitle}>Stories</Text>
-      <Text style={styles.listSubtitle}>Role para descobrir e toque para ver em tela cheia. Stories avançam automaticamente.</Text>
-      <TouchableOpacity activeOpacity={0.85} onPress={addStory} style={styles.addCard}>
-        <View style={styles.addCircle}>
-          <Plus size={28} color="#0856d6" />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.addTitle}>Adicionar novo story</Text>
-          <Text style={styles.addSubtitle}>Compartilhe um momento especial com quem te acompanha.</Text>
-        </View>
+        </ImageBackground>
       </TouchableOpacity>
-    </View>
-  ), [addStory]);
+    ),
+    [open],
+  );
+
+  const listHeader = useMemo(
+    () => (
+      <View style={styles.listHeader}>
+        <Text style={styles.listTitle}>Stories</Text>
+        <Text style={styles.listSubtitle}>
+          Role para descobrir e toque para ver em tela cheia. Stories avançam
+          automaticamente.
+        </Text>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={addStory}
+          style={styles.addCard}
+        >
+          <View style={styles.addCircle}>
+            <Plus size={28} color="#0856d6" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.addTitle}>Adicionar novo story</Text>
+            <Text style={styles.addSubtitle}>
+              Compartilhe um momento especial com quem te acompanha.
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    ),
+    [addStory],
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -127,7 +221,12 @@ export default function StoryScreen() {
       <BottomNav active="story" />
 
       {active ? (
-        <StoryViewer visible user={active.user} segments={active.segments} onClose={close} />
+        <StoryViewer
+          visible
+          user={active.user}
+          segments={active.segments}
+          onClose={close}
+        />
       ) : null}
     </SafeAreaView>
   );
