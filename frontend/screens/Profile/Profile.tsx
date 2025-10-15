@@ -39,6 +39,7 @@ export default function ProfileScreen() {
           <View style={{ alignItems: 'center', marginTop: 8 }}>
             <Text style={styles.name}>{p.name}</Text>
             <Text style={styles.handle}>@{p.username}</Text>
+            <Text style={styles.headerTagline} numberOfLines={1}>{p.bio}</Text>
           </View>
         </View>
 
@@ -138,6 +139,7 @@ const styles = StyleSheet.create({
   avatar: { width: 96, height: 96 },
   name: { fontSize: 20, fontWeight: '800', color: '#111827' },
   handle: { color: '#6b7280' },
+  headerTagline: { color: '#94a3b8', marginTop: 4, maxWidth: '90%', textAlign: 'center' },
   infoCard: { backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e5edf6', marginTop: 12, padding: 16, paddingBottom: 16, borderRadius: 12, marginHorizontal: 16 },
   bio: { color: '#374151', lineHeight: 20 },
   rowStats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
