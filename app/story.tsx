@@ -30,7 +30,11 @@ export type StoryItem = {
 const STORIES: StoryItem[] = [
   {
     id: 'alice',
-    user: { name: 'Alice Martins', avatar: 'https://i.pravatar.cc/160?img=21', online: true },
+    user: {
+      name: 'Alice Martins',
+      avatar: 'https://i.pravatar.cc/160?img=21',
+      online: true,
+    },
     postedAt: 'há 2 horas',
     caption: 'Explorando novas referências para o próximo produto. ✨',
     cover:
@@ -57,7 +61,11 @@ const STORIES: StoryItem[] = [
   },
   {
     id: 'diego',
-    user: { name: 'Diego Andrade', avatar: 'https://i.pravatar.cc/160?img=12', online: false },
+    user: {
+      name: 'Diego Andrade',
+      avatar: 'https://i.pravatar.cc/160?img=12',
+      online: false,
+    },
     postedAt: 'há 5 horas',
     caption: 'Lançamos hoje nossa nova funcionalidade! 🚀',
     cover:
@@ -84,7 +92,11 @@ const STORIES: StoryItem[] = [
   },
   {
     id: 'carla',
-    user: { name: 'Carla Sousa', avatar: 'https://i.pravatar.cc/160?img=48', online: true },
+    user: {
+      name: 'Carla Sousa',
+      avatar: 'https://i.pravatar.cc/160?img=48',
+      online: true,
+    },
     postedAt: 'ontem',
     caption: 'Workshop de pesquisa na comunidade. 🎤',
     cover:
@@ -204,15 +216,22 @@ export default function StoryScreen() {
             <TouchableOpacity
               activeOpacity={0.9}
               onPress={() => setActive(s)}
-              style={{ width: screenWidth, alignItems: 'center', paddingHorizontal: 20 }}
+              style={{
+                width: screenWidth,
+                alignItems: 'center',
+                paddingHorizontal: 20,
+              }}
             >
               <View style={{ width: compactWidth, gap: 10 }}>
                 <View style={styles.compactInfoCard}>
                   <View style={styles.compactHeader}>
                     <View style={styles.compactAvatarWrap}>
-                    <Image source={{ uri: s.user.avatar }} style={styles.compactAvatar} />
-                    {s.user.online ? <View style={styles.onlineDot} /> : null}
-                  </View>
+                      <Image
+                        source={{ uri: s.user.avatar }}
+                        style={styles.compactAvatar}
+                      />
+                      {s.user.online ? <View style={styles.onlineDot} /> : null}
+                    </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.compactName}>{s.user.name}</Text>
                       <Text style={styles.compactTime}>{s.postedAt}</Text>
@@ -420,7 +439,7 @@ const styles = StyleSheet.create({
   },
   compactMedia: {
     width: '100%',
-    aspectRatio: 9/16,
+    aspectRatio: 9 / 16,
     borderRadius: 12,
     overflow: 'hidden',
     justifyContent: 'flex-end',
