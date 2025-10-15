@@ -1,9 +1,20 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, Image, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity, Pressable } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  SafeAreaView,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Pressable,
+  ImageBackground,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import BottomNav from '../../components/BottomNav';
 import PostCard from '../../components/PostCard';
 import TopBar from '../../components/TopBar';
-import { Heart, Home, MapPin, Briefcase } from 'lucide-react-native';
+import { Heart, Home, MapPin, Briefcase, Users, ChevronRight } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { profileData } from './Data';
 import { getPosts, subscribe, toggleLike } from '../../store/posts';
@@ -24,87 +35,99 @@ export default function ProfileScreen() {
   const connectionsCount = p.connectionsCount;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f1f5f9' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0b1220' }}>
       <TopBar />
-      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-        {/* Cover and avatar */}
-        <View style={styles.coverWrap}>
-          <Image source={{ uri: p.cover }} style={styles.cover} />
-        </View>
+      <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+        {/* HEADER WITH COVER, AVATAR CENTERED, NAME/BIO */}
+        <View style={styles.headerWrap}>
+          <ImageBackground source={{ uri: p.cover }} style={styles.headerCover} imageStyle={{ resizeMode: 'cover' }}>
+            <LinearGradient
+              colors={["rgba(0,0,0,0.0)", "rgba(0,0,0,0.35)", "rgba(11,18,32,1)"]}
+              style={styles.headerOverlay}
+            />
+          </ImageBackground>
 
-        <View style={styles.metaWrap}>
-          <View style={styles.avatarWrap}>
-            <Image source={{ uri: p.avatar }} style={styles.avatar} />
+          {/* Centered avatar */}
+          <View style={styles.avatarCenterWrap}>
+            <View style={styles.avatarRing}>
+              <Image source={{ uri: p.avatar }} style={styles.avatar} />
+            </View>
           </View>
-          <View style={{ alignItems: 'center', marginTop: 8 }}>
+
+          <View style={styles.headerNames}>
             <Text style={styles.name}>{p.name}</Text>
-            <Text style={styles.handle}>@{p.username}</Text>
-            <Text style={styles.headerTagline} numberOfLines={1}>{p.bio}</Text>
+            <Text style={styles.username}>@{p.username}</Text>
+            <Text numberOfLines={2} style={styles.tagline}>{p.bio}</Text>
           </View>
-        </View>
 
-        {/* Counters and About */}
-        <View style={styles.infoCard}>
-          <Text style={styles.sectionTitle}>Biografia</Text>
-          <Text style={styles.bio}>{p.bio}</Text>
-
-          <View style={styles.rowStats}>
-            <View style={styles.stat}><Text style={styles.statNumber}>{postCount}</Text><Text style={styles.statLabel}>Posts</Text></View>
-            <View style={styles.stat}><Text style={styles.statNumber}>{connectionsCount}</Text><Text style={styles.statLabel}>Conexões</Text></View>
-            <Pressable onPress={() => router.push('/profile/about')} style={styles.aboutBtn}>
-              <Text style={styles.aboutText}>Sobre</Text>
+          <View style={styles.headerStatsRow}>
+            <StatPill label="Posts" value={postCount} />
+            <StatPill label="Conexões" value={connectionsCount} />
+            <Pressable onPress={() => router.push('/profile/about')} style={styles.aboutPill}>
+              <Text style={styles.aboutPillText}>Sobre</Text>
+              <ChevronRight size={14} color="#c7d2fe" />
             </Pressable>
           </View>
         </View>
 
-        {/* Highlights */}
-        <View style={{ paddingHorizontal: 16, marginTop: 10 }}>
+        {/* HIGHLIGHTS */}
+        <View style={styles.sectionWrap}>
           <Text style={styles.sectionTitle}>Destaques</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10 }}>
             {p.highlights.map((h, i) => (
-              <View key={`${h}-${i}`} style={styles.highlightItem}>
-                <Image source={{ uri: h }} style={styles.highlight} />
+              <View key={`${h}-${i}`} style={styles.highlightCard}>
+                <Image source={{ uri: h }} style={styles.highlightImg} />
+                <LinearGradient colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.55)"]} style={styles.highlightOverlay} />
+                <Text style={styles.highlightCaption}>• Destaque {i + 1}</Text>
               </View>
             ))}
           </ScrollView>
         </View>
 
-        {/* Informações pessoais */}
-        <View style={styles.quickInfoCard}>
-          <Text style={styles.sectionTitle}>Informações pessoais</Text>
+        {/* PERSONAL INFO CARD */}
+        <View style={styles.infoCard}>
+          <Text style={styles.infoTitle}>Informações pessoais</Text>
           <InfoRow icon={Home} label="Cidade natal" value={p.hometown} />
           <InfoRow icon={MapPin} label="Cidade atual" value={p.currentCity} />
           <InfoRow icon={Heart} label="Relacionamento" value={p.relationshipStatus} />
           <InfoRow icon={Briefcase} label="Trabalho" value={p.workplace} />
+          <InfoRow icon={Users} label="Conexões" value={`${p.connectionsCount}`} />
         </View>
 
-        {/* Tabs */}
-        <View style={styles.tabsRow}>
-          <TouchableOpacity style={[styles.tabBtn, tab === 'posts' && styles.tabActive]} onPress={() => setTab('posts')}>
-            <Text style={[styles.tabText, tab === 'posts' && styles.tabTextActive]}>Posts</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.tabBtn, tab === 'testimonials' && styles.tabActive]} onPress={() => setTab('testimonials')}>
-            <Heart size={16} color={tab === 'testimonials' ? '#0856d6' : '#6b7280'} />
-            <Text style={[styles.tabText, { marginLeft: 6 }, tab === 'testimonials' && styles.tabTextActive]}>Depoimentos</Text>
-          </TouchableOpacity>
+        {/* FRIENDS PREVIEW GRID */}
+        <View style={styles.sectionWrap}>
+          <Text style={styles.sectionTitle}>Amigos</Text>
+          <View style={styles.friendsGrid}>
+            {p.recentFriends.map((f) => (
+              <View key={f.id} style={styles.friendItem}>
+                <Image source={{ uri: f.avatar }} style={styles.friendAvatar} />
+                <Text numberOfLines={1} style={styles.friendName}>{f.name}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
-        {/* Content */}
-        <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
+        {/* SEGMENTED CONTROL */}
+        <View style={styles.segmentWrap}>
+          <Segmented tab={tab} setTab={setTab} />
+        </View>
+
+        {/* CONTENT */}
+        <View style={{ paddingHorizontal: 16, marginTop: 10 }}>
           {tab === 'posts' ? (
             myPosts.length === 0 ? (
               <View style={styles.emptyBox}><Text style={styles.emptyText}>Nenhum post ainda.</Text></View>
             ) : (
-              myPosts.map((p) => (
-                <PostCard key={p.id} post={p} onLike={() => toggleLike(p.id)} />
+              myPosts.map((pp) => (
+                <PostCard key={pp.id} post={pp} onLike={() => toggleLike(pp.id)} />
               ))
             )
           ) : (
             <View>
-              {profileData.testimonials.map((t) => (
+              {p.testimonials.map((t) => (
                 <View key={t.id} style={styles.testimonialCard}>
-                  <Text style={styles.testimonialText}>“{t.text}”</Text>
-                  <Text style={styles.testimonialAuthor}>— {t.author} · {t.date}</Text>
+                  <Text style={styles.testimonialQuote}>“{t.text}”</Text>
+                  <Text style={styles.testimonialMeta}>— {t.author} · {t.date}</Text>
                 </View>
               ))}
             </View>
@@ -117,12 +140,35 @@ export default function ProfileScreen() {
   );
 }
 
+function StatPill({ label, value }: { label: string; value: number }) {
+  return (
+    <View style={styles.statPill}>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function Segmented({ tab, setTab }: { tab: 'posts' | 'testimonials'; setTab: (t: 'posts' | 'testimonials') => void }) {
+  return (
+    <View style={styles.segment}>
+      <Pressable onPress={() => setTab('posts')} style={[styles.segmentBtn, tab === 'posts' && styles.segmentActive]}>
+        <Text style={[styles.segmentText, tab === 'posts' && styles.segmentTextActive]}>Posts</Text>
+      </Pressable>
+      <Pressable onPress={() => setTab('testimonials')} style={[styles.segmentBtn, tab === 'testimonials' && styles.segmentActive]}>
+        <Heart size={14} color={tab === 'testimonials' ? '#0ea5e9' : '#9aa4b2'} />
+        <Text style={[styles.segmentText, { marginLeft: 6 }, tab === 'testimonials' && styles.segmentTextActive]}>Depoimentos</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 function InfoRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number; color?: string }>; label: string; value: string }) {
   return (
     <View style={styles.infoRow}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#e9eef8', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
-          <Icon size={14} color="#64748b" />
+        <View style={styles.infoIconWrap}>
+          <Icon size={14} color="#7c8aa0" />
         </View>
         <Text style={styles.infoLabel}>{label}</Text>
       </View>
@@ -132,37 +178,53 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ siz
 }
 
 const styles = StyleSheet.create({
-  coverWrap: { width: '100%', height: 140, backgroundColor: '#f3f4f6' },
-  cover: { width: '100%', height: 140 },
-  metaWrap: { alignItems: 'center', marginTop: -40 },
-  avatarWrap: { width: 96, height: 96, borderRadius: 48, overflow: 'hidden', borderWidth: 4, borderColor: '#fff', backgroundColor: '#fff' },
-  avatar: { width: 96, height: 96 },
-  name: { fontSize: 20, fontWeight: '800', color: '#111827' },
-  handle: { color: '#6b7280' },
-  headerTagline: { color: '#94a3b8', marginTop: 4, maxWidth: '90%', textAlign: 'center' },
-  infoCard: { backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e5edf6', marginTop: 12, padding: 16, paddingBottom: 16, borderRadius: 12, marginHorizontal: 16 },
-  bio: { color: '#374151', lineHeight: 20 },
-  rowStats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
-  stat: { alignItems: 'center', flex: 1 },
-  statNumber: { fontWeight: '700', fontSize: 16 },
-  statLabel: { color: '#6b7280' },
-  aboutBtn: { paddingVertical: 10, paddingHorizontal: 14, backgroundColor: '#e2e8f0', borderRadius: 999 },
-  aboutText: { color: '#0f172a', fontWeight: '700' },
-  sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 8 },
-  highlightItem: { marginRight: 10 },
-  highlight: { width: 64, height: 64, borderRadius: 32 },
-  quickInfoCard: { backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e5edf6', marginHorizontal: 16, marginTop: 10, padding: 16, borderRadius: 12 },
-  infoRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  infoLabel: { color: '#6b7280' },
-  infoValue: { color: '#111827', fontWeight: '600' },
-  tabsRow: { flexDirection: 'row', marginTop: 14, paddingHorizontal: 16 },
-  tabBtn: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 12, backgroundColor: '#f3f4f6', borderRadius: 999, marginRight: 10 },
-  tabActive: { backgroundColor: '#e6f0ff' },
-  tabText: { color: '#6b7280', fontWeight: '600' },
-  tabTextActive: { color: '#0856d6' },
-  emptyBox: { backgroundColor: '#fff', padding: 20, borderRadius: 8 },
-  emptyText: { color: '#6b7280' },
-  testimonialCard: { backgroundColor: '#fff', padding: 14, borderRadius: 8, marginBottom: 10 },
-  testimonialText: { color: '#111827' },
-  testimonialAuthor: { marginTop: 6, color: '#6b7280' },
+  headerWrap: { position: 'relative', paddingBottom: 70, backgroundColor: '#0b1220' },
+  headerCover: { width: '100%', height: 200 },
+  headerOverlay: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
+  avatarCenterWrap: { position: 'absolute', left: 0, right: 0, top: 130, alignItems: 'center' },
+  avatarRing: { width: 120, height: 120, borderRadius: 60, borderWidth: 4, borderColor: '#0ea5e9', backgroundColor: '#0b1220', overflow: 'hidden' },
+  avatar: { width: '100%', height: '100%' },
+  headerNames: { alignItems: 'center', marginTop: 70 },
+  name: { color: '#f8fafc', fontSize: 22, fontWeight: '800' },
+  username: { color: '#cbd5e1', marginTop: 2 },
+  tagline: { color: '#a5b4fc', marginTop: 8, paddingHorizontal: 24, textAlign: 'center' },
+  headerStatsRow: { flexDirection: 'row', justifyContent: 'center', gap: 10 as unknown as number, marginTop: 14, paddingHorizontal: 16 },
+  statPill: { backgroundColor: '#111827', borderWidth: 1, borderColor: '#1f2937', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 999, alignItems: 'center' },
+  statValue: { color: '#e5e7eb', fontWeight: '800' },
+  statLabel: { color: '#94a3b8', fontSize: 12, marginTop: 2 },
+  aboutPill: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1f2937', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 999 },
+  aboutPillText: { color: '#c7d2fe', fontWeight: '700', marginRight: 6 },
+
+  sectionWrap: { paddingHorizontal: 16, marginTop: 18 },
+  sectionTitle: { color: '#e5e7eb', fontSize: 16, fontWeight: '800' },
+  highlightCard: { width: 110, height: 150, borderRadius: 14, overflow: 'hidden', marginRight: 12, backgroundColor: '#0f172a' },
+  highlightImg: { width: '100%', height: '100%' },
+  highlightOverlay: { position: 'absolute', left: 0, right: 0, bottom: 0, top: 0 },
+  highlightCaption: { position: 'absolute', bottom: 8, left: 10, right: 10, color: '#e5e7eb', fontWeight: '700', fontSize: 12 },
+
+  infoCard: { backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1f2937', marginHorizontal: 16, marginTop: 16, padding: 16, borderRadius: 14 },
+  infoTitle: { color: '#e5e7eb', fontSize: 14, fontWeight: '800', marginBottom: 8 },
+  infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
+  infoIconWrap: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#0b1324', borderWidth: 1, borderColor: '#1f2937', alignItems: 'center', justifyContent: 'center', marginRight: 8 },
+  infoLabel: { color: '#94a3b8' },
+  infoValue: { color: '#e5e7eb', fontWeight: '600' },
+
+  friendsGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 10 },
+  friendItem: { width: '25%', alignItems: 'center', marginBottom: 12 },
+  friendAvatar: { width: 64, height: 64, borderRadius: 32 },
+  friendName: { color: '#e5e7eb', marginTop: 6, fontSize: 12, paddingHorizontal: 4, textAlign: 'center' },
+
+  segmentWrap: { paddingHorizontal: 16, marginTop: 14 },
+  segment: { flexDirection: 'row', backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1f2937', borderRadius: 999, padding: 4 },
+  segmentBtn: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 10, borderRadius: 999 },
+  segmentActive: { backgroundColor: '#0b1324' },
+  segmentText: { color: '#9aa4b2', fontWeight: '700' },
+  segmentTextActive: { color: '#0ea5e9' },
+
+  emptyBox: { backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1f2937', padding: 20, borderRadius: 12 },
+  emptyText: { color: '#94a3b8' },
+
+  testimonialCard: { backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1f2937', padding: 16, borderRadius: 12, marginBottom: 10 },
+  testimonialQuote: { color: '#e5e7eb' },
+  testimonialMeta: { marginTop: 6, color: '#94a3b8' },
 });
