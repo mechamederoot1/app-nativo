@@ -3,7 +3,7 @@ import { View, Text, Image, SafeAreaView, StyleSheet, ScrollView, TouchableOpaci
 import BottomNav from '../../components/BottomNav';
 import PostCard from '../../components/PostCard';
 import TopBar from '../../components/TopBar';
-import { Heart } from 'lucide-react-native';
+import { Heart, Home, MapPin, Briefcase } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { profileData } from './Data';
 import { getPosts, subscribe, toggleLike } from '../../store/posts';
@@ -68,12 +68,13 @@ export default function ProfileScreen() {
           </ScrollView>
         </View>
 
-        {/* Quick Info */}
+        {/* Informações pessoais */}
         <View style={styles.quickInfoCard}>
-          <InfoRow label="Cidade natal" value={p.hometown} />
-          <InfoRow label="Cidade atual" value={p.currentCity} />
-          <InfoRow label="Relacionamento" value={p.relationshipStatus} />
-          <InfoRow label="Trabalho" value={p.workplace} />
+          <Text style={styles.sectionTitle}>Informações pessoais</Text>
+          <InfoRow icon={Home} label="Cidade natal" value={p.hometown} />
+          <InfoRow icon={MapPin} label="Cidade atual" value={p.currentCity} />
+          <InfoRow icon={Heart} label="Relacionamento" value={p.relationshipStatus} />
+          <InfoRow icon={Briefcase} label="Trabalho" value={p.workplace} />
         </View>
 
         {/* Tabs */}
@@ -115,10 +116,15 @@ export default function ProfileScreen() {
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number; color?: string }>; label: string; value: string }) {
   return (
     <View style={styles.infoRow}>
-      <Text style={styles.infoLabel}>{label}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#e9eef8', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
+          <Icon size={14} color="#64748b" />
+        </View>
+        <Text style={styles.infoLabel}>{label}</Text>
+      </View>
       <Text style={styles.infoValue}>{value}</Text>
     </View>
   );
@@ -143,7 +149,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 8 },
   highlightItem: { marginRight: 10 },
   highlight: { width: 64, height: 64, borderRadius: 32 },
-  quickInfoCard: { backgroundColor: '#fff', marginHorizontal: 16, marginTop: 10, padding: 16, borderRadius: 8 },
+  quickInfoCard: { backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e5edf6', marginHorizontal: 16, marginTop: 10, padding: 16, borderRadius: 12 },
   infoRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
   infoLabel: { color: '#6b7280' },
   infoValue: { color: '#111827', fontWeight: '600' },
