@@ -124,8 +124,9 @@ export default function StoryScreen() {
   const cardHeight = Math.max(140, Math.min(220, Math.floor(height * 0.28)));
   const itemWidth = cardWidth + 40;
 
-  const compactWidth = Math.min(220, Math.max(160, width - 160));
-  const compactItemWidth = compactWidth + 24;
+  const screenWidth = width;
+  const compactWidth = Math.min(180, Math.max(150, Math.floor(width * 0.48)));
+  const compactItemWidth = screenWidth;
 
   const renderItem = useCallback(
     ({ item }: { item: StoryItem }) => (
@@ -196,14 +197,14 @@ export default function StoryScreen() {
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           decelerationRate="fast"
-          snapToInterval={compactItemWidth}
+          snapToInterval={screenWidth}
           snapToAlignment="start"
-          contentContainerStyle={{ paddingHorizontal: 12 }}
+          contentContainerStyle={{}}
           renderItem={({ item: s }) => (
             <TouchableOpacity
               activeOpacity={0.9}
               onPress={() => setActive(s)}
-              style={{ width: compactItemWidth, paddingHorizontal: 12 }}
+              style={{ width: screenWidth, alignItems: 'center' }}
             >
               <View style={[styles.compactCard, { width: compactWidth }]}>
                 <View style={styles.compactHeader}>
@@ -226,7 +227,7 @@ export default function StoryScreen() {
         />
       </View>
     ),
-    [setActive, compactItemWidth, compactWidth],
+    [setActive, compactItemWidth, compactWidth, screenWidth],
   );
 
   return (
@@ -275,6 +276,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
     gap: 16,
+    paddingBottom: 8,
   },
   listTitle: {
     fontSize: 24,
