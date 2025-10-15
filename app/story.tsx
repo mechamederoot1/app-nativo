@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     padding: 12,
     gap: 10,
     width: '100%',
-    maxWidth: 360,
+    maxWidth: 220,
     alignSelf: 'center',
   },
   compactHeader: {
@@ -378,8 +378,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.18)',
   },
   compactMedia: {
-    height: 72,
     width: '100%',
+    aspectRatio: 9/16,
     borderRadius: 12,
     overflow: 'hidden',
     justifyContent: 'flex-end',
