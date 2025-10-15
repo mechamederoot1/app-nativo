@@ -29,7 +29,7 @@ export default function TopBar() {
         { paddingTop, paddingBottom: Platform.OS === 'ios' ? 8 : 6 },
       ]}
     >
-      <TouchableOpacity onPress={() => router.push('/feed')}>
+      <TouchableOpacity onPress={() => router.push('/feed')} activeOpacity={0.7}>
         <Text style={styles.logo}>Vibe</Text>
       </TouchableOpacity>
 
@@ -37,15 +37,17 @@ export default function TopBar() {
         <TouchableOpacity
           onPress={() => router.push('/search')}
           style={styles.iconBtn}
+          activeOpacity={0.6}
         >
-          <Search size={16} color="#6b7280" />
+          <Search size={20} color="#64748b" strokeWidth={2} />
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => router.push('/notifications')}
           style={styles.iconBtn}
+          activeOpacity={0.6}
         >
-          <Bell size={16} color="#6b7280" />
+          <Bell size={20} color="#64748b" strokeWidth={2} />
           {unreadNotifications > 0 && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>
@@ -57,9 +59,10 @@ export default function TopBar() {
 
         <TouchableOpacity
           onPress={() => router.push('/profile')}
-          style={styles.avatarPlaceholder}
+          style={styles.avatar}
+          activeOpacity={0.8}
         >
-          <Text style={{ color: '#0856d6' }}>U</Text>
+          <Text style={styles.avatarText}>U</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -69,28 +72,36 @@ export default function TopBar() {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
   },
-  logo: { fontSize: 18, fontWeight: '800', color: '#0856d6' },
-  rightRow: { flexDirection: 'row', alignItems: 'center' },
-  iconBtn: { marginLeft: 12 },
-  avatarPlaceholder: {
-    marginLeft: 12,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#e6f0ff',
+  logo: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#0856d6',
+    letterSpacing: -1,
+  },
+  rightRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  iconBtn: {
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
   badge: {
     position: 'absolute',
-    right: -6,
-    top: -6,
+    right: -4,
+    top: -4,
     minWidth: 18,
     height: 18,
     borderRadius: 9,
@@ -98,6 +109,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: '#ffffff',
   },
-  badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+  badgeText: {
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#eff6ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#dbeafe',
+  },
+  avatarText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0856d6',
+  },
 });
