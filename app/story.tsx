@@ -133,7 +133,7 @@ export default function StoryScreen() {
   const close = useCallback(() => setActive(null), []);
 
   const cardWidth = Math.min(360, width - 60);
-  const cardHeight = Math.max(140, Math.min(220, Math.floor(height * 0.28)));
+  const cardHeight = Math.max(120, Math.min(180, Math.floor(width * 0.42)));
   const itemWidth = cardWidth + 40;
 
   const screenWidth = width;
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
   },
   compactMedia: {
     width: '100%',
-    aspectRatio: 9 / 16,
+    aspectRatio: 3 / 4,
     borderRadius: 12,
     overflow: 'hidden',
     justifyContent: 'flex-end',
