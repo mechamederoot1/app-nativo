@@ -36,7 +36,7 @@ import {
   Phone,
   GraduationCap,
   UserCheck,
-  Check
+  Check,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { profileData } from './Data';
@@ -55,7 +55,10 @@ export default function ProfileScreen() {
     return unsub;
   }, []);
 
-  const myPosts = useMemo(() => posts.filter((x) => x.user === 'Você'), [posts]);
+  const myPosts = useMemo(
+    () => posts.filter((x) => x.user === 'Você'),
+    [posts],
+  );
   const postCount = myPosts.length;
   const connectionsCount = p.connectionsCount;
 
@@ -84,14 +87,14 @@ export default function ProfileScreen() {
       return;
     }
 
-    setRatings(prev => ({
+    setRatings((prev) => ({
       ...prev,
-      [type]: prev[type] + 1
+      [type]: prev[type] + 1,
     }));
 
-    setUserVotes(prev => ({
+    setUserVotes((prev) => ({
       ...prev,
-      [type]: true
+      [type]: true,
     }));
   };
 
@@ -103,7 +106,6 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
         bounces={true}
       >
-
         <View style={styles.headerSection}>
           <View style={styles.coverContainer}>
             <Image source={{ uri: p.cover }} style={styles.coverImage} />
@@ -120,7 +122,10 @@ export default function ProfileScreen() {
             <View style={styles.avatarWrapper}>
               <Image source={{ uri: p.avatar }} style={styles.avatar} />
               <View style={styles.onlineDot} />
-              <TouchableOpacity style={styles.avatarEditBtn} activeOpacity={0.8}>
+              <TouchableOpacity
+                style={styles.avatarEditBtn}
+                activeOpacity={0.8}
+              >
                 <Camera size={14} color="#ffffff" strokeWidth={2.5} />
               </TouchableOpacity>
             </View>
@@ -137,23 +142,27 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 style={[
                   styles.ratingItem,
-                  userVotes.confiavel && styles.ratingItemVoted
+                  userVotes.confiavel && styles.ratingItemVoted,
                 ]}
                 activeOpacity={userVotes.confiavel ? 1 : 0.7}
                 onPress={() => handleRating('confiavel')}
               >
                 <Text style={styles.ratingEmoji}>😊</Text>
                 <View style={styles.ratingInfo}>
-                  <Text style={[
-                    styles.ratingLabel,
-                    userVotes.confiavel && styles.ratingLabelVoted
-                  ]}>
+                  <Text
+                    style={[
+                      styles.ratingLabel,
+                      userVotes.confiavel && styles.ratingLabelVoted,
+                    ]}
+                  >
                     Confiável
                   </Text>
-                  <Text style={[
-                    styles.ratingCount,
-                    userVotes.confiavel && styles.ratingCountVoted
-                  ]}>
+                  <Text
+                    style={[
+                      styles.ratingCount,
+                      userVotes.confiavel && styles.ratingCountVoted,
+                    ]}
+                  >
                     {ratings.confiavel}
                   </Text>
                 </View>
@@ -169,23 +178,27 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 style={[
                   styles.ratingItem,
-                  userVotes.legal && styles.ratingItemVoted
+                  userVotes.legal && styles.ratingItemVoted,
                 ]}
                 activeOpacity={userVotes.legal ? 1 : 0.7}
                 onPress={() => handleRating('legal')}
               >
                 <Text style={styles.ratingEmoji}>😎</Text>
                 <View style={styles.ratingInfo}>
-                  <Text style={[
-                    styles.ratingLabel,
-                    userVotes.legal && styles.ratingLabelVoted
-                  ]}>
+                  <Text
+                    style={[
+                      styles.ratingLabel,
+                      userVotes.legal && styles.ratingLabelVoted,
+                    ]}
+                  >
                     Legal
                   </Text>
-                  <Text style={[
-                    styles.ratingCount,
-                    userVotes.legal && styles.ratingCountVoted
-                  ]}>
+                  <Text
+                    style={[
+                      styles.ratingCount,
+                      userVotes.legal && styles.ratingCountVoted,
+                    ]}
+                  >
                     {ratings.legal}
                   </Text>
                 </View>
@@ -201,23 +214,27 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 style={[
                   styles.ratingItem,
-                  userVotes.sexy && styles.ratingItemVoted
+                  userVotes.sexy && styles.ratingItemVoted,
                 ]}
                 activeOpacity={userVotes.sexy ? 1 : 0.7}
                 onPress={() => handleRating('sexy')}
               >
                 <Text style={styles.ratingEmoji}>💖</Text>
                 <View style={styles.ratingInfo}>
-                  <Text style={[
-                    styles.ratingLabel,
-                    userVotes.sexy && styles.ratingLabelVoted
-                  ]}>
+                  <Text
+                    style={[
+                      styles.ratingLabel,
+                      userVotes.sexy && styles.ratingLabelVoted,
+                    ]}
+                  >
                     Sexy
                   </Text>
-                  <Text style={[
-                    styles.ratingCount,
-                    userVotes.sexy && styles.ratingCountVoted
-                  ]}>
+                  <Text
+                    style={[
+                      styles.ratingCount,
+                      userVotes.sexy && styles.ratingCountVoted,
+                    ]}
+                  >
                     {ratings.sexy}
                   </Text>
                 </View>
@@ -235,11 +252,17 @@ export default function ProfileScreen() {
                 <Text style={styles.primaryBtnText}>Editar perfil</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.85}>
+              <TouchableOpacity
+                style={styles.secondaryBtn}
+                activeOpacity={0.85}
+              >
                 <Plus size={18} color="#3b82f6" strokeWidth={2.5} />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.85}>
+              <TouchableOpacity
+                style={styles.secondaryBtn}
+                activeOpacity={0.85}
+              >
                 <MoreVertical size={18} color="#3b82f6" strokeWidth={2.5} />
               </TouchableOpacity>
             </View>
@@ -264,7 +287,10 @@ export default function ProfileScreen() {
                     activeOpacity={0.9}
                   >
                     <View style={styles.highlightImageWrapper}>
-                      <Image source={{ uri: highlight.image }} style={styles.highlightImage} />
+                      <Image
+                        source={{ uri: highlight.image }}
+                        style={styles.highlightImage}
+                      />
                       <LinearGradient
                         colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.7)']}
                         style={styles.highlightOverlay}
@@ -275,7 +301,10 @@ export default function ProfileScreen() {
                   </TouchableOpacity>
                 ))}
 
-                <TouchableOpacity style={styles.addHighlightItem} activeOpacity={0.8}>
+                <TouchableOpacity
+                  style={styles.addHighlightItem}
+                  activeOpacity={0.8}
+                >
                   <View style={styles.addHighlightCircle}>
                     <Plus size={18} color="#64748b" strokeWidth={2.5} />
                   </View>
@@ -321,11 +350,15 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.infoItem}>
               <Link size={18} color="#64748b" strokeWidth={2} />
-              <Text style={[styles.infoText, styles.linkText]}>meusite.com.br</Text>
+              <Text style={[styles.infoText, styles.linkText]}>
+                meusite.com.br
+              </Text>
             </View>
             <View style={styles.infoItem}>
               <Mail size={18} color="#64748b" strokeWidth={2} />
-              <Text style={[styles.infoText, styles.linkText]}>contato@email.com</Text>
+              <Text style={[styles.infoText, styles.linkText]}>
+                contato@email.com
+              </Text>
             </View>
           </View>
         </View>
@@ -337,7 +370,8 @@ export default function ProfileScreen() {
               <View>
                 <Text style={styles.sectionTitle}>Conexões</Text>
                 <Text style={styles.connectionsSubtitle}>
-                  {p.connectionsCount} conexões · {p.recentFriends.length} em comum
+                  {p.connectionsCount} conexões · {p.recentFriends.length} em
+                  comum
                 </Text>
               </View>
             </View>
@@ -348,9 +382,18 @@ export default function ProfileScreen() {
 
           <View style={styles.connectionsGrid}>
             {p.recentFriends.slice(0, 9).map((friend) => (
-              <TouchableOpacity key={friend.id} style={styles.connectionCard} activeOpacity={0.85}>
-                <Image source={{ uri: friend.avatar }} style={styles.connectionAvatar} />
-                <Text style={styles.connectionName} numberOfLines={1}>{friend.name.split(' ')[0]}</Text>
+              <TouchableOpacity
+                key={friend.id}
+                style={styles.connectionCard}
+                activeOpacity={0.85}
+              >
+                <Image
+                  source={{ uri: friend.avatar }}
+                  style={styles.connectionAvatar}
+                />
+                <Text style={styles.connectionName} numberOfLines={1}>
+                  {friend.name.split(' ')[0]}
+                </Text>
                 <Text style={styles.connectionMutual}>2 em comum</Text>
               </TouchableOpacity>
             ))}
@@ -363,31 +406,64 @@ export default function ProfileScreen() {
               onPress={() => setTab('posts')}
               style={[styles.tabBtn, tab === 'posts' && styles.tabActive]}
             >
-              <FileText size={18} color={tab === 'posts' ? '#3b82f6' : '#64748b'} strokeWidth={2} />
-              <Text style={[styles.tabText, tab === 'posts' && styles.tabTextActive]}>Posts</Text>
+              <FileText
+                size={18}
+                color={tab === 'posts' ? '#3b82f6' : '#64748b'}
+                strokeWidth={2}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  tab === 'posts' && styles.tabTextActive,
+                ]}
+              >
+                Posts
+              </Text>
             </Pressable>
 
             <Pressable
               onPress={() => setTab('photos')}
               style={[styles.tabBtn, tab === 'photos' && styles.tabActive]}
             >
-              <Camera size={18} color={tab === 'photos' ? '#3b82f6' : '#64748b'} strokeWidth={2} />
-              <Text style={[styles.tabText, tab === 'photos' && styles.tabTextActive]}>Fotos</Text>
+              <Camera
+                size={18}
+                color={tab === 'photos' ? '#3b82f6' : '#64748b'}
+                strokeWidth={2}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  tab === 'photos' && styles.tabTextActive,
+                ]}
+              >
+                Fotos
+              </Text>
             </Pressable>
 
             <Pressable
               onPress={() => setTab('about')}
               style={[styles.tabBtn, tab === 'about' && styles.tabActive]}
             >
-              <Users size={18} color={tab === 'about' ? '#3b82f6' : '#64748b'} strokeWidth={2} />
-              <Text style={[styles.tabText, tab === 'about' && styles.tabTextActive]}>Sobre</Text>
+              <Users
+                size={18}
+                color={tab === 'about' ? '#3b82f6' : '#64748b'}
+                strokeWidth={2}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  tab === 'about' && styles.tabTextActive,
+                ]}
+              >
+                Sobre
+              </Text>
             </Pressable>
           </ScrollView>
         </View>
 
         <View style={styles.tabContent}>
-          {tab === 'posts' && (
-            myPosts.length === 0 ? (
+          {tab === 'posts' &&
+            (myPosts.length === 0 ? (
               <View style={styles.emptyState}>
                 <View style={styles.emptyIcon}>
                   <FileText size={48} color="#cbd5e1" strokeWidth={1.5} />
@@ -398,20 +474,29 @@ export default function ProfileScreen() {
                 </Text>
                 <TouchableOpacity style={styles.emptyBtn} activeOpacity={0.85}>
                   <Plus size={18} color="#ffffff" strokeWidth={2.5} />
-                  <Text style={styles.emptyBtnText}>Criar primeira publicação</Text>
+                  <Text style={styles.emptyBtnText}>
+                    Criar primeira publicação
+                  </Text>
                 </TouchableOpacity>
               </View>
             ) : (
               myPosts.map((post) => (
-                <PostCard key={post.id} post={post} onLike={() => toggleLike(post.id)} />
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  onLike={() => toggleLike(post.id)}
+                />
               ))
-            )
-          )}
+            ))}
 
           {tab === 'photos' && (
             <View style={styles.photosGrid}>
               {p.highlights.map((photo, i) => (
-                <TouchableOpacity key={i} style={styles.photoItem} activeOpacity={0.9}>
+                <TouchableOpacity
+                  key={i}
+                  style={styles.photoItem}
+                  activeOpacity={0.9}
+                >
                   <Image source={{ uri: photo }} style={styles.photoImage} />
                 </TouchableOpacity>
               ))}
@@ -425,9 +510,9 @@ export default function ProfileScreen() {
                 <Text style={styles.aboutText}>
                   {p.bio}
                   {'\n\n'}
-                  Apaixonado por tecnologia e inovação, sempre buscando novos desafios
-                  e oportunidades de crescimento. Acredito no poder da colaboração e
-                  no impacto positivo que podemos criar juntos.
+                  Apaixonado por tecnologia e inovação, sempre buscando novos
+                  desafios e oportunidades de crescimento. Acredito no poder da
+                  colaboração e no impacto positivo que podemos criar juntos.
                 </Text>
               </View>
 
@@ -452,7 +537,6 @@ export default function ProfileScreen() {
             </View>
           )}
         </View>
-
       </ScrollView>
       <BottomNav active="profile" />
     </SafeAreaView>
