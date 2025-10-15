@@ -35,21 +35,21 @@ export default function ProfileScreen() {
   const connectionsCount = p.connectionsCount;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#0b1220' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f1f5f9' }}>
       <TopBar />
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
-        {/* HEADER WITH COVER, AVATAR CENTERED, NAME/BIO */}
+        {/* HEADER - light, original style (unique) with soft fade and centered avatar */}
         <View style={styles.headerWrap}>
           <ImageBackground source={{ uri: p.cover }} style={styles.headerCover} imageStyle={{ resizeMode: 'cover' }}>
             <LinearGradient
-              colors={["rgba(0,0,0,0.0)", "rgba(0,0,0,0.35)", "rgba(11,18,32,1)"]}
+              colors={["rgba(241,245,249,0)", "rgba(241,245,249,0.85)", "rgba(241,245,249,1)"]}
               style={styles.headerOverlay}
             />
           </ImageBackground>
 
-          {/* Centered avatar */}
+          {/* Centered avatar (requirement) */}
           <View style={styles.avatarCenterWrap}>
-            <View style={styles.avatarRing}>
+            <View style={styles.avatarShadow}>
               <Image source={{ uri: p.avatar }} style={styles.avatar} />
             </View>
           </View>
@@ -65,7 +65,7 @@ export default function ProfileScreen() {
             <StatPill label="Conexões" value={connectionsCount} />
             <Pressable onPress={() => router.push('/profile/about')} style={styles.aboutPill}>
               <Text style={styles.aboutPillText}>Sobre</Text>
-              <ChevronRight size={14} color="#c7d2fe" />
+              <ChevronRight size={14} color="#111827" />
             </Pressable>
           </View>
         </View>
@@ -77,7 +77,7 @@ export default function ProfileScreen() {
             {p.highlights.map((h, i) => (
               <View key={`${h}-${i}`} style={styles.highlightCard}>
                 <Image source={{ uri: h }} style={styles.highlightImg} />
-                <LinearGradient colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.55)"]} style={styles.highlightOverlay} />
+                <LinearGradient colors={["rgba(255,255,255,0)", "rgba(0,0,0,0.25)"]} style={styles.highlightOverlay} />
                 <Text style={styles.highlightCaption}>• Destaque {i + 1}</Text>
               </View>
             ))}
@@ -156,7 +156,7 @@ function Segmented({ tab, setTab }: { tab: 'posts' | 'testimonials'; setTab: (t:
         <Text style={[styles.segmentText, tab === 'posts' && styles.segmentTextActive]}>Posts</Text>
       </Pressable>
       <Pressable onPress={() => setTab('testimonials')} style={[styles.segmentBtn, tab === 'testimonials' && styles.segmentActive]}>
-        <Heart size={14} color={tab === 'testimonials' ? '#0ea5e9' : '#9aa4b2'} />
+        <Heart size={14} color={tab === 'testimonials' ? '#0856d6' : '#9aa4b2'} />
         <Text style={[styles.segmentText, { marginLeft: 6 }, tab === 'testimonials' && styles.segmentTextActive]}>Depoimentos</Text>
       </Pressable>
     </View>
@@ -168,7 +168,7 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ siz
     <View style={styles.infoRow}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View style={styles.infoIconWrap}>
-          <Icon size={14} color="#7c8aa0" />
+          <Icon size={14} color="#64748b" />
         </View>
         <Text style={styles.infoLabel}>{label}</Text>
       </View>
@@ -178,53 +178,53 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ siz
 }
 
 const styles = StyleSheet.create({
-  headerWrap: { position: 'relative', paddingBottom: 70, backgroundColor: '#0b1220' },
-  headerCover: { width: '100%', height: 200 },
+  headerWrap: { position: 'relative', paddingBottom: 70, backgroundColor: '#f1f5f9' },
+  headerCover: { width: '100%', height: 160 },
   headerOverlay: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
-  avatarCenterWrap: { position: 'absolute', left: 0, right: 0, top: 130, alignItems: 'center' },
-  avatarRing: { width: 120, height: 120, borderRadius: 60, borderWidth: 4, borderColor: '#0ea5e9', backgroundColor: '#0b1220', overflow: 'hidden' },
+  avatarCenterWrap: { position: 'absolute', left: 0, right: 0, top: 110, alignItems: 'center' },
+  avatarShadow: { width: 112, height: 112, borderRadius: 56, borderWidth: 4, borderColor: '#ffffff', backgroundColor: '#ffffff', overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 },
   avatar: { width: '100%', height: '100%' },
-  headerNames: { alignItems: 'center', marginTop: 70 },
-  name: { color: '#f8fafc', fontSize: 22, fontWeight: '800' },
-  username: { color: '#cbd5e1', marginTop: 2 },
-  tagline: { color: '#a5b4fc', marginTop: 8, paddingHorizontal: 24, textAlign: 'center' },
+  headerNames: { alignItems: 'center', marginTop: 64 },
+  name: { color: '#111827', fontSize: 22, fontWeight: '800' },
+  username: { color: '#6b7280', marginTop: 2 },
+  tagline: { color: '#64748b', marginTop: 8, paddingHorizontal: 24, textAlign: 'center' },
   headerStatsRow: { flexDirection: 'row', justifyContent: 'center', gap: 10 as unknown as number, marginTop: 14, paddingHorizontal: 16 },
-  statPill: { backgroundColor: '#111827', borderWidth: 1, borderColor: '#1f2937', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 999, alignItems: 'center' },
-  statValue: { color: '#e5e7eb', fontWeight: '800' },
-  statLabel: { color: '#94a3b8', fontSize: 12, marginTop: 2 },
-  aboutPill: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1f2937', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 999 },
-  aboutPillText: { color: '#c7d2fe', fontWeight: '700', marginRight: 6 },
+  statPill: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#e5e7eb', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 999, alignItems: 'center' },
+  statValue: { color: '#0f172a', fontWeight: '800' },
+  statLabel: { color: '#64748b', fontSize: 12, marginTop: 2 },
+  aboutPill: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#e5e7eb', borderWidth: 1, borderColor: '#e5e7eb', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 999 },
+  aboutPillText: { color: '#0f172a', fontWeight: '700', marginRight: 6 },
 
   sectionWrap: { paddingHorizontal: 16, marginTop: 18 },
-  sectionTitle: { color: '#e5e7eb', fontSize: 16, fontWeight: '800' },
-  highlightCard: { width: 110, height: 150, borderRadius: 14, overflow: 'hidden', marginRight: 12, backgroundColor: '#0f172a' },
+  sectionTitle: { color: '#0f172a', fontSize: 16, fontWeight: '800' },
+  highlightCard: { width: 110, height: 150, borderRadius: 14, overflow: 'hidden', marginRight: 12, backgroundColor: '#e5e7eb' },
   highlightImg: { width: '100%', height: '100%' },
   highlightOverlay: { position: 'absolute', left: 0, right: 0, bottom: 0, top: 0 },
-  highlightCaption: { position: 'absolute', bottom: 8, left: 10, right: 10, color: '#e5e7eb', fontWeight: '700', fontSize: 12 },
+  highlightCaption: { position: 'absolute', bottom: 8, left: 10, right: 10, color: '#f8fafc', fontWeight: '700', fontSize: 12 },
 
-  infoCard: { backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1f2937', marginHorizontal: 16, marginTop: 16, padding: 16, borderRadius: 14 },
-  infoTitle: { color: '#e5e7eb', fontSize: 14, fontWeight: '800', marginBottom: 8 },
+  infoCard: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#e5e7eb', marginHorizontal: 16, marginTop: 16, padding: 16, borderRadius: 14 },
+  infoTitle: { color: '#0f172a', fontSize: 14, fontWeight: '800', marginBottom: 8 },
   infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
-  infoIconWrap: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#0b1324', borderWidth: 1, borderColor: '#1f2937', alignItems: 'center', justifyContent: 'center', marginRight: 8 },
-  infoLabel: { color: '#94a3b8' },
-  infoValue: { color: '#e5e7eb', fontWeight: '600' },
+  infoIconWrap: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#eef2f7', borderWidth: 1, borderColor: '#e5e7eb', alignItems: 'center', justifyContent: 'center', marginRight: 8 },
+  infoLabel: { color: '#64748b' },
+  infoValue: { color: '#0f172a', fontWeight: '600' },
 
   friendsGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 10 },
   friendItem: { width: '25%', alignItems: 'center', marginBottom: 12 },
   friendAvatar: { width: 64, height: 64, borderRadius: 32 },
-  friendName: { color: '#e5e7eb', marginTop: 6, fontSize: 12, paddingHorizontal: 4, textAlign: 'center' },
+  friendName: { color: '#0f172a', marginTop: 6, fontSize: 12, paddingHorizontal: 4, textAlign: 'center' },
 
   segmentWrap: { paddingHorizontal: 16, marginTop: 14 },
-  segment: { flexDirection: 'row', backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1f2937', borderRadius: 999, padding: 4 },
+  segment: { flexDirection: 'row', backgroundColor: '#eef2f7', borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 999, padding: 4 },
   segmentBtn: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 10, borderRadius: 999 },
-  segmentActive: { backgroundColor: '#0b1324' },
-  segmentText: { color: '#9aa4b2', fontWeight: '700' },
-  segmentTextActive: { color: '#0ea5e9' },
+  segmentActive: { backgroundColor: '#dbeafe' },
+  segmentText: { color: '#6b7280', fontWeight: '700' },
+  segmentTextActive: { color: '#0856d6' },
 
-  emptyBox: { backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1f2937', padding: 20, borderRadius: 12 },
-  emptyText: { color: '#94a3b8' },
+  emptyBox: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#e5e7eb', padding: 20, borderRadius: 12 },
+  emptyText: { color: '#6b7280' },
 
-  testimonialCard: { backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1f2937', padding: 16, borderRadius: 12, marginBottom: 10 },
-  testimonialQuote: { color: '#e5e7eb' },
-  testimonialMeta: { marginTop: 6, color: '#94a3b8' },
+  testimonialCard: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#e5e7eb', padding: 16, borderRadius: 12, marginBottom: 10 },
+  testimonialQuote: { color: '#0f172a' },
+  testimonialMeta: { marginTop: 6, color: '#6b7280' },
 });
