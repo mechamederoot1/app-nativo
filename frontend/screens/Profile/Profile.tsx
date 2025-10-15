@@ -96,14 +96,16 @@ export default function ProfileScreen() {
 
         {/* FRIENDS PREVIEW GRID */}
         <View style={styles.sectionWrap}>
-          <Text style={styles.sectionTitle}>Amigos</Text>
-          <View style={styles.friendsGrid}>
+          <View style={styles.sectionCard}>
+            <View style={styles.cardHeaderRow}><Text style={styles.cardHeaderTitle}>Amigos</Text></View>
+            <View style={styles.friendsGrid}>
             {p.recentFriends.map((f) => (
               <View key={f.id} style={styles.friendItem}>
                 <Image source={{ uri: f.avatar }} style={styles.friendAvatar} />
                 <Text numberOfLines={1} style={styles.friendName}>{f.name}</Text>
               </View>
             ))}
+            </View>
           </View>
         </View>
 
