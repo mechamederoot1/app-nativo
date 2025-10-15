@@ -120,9 +120,9 @@ export default function StoryScreen() {
   const open = useCallback((s: StoryItem) => setActive(s), []);
   const close = useCallback(() => setActive(null), []);
 
-  const itemWidth = width;
-  const cardWidth = width - 40;
-  const cardHeight = Math.min(height - 180, 600);
+  const cardWidth = Math.min(360, width - 60);
+  const cardHeight = Math.max(140, Math.min(220, Math.floor(height * 0.28)));
+  const itemWidth = cardWidth + 40;
 
   const renderItem = useCallback(
     ({ item }: { item: StoryItem }) => (
@@ -185,6 +185,30 @@ export default function StoryScreen() {
             </Text>
           </View>
         </TouchableOpacity>
+
+        {STORIES.slice(0, 2).map((s) => (
+          <TouchableOpacity
+            key={`compact-${s.id}`}
+            activeOpacity={0.9}
+            onPress={() => setActive(s)}
+            style={styles.compactCard}
+          >
+            <View style={styles.compactHeader}>
+              <Image source={{ uri: s.user.avatar }} style={styles.compactAvatar} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.compactName}>{s.user.name}</Text>
+                <Text style={styles.compactTime}>{s.postedAt}</Text>
+              </View>
+            </View>
+            <ImageBackground
+              source={{ uri: s.cover }}
+              style={{ height: 96, width: '100%', borderRadius: 12, overflow: 'hidden', justifyContent: 'flex-end' }}
+              imageStyle={{ resizeMode: 'cover' }}
+            >
+              <View style={styles.compactOverlay} />
+            </ImageBackground>
+          </TouchableOpacity>
+        ))}
       </View>
     ),
     [],
@@ -318,5 +342,36 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#f8fafc',
     lineHeight: 22,
+  },
+  compactCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    padding: 12,
+    gap: 10,
+  },
+  compactHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  compactAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+  },
+  compactName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0f172a',
+  },
+  compactTime: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  compactOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.18)',
   },
 });
