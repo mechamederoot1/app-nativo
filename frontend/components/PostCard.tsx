@@ -27,7 +27,11 @@ export default function PostCard({
 }) {
   return (
     <View style={styles.card}>
-      <TouchableOpacity style={styles.header} activeOpacity={0.85} onPress={() => onOpen && onOpen(post.id)}>
+      <TouchableOpacity
+        style={styles.header}
+        activeOpacity={0.85}
+        onPress={() => onOpen && onOpen(post.id)}
+      >
         <View style={styles.avatarPlaceholder}>
           <Text style={styles.avatarText}>
             {post.user.charAt(0).toUpperCase()}
@@ -39,12 +43,19 @@ export default function PostCard({
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity activeOpacity={0.85} onPress={() => onOpen && onOpen(post.id)} style={{ marginTop: 10 }}>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={() => onOpen && onOpen(post.id)}
+        style={{ marginTop: 10 }}
+      >
         <Text style={styles.content}>{post.content}</Text>
       </TouchableOpacity>
 
       {post.image ? (
-        <TouchableOpacity activeOpacity={0.9} onPress={() => onOpen && onOpen(post.id)}>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => onOpen && onOpen(post.id)}
+        >
           <Image source={{ uri: post.image }} style={styles.image} />
         </TouchableOpacity>
       ) : null}

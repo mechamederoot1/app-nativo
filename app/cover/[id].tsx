@@ -13,7 +13,10 @@ export default function CoverView() {
       <View style={styles.container}>
         <Text style={styles.title}>Capa</Text>
         <Text style={styles.sub}>ID: {String(id ?? '')}</Text>
-        <Image source={{ uri: 'https://picsum.photos/1200/400' }} style={styles.image} />
+        <Image
+          source={{ uri: 'https://picsum.photos/1200/400' }}
+          style={styles.image}
+        />
       </View>
       <BottomNav active="profile" />
     </SafeAreaView>

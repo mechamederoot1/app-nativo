@@ -24,7 +24,12 @@ export default function PhotoView() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, alignItems: 'center', justifyContent: 'center' },
+  container: {
+    flex: 1,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   sub: { marginBottom: 10, color: '#e5e7eb' },
   image: { width: '100%', height: '70%' },
 });

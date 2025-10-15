@@ -101,8 +101,14 @@ export function toggleLike(id: string) {
 }
 
 export function addComment(postId: string, text: string, user = 'Você') {
-  const comment: Comment = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, user, text };
-  posts = posts.map((p) => (p.id === postId ? { ...p, comments: [...p.comments, comment] } : p));
+  const comment: Comment = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    user,
+    text,
+  };
+  posts = posts.map((p) =>
+    p.id === postId ? { ...p, comments: [...p.comments, comment] } : p,
+  );
   notify();
   return comment;
 }

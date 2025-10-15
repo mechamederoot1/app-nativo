@@ -1,6 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import TopBar from '../../frontend/components/TopBar';
 import BottomNav from '../../frontend/components/BottomNav';
@@ -79,11 +86,34 @@ export default function PostDetail() {
 const styles = StyleSheet.create({
   title: { fontSize: 18, fontWeight: '700', color: '#0f172a' },
   sub: { marginTop: 4, color: '#475569' },
-  commentRow: { flexDirection: 'row', marginTop: 10, backgroundColor: '#fff', padding: 10, borderRadius: 10 },
+  commentRow: {
+    flexDirection: 'row',
+    marginTop: 10,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 10,
+  },
   commentUser: { fontWeight: '700', color: '#111827' },
   commentText: { color: '#374151', marginLeft: 6 },
-  inputBar: { position: 'absolute', left: 16, right: 16, bottom: 16, flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: '#e2e8f0', padding: 8 },
+  inputBar: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    bottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    padding: 8,
+  },
   input: { flex: 1, paddingHorizontal: 12, paddingVertical: 8 },
-  sendBtn: { paddingHorizontal: 14, paddingVertical: 8, backgroundColor: '#0856d6', borderRadius: 10 },
+  sendBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: '#0856d6',
+    borderRadius: 10,
+  },
   sendText: { color: '#fff', fontWeight: '700' },
 });
