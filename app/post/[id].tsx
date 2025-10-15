@@ -7,10 +7,10 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import TopBar from '../../frontend/components/TopBar';
-import BottomNav from '../../frontend/components/BottomNav';
 import PostCard from '../../frontend/components/PostCard';
 import { addComment, getPost } from '../../frontend/store/posts';
 
@@ -22,13 +22,11 @@ export default function PostDetail() {
 
   if (!post) {
     return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <TopBar />
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
         <View style={{ padding: 16 }}>
           <Text style={styles.title}>Publicação não encontrada</Text>
           <Text style={styles.sub}>ID da publicação: {id}</Text>
         </View>
-        <BottomNav active="feed" />
       </SafeAreaView>
     );
   }
@@ -41,44 +39,51 @@ export default function PostDetail() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f1f5f9' }}>
-      <TopBar />
-      <View style={{ flex: 1 }}>
-        <FlatList
-          data={post.comments}
-          keyExtractor={(c) => c.id}
-          ListHeaderComponent={
-            <View style={{ paddingHorizontal: 16, paddingTop: 10 }}>
-              <PostCard post={post} />
-              <View style={{ marginTop: 12 }}>
-                <Text style={styles.title}>Comentários</Text>
-                <Text style={styles.sub}>ID da publicação: {post.id}</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}
+      >
+        <View style={{ flex: 1 }}>
+          <FlatList
+            data={post.comments}
+            keyExtractor={(c) => c.id}
+            ListHeaderComponent={
+              <View style={{ paddingHorizontal: 16, paddingTop: 10 }}>
+                <PostCard post={post} />
+                <View style={{ marginTop: 12 }}>
+                  <Text style={styles.title}>Comentários</Text>
+                </View>
               </View>
-            </View>
-          }
-          renderItem={({ item }) => (
-            <View style={styles.commentRow}>
-              <Text style={styles.commentUser}>{item.user}</Text>
-              <Text style={styles.commentText}> {item.text}</Text>
-            </View>
-          )}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 120 }}
-        />
-
-        <View style={styles.inputBar}>
-          <TextInput
-            style={styles.input}
-            value={comment}
-            onChangeText={setComment}
-            placeholder="Adicionar um comentário..."
-            placeholderTextColor="#9aa0a6"
+            }
+            renderItem={({ item }) => (
+              <View style={styles.commentRow}>
+                <Text style={styles.commentUser}>{item.user}</Text>
+                <Text style={styles.commentText}> {item.text}</Text>
+              </View>
+            )}
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingBottom: 120,
+            }}
+            showsVerticalScrollIndicator={false}
           />
-          <TouchableOpacity style={styles.sendBtn} onPress={handleAddComment}>
-            <Text style={styles.sendText}>Enviar</Text>
-          </TouchableOpacity>
+
+          <View style={styles.inputBar}>
+            <TextInput
+              style={styles.input}
+              value={comment}
+              onChangeText={setComment}
+              placeholder="Adicionar um comentário..."
+              placeholderTextColor="#9aa0a6"
+            />
+            <TouchableOpacity style={styles.sendBtn} onPress={handleAddComment}>
+              <Text style={styles.sendText}>Enviar</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-      <BottomNav active="feed" />
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

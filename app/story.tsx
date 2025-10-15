@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -8,6 +8,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  useWindowDimensions,
 } from 'react-native';
 import { Plus } from 'lucide-react-native';
 import TopBar from '../frontend/components/TopBar';
@@ -112,82 +113,66 @@ const STORIES: StoryItem[] = [
 ];
 
 export default function StoryScreen() {
-  const [stories, setStories] = useState<StoryItem[]>(STORIES);
+  const { width, height } = useWindowDimensions();
   const [active, setActive] = useState<StoryItem | null>(null);
+  const listRef = useRef<FlatList<StoryItem>>(null);
 
   const open = useCallback((s: StoryItem) => setActive(s), []);
   const close = useCallback(() => setActive(null), []);
 
-  const addStory = useCallback(() => {
-    const id = String(Date.now());
-    const me: StoryItem = {
-      id,
-      user: { name: 'Você', avatar: 'https://i.pravatar.cc/160?u=voce' },
-      postedAt: 'agora mesmo',
-      caption: 'Novo story compartilhado com a comunidade! ✨',
-      cover: `https://picsum.photos/900/1600?random=${Math.floor(Math.random() * 1000)}`,
-      segments: [
-        {
-          id: `${id}-1`,
-          type: 'image',
-          uri: `https://picsum.photos/900/1600?random=${Math.floor(Math.random() * 1000)}`,
-          durationMs: 4500,
-        },
-        {
-          id: `${id}-2`,
-          type: 'image',
-          uri: `https://picsum.photos/900/1600?random=${Math.floor(Math.random() * 1000)}`,
-          durationMs: 4500,
-        },
-      ],
-    };
-    setStories((prev) => [me, ...prev]);
-    setActive(me);
-  }, []);
+  const itemWidth = width;
+  const cardWidth = width - 40;
+  const cardHeight = Math.min(height - 180, 600);
 
   const renderItem = useCallback(
     ({ item }: { item: StoryItem }) => (
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPress={() => open(item)}
-        style={styles.storyCard}
-      >
-        <ImageBackground
-          source={{ uri: item.cover }}
-          style={styles.storyImage}
-          imageStyle={styles.storyImageInner}
-        >
-          <View style={styles.storyOverlay} />
-          <View style={styles.storyContent}>
-            <View style={styles.storyHeader}>
-              <Image
-                source={{ uri: item.user.avatar }}
-                style={styles.storyAvatar}
-              />
-              <View>
-                <Text style={styles.storyName}>{item.user.name}</Text>
-                <Text style={styles.storyTime}>{item.postedAt}</Text>
+      <View style={{ width: itemWidth, paddingHorizontal: 20 }}>
+        <TouchableOpacity activeOpacity={0.9} onPress={() => open(item)}>
+          <View style={styles.storyCard}>
+            <ImageBackground
+              source={{ uri: item.cover }}
+              style={{
+                height: cardHeight,
+                width: cardWidth,
+                alignSelf: 'center',
+                justifyContent: 'flex-end',
+              }}
+              imageStyle={styles.storyImageInner}
+            >
+              <View style={styles.storyOverlay} />
+              <View style={styles.storyContent}>
+                <View style={styles.storyHeader}>
+                  <Image
+                    source={{ uri: item.user.avatar }}
+                    style={styles.storyAvatar}
+                  />
+                  <View>
+                    <Text style={styles.storyName}>{item.user.name}</Text>
+                    <Text style={styles.storyTime}>{item.postedAt}</Text>
+                  </View>
+                </View>
+                <Text style={styles.storyCaption}>{item.caption}</Text>
               </View>
-            </View>
-            <Text style={styles.storyCaption}>{item.caption}</Text>
+            </ImageBackground>
           </View>
-        </ImageBackground>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </View>
     ),
-    [open],
+    [open, itemWidth, cardHeight, cardWidth],
   );
+
+  const keyExtractor = useCallback((i: StoryItem) => i.id, []);
 
   const listHeader = useMemo(
     () => (
       <View style={styles.listHeader}>
         <Text style={styles.listTitle}>Stories</Text>
         <Text style={styles.listSubtitle}>
-          Role para descobrir e toque para ver em tela cheia. Stories avançam
-          automaticamente.
+          Deslize para o lado para ver outros. Toque para abrir em tela cheia.
         </Text>
         <TouchableOpacity
           activeOpacity={0.85}
-          onPress={addStory}
+          onPress={() => {}}
           style={styles.addCard}
         >
           <View style={styles.addCircle}>
@@ -202,21 +187,30 @@ export default function StoryScreen() {
         </TouchableOpacity>
       </View>
     ),
-    [addStory],
+    [],
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <TopBar />
+      {listHeader}
       <FlatList
-        data={stories}
-        keyExtractor={(i) => i.id}
+        ref={listRef}
+        data={STORIES}
+        keyExtractor={keyExtractor}
         renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-        ListHeaderComponent={listHeader}
-        ListFooterComponent={<View style={{ height: 120 }} />}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        decelerationRate="fast"
+        snapToInterval={itemWidth}
+        snapToAlignment="start"
+        getItemLayout={(_, index) => ({
+          length: itemWidth,
+          offset: itemWidth * index,
+          index,
+        })}
+        contentContainerStyle={{ paddingBottom: 120 }}
       />
       <BottomNav active="story" />
 
@@ -237,13 +231,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f1f5f9',
   },
-  listContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 0,
-    paddingTop: 16,
-  },
   listHeader: {
-    marginBottom: 20,
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingTop: 16,
     gap: 16,
   },
   listTitle: {
@@ -292,10 +283,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#111827',
     borderWidth: 1,
     borderColor: 'rgba(15, 23, 42, 0.12)',
-  },
-  storyImage: {
-    height: 280,
-    justifyContent: 'flex-end',
   },
   storyImageInner: { resizeMode: 'cover' },
   storyOverlay: {
