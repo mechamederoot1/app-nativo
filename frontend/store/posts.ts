@@ -1,5 +1,3 @@
-import { nanoid } from 'nanoid/non-secure';
-
 export type Comment = { id: string; user: string; text: string };
 export type Post = {
   id: string;
@@ -103,7 +101,7 @@ export function toggleLike(id: string) {
 }
 
 export function addComment(postId: string, text: string, user = 'Você') {
-  const comment: Comment = { id: nanoid(), user, text };
+  const comment: Comment = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, user, text };
   posts = posts.map((p) => (p.id === postId ? { ...p, comments: [...p.comments, comment] } : p));
   notify();
   return comment;
