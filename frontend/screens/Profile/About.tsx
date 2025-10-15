@@ -3,11 +3,12 @@ import { View, Text, Image, StyleSheet, ScrollView, SafeAreaView } from 'react-n
 import TopBar from '../../components/TopBar';
 import BottomNav from '../../components/BottomNav';
 import { profileData } from './Data';
+import { Home, MapPin, Heart, Briefcase } from 'lucide-react-native';
 
 export default function AboutScreen() {
   const p = profileData;
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f1f5f9' }}>
       <TopBar />
       <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
         <Image source={{ uri: p.cover }} style={styles.cover} />
@@ -25,12 +26,12 @@ export default function AboutScreen() {
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Informações</Text>
-          <InfoRow label="Cidade natal" value={p.hometown} />
-          <InfoRow label="Cidade atual" value={p.currentCity} />
-          <InfoRow label="Relacionamento" value={p.relationshipStatus} />
-          <InfoRow label="Trabalho" value={p.workplace} />
-          <InfoRow label="Conexões" value={`${p.connectionsCount}`} />
+          <Text style={styles.cardTitle}>Informações pessoais</Text>
+          <InfoRow icon={Home} label="Cidade natal" value={p.hometown} />
+          <InfoRow icon={MapPin} label="Cidade atual" value={p.currentCity} />
+          <InfoRow icon={Heart} label="Relacionamento" value={p.relationshipStatus} />
+          <InfoRow icon={Briefcase} label="Trabalho" value={p.workplace} />
+          <InfoRow icon={Heart} label="Conexões" value={`${p.connectionsCount}`} />
         </View>
 
         <View style={styles.card}>
@@ -86,10 +87,15 @@ export default function AboutScreen() {
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number; color?: string }>; label: string; value: string }) {
   return (
     <View style={styles.infoRow}>
-      <Text style={styles.infoLabel}>{label}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#e9eef8', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
+          <Icon size={14} color="#64748b" />
+        </View>
+        <Text style={styles.infoLabel}>{label}</Text>
+      </View>
       <Text style={styles.infoValue}>{value}</Text>
     </View>
   );
@@ -101,10 +107,10 @@ const styles = StyleSheet.create({
   avatar: { width: 72, height: 72, borderRadius: 36, borderWidth: 3, borderColor: '#fff' },
   name: { fontSize: 20, fontWeight: '800', color: '#111827' },
   handle: { color: '#6b7280', marginTop: 2 },
-  card: { backgroundColor: '#fff', marginHorizontal: 16, marginBottom: 12, padding: 16, borderRadius: 10 },
+  card: { backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e5edf6', marginHorizontal: 16, marginBottom: 12, padding: 16, borderRadius: 12 },
   cardTitle: { fontSize: 16, fontWeight: '800', marginBottom: 10, color: '#111827' },
   text: { color: '#374151', lineHeight: 20 },
-  infoRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   infoLabel: { color: '#6b7280' },
   infoValue: { color: '#111827', fontWeight: '600' },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
