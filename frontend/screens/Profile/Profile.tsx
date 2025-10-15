@@ -40,12 +40,7 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         {/* HEADER - light, original style (unique) with soft fade and centered avatar */}
         <View style={styles.headerWrap}>
-          <ImageBackground source={{ uri: p.cover }} style={styles.headerCover} imageStyle={{ resizeMode: 'cover' }}>
-            <LinearGradient
-              colors={["rgba(241,245,249,0)", "rgba(241,245,249,0.85)", "rgba(241,245,249,1)"]}
-              style={styles.headerOverlay}
-            />
-          </ImageBackground>
+          <Image source={{ uri: p.cover }} style={styles.headerCover} />
 
           {/* Centered avatar (requirement) */}
           <View style={styles.avatarCenterWrap}>
@@ -75,10 +70,9 @@ export default function ProfileScreen() {
           <Text style={styles.sectionTitle}>Destaques</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10 }}>
             {p.highlights.map((h, i) => (
-              <View key={`${h}-${i}`} style={styles.highlightCard}>
-                <Image source={{ uri: h }} style={styles.highlightImg} />
-                <LinearGradient colors={["rgba(255,255,255,0)", "rgba(0,0,0,0.25)"]} style={styles.highlightOverlay} />
-                <Text style={styles.highlightCaption}>• Destaque {i + 1}</Text>
+              <View key={`${h}-${i}`} style={styles.highlightCircleWrap}>
+                <Image source={{ uri: h }} style={styles.highlightCircle} />
+                <Text style={styles.highlightCircleLabel}>Destaque {i + 1}</Text>
               </View>
             ))}
           </ScrollView>
@@ -87,11 +81,11 @@ export default function ProfileScreen() {
         {/* PERSONAL INFO CARD */}
         <View style={styles.infoCard}>
           <Text style={styles.infoTitle}>Informações pessoais</Text>
-          <InfoRow icon={Home} label="Cidade natal" value={p.hometown} />
-          <InfoRow icon={MapPin} label="Cidade atual" value={p.currentCity} />
-          <InfoRow icon={Heart} label="Relacionamento" value={p.relationshipStatus} />
-          <InfoRow icon={Briefcase} label="Trabalho" value={p.workplace} />
-          <InfoRow icon={Users} label="Conexões" value={`${p.connectionsCount}`} />
+          <InfoRow icon={Heart} value={p.relationshipStatus} />
+          <InfoRow icon={Briefcase} value={p.workplace} divider />
+          <InfoRow icon={MapPin} value={p.currentCity} divider />
+          <InfoRow icon={Home} value={p.hometown} divider />
+          <InfoRow icon={Users} value={`${p.connectionsCount} conexões`} divider />
         </View>
 
         {/* FRIENDS PREVIEW GRID */}
@@ -170,14 +164,11 @@ function Segmented({ tab, setTab }: { tab: 'posts' | 'testimonials'; setTab: (t:
   );
 }
 
-function InfoRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number; color?: string }>; label: string; value: string }) {
+function InfoRow({ icon: Icon, value, divider }: { icon: React.ComponentType<{ size?: number; color?: string }>; value: string; divider?: boolean }) {
   return (
-    <View style={styles.infoRow}>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <View style={styles.infoIconWrap}>
-          <Icon size={14} color="#64748b" />
-        </View>
-        <Text style={styles.infoLabel}>{label}</Text>
+    <View style={[styles.infoRow, divider && styles.infoRowDivider]}>
+      <View style={styles.infoIconWrap}>
+        <Icon size={14} color="#64748b" />
       </View>
       <Text style={styles.infoValue}>{value}</Text>
     </View>
@@ -186,8 +177,7 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ siz
 
 const styles = StyleSheet.create({
   headerWrap: { position: 'relative', paddingBottom: 70, backgroundColor: '#f1f5f9' },
-  headerCover: { width: '100%', height: 160 },
-  headerOverlay: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
+  headerCover: { width: '100%', height: 180 },
   avatarCenterWrap: { position: 'absolute', left: 0, right: 0, top: 110, alignItems: 'center' },
   avatarShadow: { width: 112, height: 112, borderRadius: 56, borderWidth: 4, borderColor: '#ffffff', backgroundColor: '#ffffff', overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 },
   avatar: { width: '100%', height: '100%' },
@@ -206,16 +196,15 @@ const styles = StyleSheet.create({
 
   sectionWrap: { paddingHorizontal: 16, marginTop: 18 },
   sectionTitle: { color: '#0f172a', fontSize: 16, fontWeight: '800' },
-  highlightCard: { width: 110, height: 150, borderRadius: 14, overflow: 'hidden', marginRight: 12, backgroundColor: '#e5e7eb' },
-  highlightImg: { width: '100%', height: '100%' },
-  highlightOverlay: { position: 'absolute', left: 0, right: 0, bottom: 0, top: 0 },
-  highlightCaption: { position: 'absolute', bottom: 8, left: 10, right: 10, color: '#f8fafc', fontWeight: '700', fontSize: 12 },
+  highlightCircleWrap: { width: 84, alignItems: 'center', marginRight: 14 },
+  highlightCircle: { width: 72, height: 72, borderRadius: 36, borderWidth: 2, borderColor: '#ffffff', backgroundColor: '#e5e7eb' },
+  highlightCircleLabel: { marginTop: 6, color: '#0f172a', fontSize: 12 },
 
   infoCard: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#e5e7eb', marginHorizontal: 16, marginTop: 16, padding: 16, borderRadius: 14 },
   infoTitle: { color: '#0f172a', fontSize: 14, fontWeight: '800', marginBottom: 8 },
-  infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
-  infoIconWrap: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#eef2f7', borderWidth: 1, borderColor: '#e5e7eb', alignItems: 'center', justifyContent: 'center', marginRight: 8 },
-  infoLabel: { color: '#64748b' },
+  infoRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
+  infoRowDivider: { borderTopWidth: 1, borderColor: '#e5e7eb' },
+  infoIconWrap: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#eef2f7', borderWidth: 1, borderColor: '#e5e7eb', alignItems: 'center', justifyContent: 'center', marginRight: 10 },
   infoValue: { color: '#0f172a', fontWeight: '600' },
 
   friendsGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 10 },
