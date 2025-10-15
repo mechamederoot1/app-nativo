@@ -30,7 +30,11 @@ export type StoryItem = {
 const STORIES: StoryItem[] = [
   {
     id: 'alice',
-    user: { name: 'Alice Martins', avatar: 'https://i.pravatar.cc/160?img=21' },
+    user: {
+      name: 'Alice Martins',
+      avatar: 'https://i.pravatar.cc/160?img=21',
+      online: true,
+    },
     postedAt: 'há 2 horas',
     caption: 'Explorando novas referências para o próximo produto. ✨',
     cover:
@@ -57,7 +61,11 @@ const STORIES: StoryItem[] = [
   },
   {
     id: 'diego',
-    user: { name: 'Diego Andrade', avatar: 'https://i.pravatar.cc/160?img=12' },
+    user: {
+      name: 'Diego Andrade',
+      avatar: 'https://i.pravatar.cc/160?img=12',
+      online: false,
+    },
     postedAt: 'há 5 horas',
     caption: 'Lançamos hoje nossa nova funcionalidade! 🚀',
     cover:
@@ -84,7 +92,11 @@ const STORIES: StoryItem[] = [
   },
   {
     id: 'carla',
-    user: { name: 'Carla Sousa', avatar: 'https://i.pravatar.cc/160?img=48' },
+    user: {
+      name: 'Carla Sousa',
+      avatar: 'https://i.pravatar.cc/160?img=48',
+      online: true,
+    },
     postedAt: 'ontem',
     caption: 'Workshop de pesquisa na comunidade. 🎤',
     cover:
@@ -120,9 +132,13 @@ export default function StoryScreen() {
   const open = useCallback((s: StoryItem) => setActive(s), []);
   const close = useCallback(() => setActive(null), []);
 
-  const itemWidth = width;
-  const cardWidth = width - 40;
-  const cardHeight = Math.min(height - 180, 600);
+  const cardWidth = Math.min(360, width - 60);
+  const cardHeight = Math.max(140, Math.min(220, Math.floor(height * 0.28)));
+  const itemWidth = cardWidth + 40;
+
+  const screenWidth = width;
+  const compactWidth = Math.min(220, Math.max(180, Math.floor(width * 0.56)));
+  const compactItemWidth = screenWidth;
 
   const renderItem = useCallback(
     ({ item }: { item: StoryItem }) => (
@@ -185,9 +201,57 @@ export default function StoryScreen() {
             </Text>
           </View>
         </TouchableOpacity>
+
+        <FlatList
+          data={STORIES}
+          keyExtractor={(i: StoryItem) => `compact-${i.id}`}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          decelerationRate="fast"
+          snapToInterval={screenWidth}
+          snapToAlignment="start"
+          contentContainerStyle={{}}
+          renderItem={({ item: s }) => (
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => setActive(s)}
+              style={{
+                width: screenWidth,
+                alignItems: 'center',
+                paddingHorizontal: 20,
+              }}
+            >
+              <View style={{ width: compactWidth, gap: 10 }}>
+                <View style={styles.compactInfoCard}>
+                  <View style={styles.compactHeader}>
+                    <View style={styles.compactAvatarWrap}>
+                      <Image
+                        source={{ uri: s.user.avatar }}
+                        style={styles.compactAvatar}
+                      />
+                      {s.user.online ? <View style={styles.onlineDot} /> : null}
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.compactName}>{s.user.name}</Text>
+                      <Text style={styles.compactTime}>{s.postedAt}</Text>
+                    </View>
+                  </View>
+                </View>
+                <ImageBackground
+                  source={{ uri: s.cover }}
+                  style={[styles.compactMedia, { width: compactWidth }]}
+                  imageStyle={{ resizeMode: 'cover' }}
+                >
+                  <View style={styles.compactOverlay} />
+                </ImageBackground>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
       </View>
     ),
-    [],
+    [setActive, compactItemWidth, compactWidth, screenWidth],
   );
 
   return (
@@ -236,6 +300,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
     gap: 16,
+    paddingBottom: 8,
   },
   listTitle: {
     fontSize: 24,
@@ -318,5 +383,66 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#f8fafc',
     lineHeight: 22,
+  },
+  compactInfoCard: {
+    backgroundColor: '#f1f5f9',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#dde6f2',
+    padding: 12,
+    gap: 10,
+    shadowColor: '#000000',
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  compactHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  compactAvatarWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    position: 'relative',
+  },
+  compactAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+  },
+  compactName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0f172a',
+  },
+  compactTime: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  compactOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.18)',
+  },
+  onlineDot: {
+    position: 'absolute',
+    right: -1,
+    bottom: -1,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#22c55e',
+    borderWidth: 2,
+    borderColor: '#ffffff',
+  },
+  compactMedia: {
+    width: '100%',
+    aspectRatio: 9 / 16,
+    borderRadius: 12,
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
+    alignSelf: 'center',
   },
 });
