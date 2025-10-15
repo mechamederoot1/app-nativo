@@ -1,47 +1,179 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, TextInput, FlatList, SafeAreaView, TouchableOpacity, StyleSheet } from 'react-native';
-import MessageItem from '../../components/MessageItem';
+import {
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  SafeAreaView,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Dimensions
+} from 'react-native';
+import {
+  Search,
+  Plus,
+  MessageCircle,
+  CheckCheck
+} from 'lucide-react-native';
 import BottomNav from '../../components/BottomNav';
 import TopBar from '../../components/TopBar';
 
+const { width } = Dimensions.get('window');
+
 const MOCK = [
-  { id: '1', name: 'Jaque Santos', avatar: 'https://i.pravatar.cc/150?img=10', snippet: 'Oi', time: '18:16', unread: false },
-  { id: '2', name: 'Bruno Almeida', avatar: 'https://i.pravatar.cc/150?img=12', snippet: 'Vamos marcar?', time: '12:02', unread: true },
-  { id: '3', name: 'Carla', avatar: 'https://i.pravatar.cc/150?img=5', snippet: 'Adorei a foto!', time: 'ontem', unread: false },
+  {
+    id: '1',
+    name: 'Jaque Santos',
+    avatar: 'https://i.pravatar.cc/150?img=10',
+    message: 'Oi! Como você está?',
+    time: '18:16',
+    unread: false,
+    online: true,
+  },
+  {
+    id: '2',
+    name: 'Bruno Almeida',
+    avatar: 'https://i.pravatar.cc/150?img=12',
+    message: 'Vamos marcar aquele café? Estava pensando em irmos naquele lugar novo que abriu no centro',
+    time: '12:02',
+    unread: true,
+    online: false,
+    unreadCount: 3
+  },
+  {
+    id: '3',
+    name: 'Carla Mendes',
+    avatar: 'https://i.pravatar.cc/150?img=5',
+    message: 'Adorei a foto do evento! Ficou incrível',
+    time: 'ontem',
+    unread: false,
+    online: true,
+  },
+  {
+    id: '4',
+    name: 'Pedro Silva',
+    avatar: 'https://i.pravatar.cc/150?img=8',
+    message: 'Fechado! Nos vemos amanhã então',
+    time: '2d',
+    unread: false,
+    online: false,
+  },
 ];
 
+const ChatItem = ({ item, onPress }) => (
+  <TouchableOpacity
+    style={[
+      styles.chatItem,
+      item.unread && styles.chatItemUnread
+    ]}
+    onPress={onPress}
+    activeOpacity={0.7}
+  >
+    <View style={styles.avatarContainer}>
+      <Image source={{ uri: item.avatar }} style={styles.avatar} />
+      {item.online && <View style={styles.onlineBadge} />}
+    </View>
+
+    <View style={styles.chatContent}>
+      <View style={styles.chatHeader}>
+        <Text style={[
+          styles.chatName,
+          item.unread && styles.chatNameUnread
+        ]}>
+          {item.name}
+        </Text>
+        <Text style={[
+          styles.chatTime,
+          item.unread && styles.chatTimeUnread
+        ]}>
+          {item.time}
+        </Text>
+      </View>
+
+      <View style={styles.chatFooter}>
+        <Text
+          style={[
+            styles.chatMessage,
+            item.unread && styles.chatMessageUnread
+          ]}
+          numberOfLines={2}
+        >
+          {item.message}
+        </Text>
+
+        {item.unread ? (
+          item.unreadCount ? (
+            <View style={styles.unreadBadge}>
+              <Text style={styles.unreadCount}>{item.unreadCount}</Text>
+            </View>
+          ) : (
+            <View style={styles.newBadge}>
+              <Text style={styles.newText}>Novo</Text>
+            </View>
+          )
+        ) : (
+          <CheckCheck size={16} color="#94a3b8" strokeWidth={2} />
+        )}
+      </View>
+    </View>
+  </TouchableOpacity>
+);
+
 export default function MessagesScreen() {
-  const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
 
-  const list = useMemo(() => {
-    let data = MOCK;
-    if (filter === 'unread') data = data.filter(d => d.unread);
-    if (query.trim()) data = data.filter(d => d.name.toLowerCase().includes(query.toLowerCase()) || d.snippet.toLowerCase().includes(query.toLowerCase()));
-    return data;
-  }, [filter, query]);
+  const filteredChats = useMemo(() => {
+    if (!query.trim()) return MOCK;
+    return MOCK.filter(chat =>
+      chat.name.toLowerCase().includes(query.toLowerCase()) ||
+      chat.message.toLowerCase().includes(query.toLowerCase())
+    );
+  }, [query]);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.container}>
       <TopBar />
 
-      <View style={styles.container}>
-        <Text style={styles.title}>Mensagens</Text>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.title}>Bate-papo</Text>
+            <Text style={styles.subtitle}>3 mensagens não lidas</Text>
+          </View>
 
-        <View style={styles.tabsRow}>
-          <TouchableOpacity onPress={() => setFilter('all')} style={[styles.tab, filter === 'all' && styles.tabActive]}>
-            <Text style={[styles.tabText, filter === 'all' && styles.tabTextActive]}>Todas</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setFilter('unread')} style={[styles.tab, filter === 'unread' && styles.tabActive]}>
-            <Text style={[styles.tabText, filter === 'unread' && styles.tabTextActive]}>Não lidas</Text>
+          <TouchableOpacity style={styles.newChatBtn} activeOpacity={0.7}>
+            <Plus size={22} color="#fff" strokeWidth={2.5} />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.searchWrap}>
-          <TextInput placeholder="Buscar conversas..." value={query} onChangeText={setQuery} style={styles.searchInput} />
+        <View style={styles.searchBar}>
+          <Search size={20} color="#94a3b8" strokeWidth={2} />
+          <TextInput
+            placeholder="Buscar conversas..."
+            placeholderTextColor="#94a3b8"
+            style={styles.searchInput}
+            value={query}
+            onChangeText={setQuery}
+          />
         </View>
 
-        <FlatList data={list} keyExtractor={i => i.id} renderItem={({ item }) => <MessageItem item={item} />} />
+        <FlatList
+          data={filteredChats}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => <ChatItem item={item} onPress={() => { }} />}
+          contentContainerStyle={styles.chatList}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <MessageCircle size={48} color="#cbd5e1" strokeWidth={1.5} />
+              <Text style={styles.emptyTitle}>Nenhuma conversa encontrada</Text>
+              <Text style={styles.emptyText}>
+                Tente buscar por outro nome ou mensagem
+              </Text>
+            </View>
+          }
+        />
       </View>
 
       <BottomNav active="messages" />
@@ -50,17 +182,179 @@ export default function MessagesScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 12 },
-  logo: { fontSize: 24, fontWeight: '800', color: '#0856d6' },
-  headerIcons: { flexDirection: 'row', alignItems: 'center' },
-  iconBtn: { marginLeft: 12 },
-  container: { flex: 1, paddingHorizontal: 16 },
-  title: { fontSize: 22, fontWeight: '700', marginBottom: 12 },
-  tabsRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  tab: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, backgroundColor: '#f3f4f6', marginRight: 8 },
-  tabActive: { backgroundColor: '#0856d6' },
-  tabText: { color: '#374151' },
-  tabTextActive: { color: '#fff', fontWeight: '700' },
-  searchWrap: { marginBottom: 12 },
-  searchInput: { borderWidth: 1, borderColor: '#e6e6e9', borderRadius: 8, padding: 12 },
+  container: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  content: {
+    flex: 1,
+    paddingTop: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#0f172a',
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#64748b',
+    marginTop: 2,
+  },
+  newChatBtn: {
+    backgroundColor: '#3b82f6',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#3b82f6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    marginHorizontal: 20,
+    marginBottom: 20,
+    paddingHorizontal: 16,
+    height: 48,
+    borderRadius: 24,
+    gap: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: '#0f172a',
+  },
+  chatList: {
+    paddingHorizontal: 20,
+  },
+  chatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    gap: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  chatItemUnread: {
+    backgroundColor: '#f8fafc',
+    marginHorizontal: -20,
+    paddingHorizontal: 20,
+    borderBottomColor: '#e2e8f0',
+  },
+  avatarContainer: {
+    position: 'relative',
+  },
+  avatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#f1f5f9',
+  },
+  onlineBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#10b981',
+    borderWidth: 2,
+    borderColor: '#ffffff',
+  },
+  chatContent: {
+    flex: 1,
+    gap: 4,
+  },
+  chatHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  chatName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#0f172a',
+  },
+  chatNameUnread: {
+    fontWeight: '700',
+  },
+  chatTime: {
+    fontSize: 13,
+    color: '#94a3b8',
+  },
+  chatTimeUnread: {
+    color: '#3b82f6',
+    fontWeight: '600',
+  },
+  chatFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  chatMessage: {
+    flex: 1,
+    fontSize: 14,
+    color: '#64748b',
+    lineHeight: 20,
+  },
+  chatMessageUnread: {
+    color: '#334155',
+    fontWeight: '500',
+  },
+  unreadBadge: {
+    backgroundColor: '#3b82f6',
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+  },
+  unreadCount: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  newBadge: {
+    backgroundColor: '#dbeafe',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  newText: {
+    color: '#2563eb',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#0f172a',
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+  },
 });
