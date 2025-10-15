@@ -202,7 +202,7 @@ export default function StoryScreen() {
             </View>
             <ImageBackground
               source={{ uri: s.cover }}
-              style={{ height: 96, width: '100%', borderRadius: 12, overflow: 'hidden', justifyContent: 'flex-end' }}
+              style={styles.compactMedia}
               imageStyle={{ resizeMode: 'cover' }}
             >
               <View style={styles.compactOverlay} />
@@ -350,6 +350,9 @@ const styles = StyleSheet.create({
     borderColor: '#e2e8f0',
     padding: 12,
     gap: 10,
+    width: '100%',
+    maxWidth: 360,
+    alignSelf: 'center',
   },
   compactHeader: {
     flexDirection: 'row',
@@ -373,5 +376,13 @@ const styles = StyleSheet.create({
   compactOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.18)',
+  },
+  compactMedia: {
+    height: 72,
+    width: '100%',
+    borderRadius: 12,
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
+    alignSelf: 'center',
   },
 });
