@@ -32,17 +32,19 @@ export type StoryUser = {
 };
 
 export type StoryViewerProps = {
-  visible: boolean;
+  visible?: boolean;
   user: StoryUser;
   segments: StorySegment[];
   onClose: () => void;
+  mode?: 'modal' | 'inline';
 };
 
 export default function StoryViewer({
-  visible,
+  visible = false,
   user,
   segments,
   onClose,
+  mode = 'modal',
 }: StoryViewerProps) {
   const { width, height } = useWindowDimensions();
   const [index, setIndex] = useState(0);
@@ -65,7 +67,7 @@ export default function StoryViewer({
 
   // Image timer auto-advance
   useEffect(() => {
-    if (!visible) return;
+    if (mode === 'modal' && !visible) return;
     if (!current) return;
     if (current.type !== 'image') return;
     const timeout = setTimeout(
@@ -73,7 +75,7 @@ export default function StoryViewer({
       Math.max(1500, current.durationMs ?? 5000),
     );
     return () => clearTimeout(timeout);
-  }, [visible, current, goNext]);
+  }, [mode, visible, current, goNext]);
 
   // Reset/pause when segment changes
   useEffect(() => {
@@ -93,82 +95,93 @@ export default function StoryViewer({
     }));
   }, [segments, index]);
 
+  const Body = (
+    <View style={[styles.container]}>
+      {/* Top Overlay: progress and header */}
+      <SafeAreaView style={styles.safeTop}>
+        <View style={styles.progressRow}>
+          {progressItems.map((p, i) => (
+            <View key={i} style={styles.progressTrack}>
+              <View
+                style={[
+                  styles.progressFill,
+                  p.filled && styles.progressFilled,
+                  p.active && styles.progressActive,
+                ]}
+              />
+            </View>
+          ))}
+        </View>
+        <View style={styles.headerRow}>
+          <View style={styles.userRow}>
+            <Image source={{ uri: user.avatar }} style={styles.avatar} />
+            <Text style={styles.userName}>{user.name}</Text>
+          </View>
+          <Pressable onPress={onClose} hitSlop={16} style={styles.closeBtn}>
+            <X size={20} color="#ffffff" />
+          </Pressable>
+        </View>
+      </SafeAreaView>
+
+      {/* Content area with tap zones */}
+      <View style={styles.content}>
+        {/* Left tap to go previous */}
+        <Pressable style={styles.sideZone} onPress={goPrev} />
+
+        {/* Media */}
+        <View style={styles.mediaWrapper}>
+          {current?.type === 'image' ? (
+            <Image
+              source={{ uri: current.uri }}
+              resizeMode="cover"
+              style={{ width: '100%', height: '100%' }}
+            />
+          ) : (
+            <Video
+              ref={(r) => (videoRef.current = r)}
+              style={{ width: '100%', height: '100%' }}
+              source={{ uri: current?.uri ?? '' }}
+              useNativeControls={false}
+              resizeMode={ResizeMode.COVER}
+              isLooping={false}
+              shouldPlay={!isPaused}
+              onPlaybackStatusUpdate={(s) => {
+                const st = s as AVPlaybackStatusSuccess;
+                if (!('isLoaded' in st) || !st.isLoaded) return;
+                if (st.didJustFinish) {
+                  goNext();
+                }
+              }}
+            />
+          )}
+        </View>
+
+        {/* Right tap to go next */}
+        <Pressable style={styles.sideZone} onPress={goNext} />
+      </View>
+    </View>
+  );
+
+  if (mode === 'inline') {
+    return Body;
+  }
+
   return (
     <Modal
-      visible={visible}
+      visible={!!visible}
       animationType="fade"
       presentationStyle="fullScreen"
       onRequestClose={onClose}
     >
-      <View style={[styles.container, { width, height }]}>
-        {/* Top Overlay: progress and header */}
-        <SafeAreaView style={styles.safeTop}>
-          <View style={styles.progressRow}>
-            {progressItems.map((p, i) => (
-              <View key={i} style={styles.progressTrack}>
-                <View
-                  style={[
-                    styles.progressFill,
-                    p.filled && styles.progressFilled,
-                    p.active && styles.progressActive,
-                  ]}
-                />
-              </View>
-            ))}
-          </View>
-          <View style={styles.headerRow}>
-            <View style={styles.userRow}>
-              <Image source={{ uri: user.avatar }} style={styles.avatar} />
-              <Text style={styles.userName}>{user.name}</Text>
-            </View>
-            <Pressable onPress={onClose} hitSlop={16} style={styles.closeBtn}>
-              <X size={20} color="#ffffff" />
-            </Pressable>
-          </View>
-        </SafeAreaView>
-
-        {/* Content area with tap zones */}
-        <View style={styles.content}>
-          {/* Left tap to go previous */}
-          <Pressable style={styles.sideZone} onPress={goPrev} />
-
-          {/* Media */}
-          <View style={styles.mediaWrapper}>
-            {current?.type === 'image' ? (
-              <Image
-                source={{ uri: current.uri }}
-                resizeMode="cover"
-                style={{ width, height }}
-              />
-            ) : (
-              <Video
-                ref={(r) => (videoRef.current = r)}
-                style={{ width, height }}
-                source={{ uri: current?.uri ?? '' }}
-                useNativeControls={false}
-                resizeMode={ResizeMode.COVER}
-                isLooping={false}
-                shouldPlay={!isPaused}
-                onPlaybackStatusUpdate={(s) => {
-                  const st = s as AVPlaybackStatusSuccess;
-                  if (!('isLoaded' in st) || !st.isLoaded) return;
-                  if (st.didJustFinish) {
-                    goNext();
-                  }
-                }}
-              />
-            )}
-          </View>
-
-          {/* Right tap to go next */}
-          <Pressable style={styles.sideZone} onPress={goNext} />
-        </View>
-      </View>
+      <View style={[styles.modalSizer, { width, height }]}>{Body}</View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  modalSizer: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: '#000000',
@@ -240,11 +253,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   sideZone: {
-    width: '20%',
+    width: 80,
     height: '100%',
   },
   mediaWrapper: {
-    width: '60%',
+    flex: 1,
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
