@@ -10,6 +10,8 @@ import {
   Platform,
   Pressable,
   Animated,
+  ScrollView,
+  Keyboard,
 } from 'react-native';
 import {
   Image as ImageIcon,
@@ -52,6 +54,7 @@ export default function CreatePost({ onCreate }: CreatePostProps) {
   }, [fadeAnim]);
 
   const closeModal = useCallback(() => {
+    Keyboard.dismiss();
     Animated.timing(fadeAnim, {
       toValue: 0,
       duration: 150,
@@ -101,16 +104,24 @@ export default function CreatePost({ onCreate }: CreatePostProps) {
         animationType="none"
         transparent
         onRequestClose={closeModal}
-        statusBarTranslucent
       >
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.modalContainer}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
-          <Pressable style={styles.backdrop} onPress={closeModal}>
-            <Animated.View style={[styles.backdropFill, { opacity: fadeAnim }]} />
+          {/* Backdrop */}
+          <Pressable
+            style={styles.backdrop}
+            onPress={closeModal}
+          >
+            <Animated.View
+              style={[styles.backdropFill, { opacity: fadeAnim }]}
+              pointerEvents="none"
+            />
           </Pressable>
 
+          {/* Modal Content */}
           <Animated.View
             style={[
               styles.modal,
@@ -124,6 +135,7 @@ export default function CreatePost({ onCreate }: CreatePostProps) {
                 }],
               },
             ]}
+            onStartShouldSetResponder={() => true}
           >
             {/* Header */}
             <View style={styles.header}>
@@ -133,75 +145,81 @@ export default function CreatePost({ onCreate }: CreatePostProps) {
               </TouchableOpacity>
             </View>
 
-            {/* User & Privacy */}
-            <View style={styles.user}>
-              <View style={styles.avatarLarge}>
-                <Text style={styles.avatarLargeText}>V</Text>
+            {/* Scrollable Content */}
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              bounces={false}
+            >
+              {/* User & Privacy */}
+              <View style={styles.user}>
+                <View style={styles.avatarLarge}>
+                  <Text style={styles.avatarLargeText}>V</Text>
+                </View>
+                <View style={styles.userInfo}>
+                  <Text style={styles.userName}>Você</Text>
+                  <TouchableOpacity
+                    style={styles.privacyBtn}
+                    onPress={() => setShowPrivacy(!showPrivacy)}
+                    activeOpacity={0.7}
+                  >
+                    <PrivacyIcon size={12} color={currentPrivacy.color} strokeWidth={2} />
+                    <Text style={[styles.privacyText, { color: currentPrivacy.color }]}>
+                      {currentPrivacy.label}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-              <View style={styles.userInfo}>
-                <Text style={styles.userName}>Você</Text>
-                <TouchableOpacity
-                  style={styles.privacyBtn}
-                  onPress={() => setShowPrivacy(!showPrivacy)}
-                  activeOpacity={0.7}
-                >
-                  <PrivacyIcon size={12} color={currentPrivacy.color} strokeWidth={2} />
-                  <Text style={[styles.privacyText, { color: currentPrivacy.color }]}>
-                    {currentPrivacy.label}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
 
-            {/* Privacy Options */}
-            {showPrivacy && (
-              <View style={styles.privacyList}>
-                {PRIVACY_OPTIONS.map((option) => {
-                  const Icon = option.icon;
-                  const isSelected = privacy === option.value;
-                  return (
-                    <TouchableOpacity
-                      key={option.value}
-                      style={[
-                        styles.privacyItem,
-                        isSelected && {
-                          backgroundColor: `${option.color}10`,
-                          borderColor: `${option.color}30`,
-                        }
-                      ]}
-                      onPress={() => selectPrivacy(option.value)}
-                      activeOpacity={0.7}
-                    >
-                      <Icon
-                        size={16}
-                        color={option.color}
-                        strokeWidth={2}
-                      />
-                      <Text style={[
-                        styles.privacyLabel,
-                        isSelected && { color: option.color, fontWeight: '600' }
-                      ]}>
-                        {option.label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            )}
+              {/* Privacy Options */}
+              {showPrivacy && (
+                <View style={styles.privacyList}>
+                  {PRIVACY_OPTIONS.map((option) => {
+                    const Icon = option.icon;
+                    const isSelected = privacy === option.value;
+                    return (
+                      <TouchableOpacity
+                        key={option.value}
+                        style={[
+                          styles.privacyItem,
+                          isSelected && {
+                            backgroundColor: `${option.color}10`,
+                            borderColor: `${option.color}30`,
+                          }
+                        ]}
+                        onPress={() => selectPrivacy(option.value)}
+                        activeOpacity={0.7}
+                      >
+                        <Icon
+                          size={16}
+                          color={option.color}
+                          strokeWidth={2}
+                        />
+                        <Text style={[
+                          styles.privacyLabel,
+                          isSelected && { color: option.color, fontWeight: '600' }
+                        ]}>
+                          {option.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
 
-            {/* Input */}
-            <TextInput
-              style={styles.input}
-              placeholder="Escreva algo..."
-              placeholderTextColor="#9ca3af"
-              multiline
-              value={text}
-              onChangeText={setText}
-              autoFocus
-              textAlignVertical="top"
-            />
+              {/* Input */}
+              <TextInput
+                style={styles.input}
+                placeholder="Escreva algo..."
+                placeholderTextColor="#9ca3af"
+                multiline
+                value={text}
+                onChangeText={setText}
+                textAlignVertical="top"
+              />
+            </ScrollView>
 
-            {/* Actions */}
+            {/* Actions - Fixed at bottom */}
             <View style={styles.actions}>
               <TouchableOpacity style={styles.actionBtn} activeOpacity={0.7}>
                 <View style={styles.iconWrapper}>
@@ -290,6 +308,7 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-end',
   },
   backdropFill: {
     ...StyleSheet.absoluteFillObject,
@@ -299,8 +318,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    maxHeight: '90%',
     paddingBottom: Platform.OS === 'ios' ? 34 : 20,
-    maxHeight: '85%',
   },
   header: {
     flexDirection: 'row',
@@ -393,8 +412,7 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 16,
     color: '#111827',
-    minHeight: 140,
-    maxHeight: 300,
+    minHeight: 120,
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 16,
@@ -409,6 +427,7 @@ const styles = StyleSheet.create({
     gap: 10,
     borderTopWidth: 1,
     borderTopColor: '#f3f4f6',
+    backgroundColor: '#ffffff',
   },
   actionBtn: {
     borderRadius: 20,
