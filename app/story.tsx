@@ -124,6 +124,9 @@ export default function StoryScreen() {
   const cardHeight = Math.max(140, Math.min(220, Math.floor(height * 0.28)));
   const itemWidth = cardWidth + 40;
 
+  const compactWidth = Math.min(220, Math.max(160, width - 160));
+  const compactItemWidth = compactWidth + 24;
+
   const renderItem = useCallback(
     ({ item }: { item: StoryItem }) => (
       <View style={{ width: itemWidth, paddingHorizontal: 20 }}>
@@ -186,32 +189,44 @@ export default function StoryScreen() {
           </View>
         </TouchableOpacity>
 
-        {STORIES.slice(0, 2).map((s) => (
-          <TouchableOpacity
-            key={`compact-${s.id}`}
-            activeOpacity={0.9}
-            onPress={() => setActive(s)}
-            style={styles.compactCard}
-          >
-            <View style={styles.compactHeader}>
-              <Image source={{ uri: s.user.avatar }} style={styles.compactAvatar} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.compactName}>{s.user.name}</Text>
-                <Text style={styles.compactTime}>{s.postedAt}</Text>
-              </View>
-            </View>
-            <ImageBackground
-              source={{ uri: s.cover }}
-              style={styles.compactMedia}
-              imageStyle={{ resizeMode: 'cover' }}
+        <FlatList
+          data={STORIES}
+          keyExtractor={(i: StoryItem) => `compact-${i.id}`}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          decelerationRate="fast"
+          snapToInterval={compactItemWidth}
+          snapToAlignment="start"
+          contentContainerStyle={{ paddingHorizontal: 12 }}
+          renderItem={({ item: s }) => (
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => setActive(s)}
+              style={{ width: compactItemWidth, paddingHorizontal: 12 }}
             >
-              <View style={styles.compactOverlay} />
-            </ImageBackground>
-          </TouchableOpacity>
-        ))}
+              <View style={[styles.compactCard, { width: compactWidth }]}>
+                <View style={styles.compactHeader}>
+                  <Image source={{ uri: s.user.avatar }} style={styles.compactAvatar} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.compactName}>{s.user.name}</Text>
+                    <Text style={styles.compactTime}>{s.postedAt}</Text>
+                  </View>
+                </View>
+                <ImageBackground
+                  source={{ uri: s.cover }}
+                  style={[styles.compactMedia, { width: compactWidth }]}
+                  imageStyle={{ resizeMode: 'cover' }}
+                >
+                  <View style={styles.compactOverlay} />
+                </ImageBackground>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
       </View>
     ),
-    [],
+    [setActive, compactItemWidth, compactWidth],
   );
 
   return (
