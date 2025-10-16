@@ -10,8 +10,6 @@ import {
   Dimensions,
   TextInput,
   Modal,
-  GestureResponderEvent,
-  PanResponder,
 } from 'react-native';
 import {
   Download,
@@ -43,8 +41,9 @@ export default function ProfilePhotoEditor({
   const [offsetX, setOffsetX] = useState(0);
   const [offsetY, setOffsetY] = useState(0);
 
-  // Use refs to track gesture state without triggering re-renders
+  // Refs to track gesture state
   const gestureState = useRef({
+    isGesturing: false,
     initialDistance: 0,
     initialScale: 1,
     initialOffsetX: 0,
@@ -52,82 +51,98 @@ export default function ProfilePhotoEditor({
     currentScale: 1,
     currentOffsetX: 0,
     currentOffsetY: 0,
+    lastX: 0,
+    lastY: 0,
+    touchCount: 0,
   });
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (evt: GestureResponderEvent) => {
-        const touches = evt.nativeEvent.touches;
-        
-        if (touches.length === 2) {
-          // Start pinch gesture
-          const dx = touches[0].pageX - touches[1].pageX;
-          const dy = touches[0].pageY - touches[1].pageY;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          
-          gestureState.current.initialDistance = distance;
-          gestureState.current.initialScale = gestureState.current.currentScale;
-        } else if (touches.length === 1) {
-          // Start pan gesture
-          gestureState.current.initialOffsetX = gestureState.current.currentOffsetX;
-          gestureState.current.initialOffsetY = gestureState.current.currentOffsetY;
-        }
-      },
-      onPanResponderMove: (evt: GestureResponderEvent) => {
-        const touches = evt.nativeEvent.touches;
+  const circleContainerRef = useRef<View>(null);
 
-        if (touches.length === 2) {
-          // Two finger pinch zoom
-          const dx = touches[0].pageX - touches[1].pageX;
-          const dy = touches[0].pageY - touches[1].pageY;
-          const currentDistance = Math.sqrt(dx * dx + dy * dy);
+  const getDistance = (touches: React.TouchList | any[]) => {
+    if (touches.length < 2) return 0;
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
 
-          if (gestureState.current.initialDistance > 0) {
-            const scaleFactor = currentDistance / gestureState.current.initialDistance;
-            const newScale = Math.max(
-              MIN_SCALE,
-              Math.min(MAX_SCALE, gestureState.current.initialScale * scaleFactor)
-            );
-            
-            gestureState.current.currentScale = newScale;
-            setScale(newScale);
-          }
-        } else if (touches.length === 1 && gestureState.current.currentScale > MIN_SCALE) {
-          // Single finger pan - only enabled when zoomed in
-          const maxOffset = (CIRCLE_SIZE * (gestureState.current.currentScale - 1)) / 2;
-          
-          const newOffsetX = Math.max(
-            -maxOffset,
-            Math.min(
-              maxOffset,
-              gestureState.current.initialOffsetX + evt.nativeEvent.dx
-            )
-          );
-          const newOffsetY = Math.max(
-            -maxOffset,
-            Math.min(
-              maxOffset,
-              gestureState.current.initialOffsetY + evt.nativeEvent.dy
-            )
-          );
-          
-          gestureState.current.currentOffsetX = newOffsetX;
-          gestureState.current.currentOffsetY = newOffsetY;
-          
-          setOffsetX(newOffsetX);
-          setOffsetY(newOffsetY);
-        }
-      },
-      onPanResponderRelease: () => {
-        gestureState.current.initialDistance = 0;
-      },
-      onPanResponderTerminate: () => {
-        gestureState.current.initialDistance = 0;
-      },
-    }),
-  ).current;
+  const handleTouchStart = useCallback((e: any) => {
+    const touches = e.touches || e.nativeEvent.touches;
+    gestureState.current.touchCount = touches.length;
+
+    if (touches.length === 2) {
+      // Start pinch
+      gestureState.current.isGesturing = true;
+      gestureState.current.initialDistance = getDistance(touches);
+      gestureState.current.initialScale = gestureState.current.currentScale;
+    } else if (touches.length === 1) {
+      // Start pan
+      gestureState.current.isGesturing = true;
+      gestureState.current.lastX = touches[0].clientX;
+      gestureState.current.lastY = touches[0].clientY;
+      gestureState.current.initialOffsetX = gestureState.current.currentOffsetX;
+      gestureState.current.initialOffsetY = gestureState.current.currentOffsetY;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: any) => {
+    if (!gestureState.current.isGesturing) return;
+
+    const touches = e.touches || e.nativeEvent.touches;
+
+    if (touches.length === 2) {
+      // Pinch zoom
+      const currentDistance = getDistance(touches);
+
+      if (gestureState.current.initialDistance > 0) {
+        const scaleFactor = currentDistance / gestureState.current.initialDistance;
+        const newScale = Math.max(
+          MIN_SCALE,
+          Math.min(MAX_SCALE, gestureState.current.initialScale * scaleFactor)
+        );
+
+        gestureState.current.currentScale = newScale;
+        setScale(newScale);
+      }
+    } else if (touches.length === 1 && gestureState.current.currentScale > MIN_SCALE) {
+      // Pan only when zoomed in
+      const deltaX = touches[0].clientX - gestureState.current.lastX;
+      const deltaY = touches[0].clientY - gestureState.current.lastY;
+
+      const maxOffset = (CIRCLE_SIZE * (gestureState.current.currentScale - 1)) / 2;
+
+      const newOffsetX = Math.max(
+        -maxOffset,
+        Math.min(maxOffset, gestureState.current.initialOffsetX + deltaX)
+      );
+      const newOffsetY = Math.max(
+        -maxOffset,
+        Math.min(maxOffset, gestureState.current.initialOffsetY + deltaY)
+      );
+
+      gestureState.current.currentOffsetX = newOffsetX;
+      gestureState.current.currentOffsetY = newOffsetY;
+
+      setOffsetX(newOffsetX);
+      setOffsetY(newOffsetY);
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e: any) => {
+    const touches = e.touches || e.nativeEvent.touches;
+
+    if (touches.length === 0) {
+      gestureState.current.isGesturing = false;
+      gestureState.current.initialDistance = 0;
+      gestureState.current.touchCount = 0;
+    } else if (touches.length === 1) {
+      // When one finger is lifted from pinch, start pan
+      gestureState.current.lastX = touches[0].clientX;
+      gestureState.current.lastY = touches[0].clientY;
+      gestureState.current.initialOffsetX = gestureState.current.currentOffsetX;
+      gestureState.current.initialOffsetY = gestureState.current.currentOffsetY;
+      gestureState.current.initialDistance = 0;
+    }
+  }, []);
 
   const handleReset = () => {
     setScale(1);
@@ -162,15 +177,24 @@ export default function ProfilePhotoEditor({
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
           scrollEnabled={false}
+          onStartShouldSetResponder={() => gestureState.current.isGesturing}
         >
           {/* Editor Canvas */}
           <View style={styles.editorSection}>
             <Text style={styles.sectionLabel}>Editar Foto</Text>
-            <Text style={styles.instructionHint}>Arraste com um dedo ou faça pinch com dois dedos</Text>
+            <Text style={styles.instructionHint}>
+              Arraste com um dedo ou faça pinch com dois dedos
+            </Text>
 
-            <View style={styles.circleContainer} {...panResponder.panHandlers}>
+            <View
+              ref={circleContainerRef}
+              style={styles.circleContainer}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
               {/* Background container for circular crop */}
-              <View style={styles.circleMask}>
+              <View style={styles.circleMask} pointerEvents="none">
                 <Image
                   source={{ uri: imageUri }}
                   style={[
@@ -187,10 +211,10 @@ export default function ProfilePhotoEditor({
               </View>
 
               {/* Circular border indicator */}
-              <View style={styles.circleBorderIndicator} />
-              
+              <View style={styles.circleBorderIndicator} pointerEvents="none" />
+
               {/* Zoom level display */}
-              <View style={styles.zoomDisplay}>
+              <View style={styles.zoomDisplay} pointerEvents="none">
                 <Text style={styles.zoomDisplayText}>
                   {Math.round(scale * 100)}%
                 </Text>
@@ -338,7 +362,6 @@ const styles = StyleSheet.create({
     borderRadius: CIRCLE_RADIUS,
     borderWidth: 3,
     borderColor: '#3b82f6',
-    pointerEvents: 'none',
   },
   zoomDisplay: {
     position: 'absolute',
@@ -348,7 +371,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
-    pointerEvents: 'none',
   },
   zoomDisplayText: {
     fontSize: 12,
