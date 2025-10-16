@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import TopBar from '../frontend/components/TopBar';
-import BottomNav from '../frontend/components/BottomNav';
+import TopBar from '../components/TopBar';
+import BottomNav from '../components/BottomNav';
 import {
   ChevronRight,
   Shield,
