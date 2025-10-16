@@ -61,6 +61,33 @@ export default function ProfileScreen() {
     return unsub;
   }, []);
 
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permissão necessária', 'Permitir acesso à galeria de fotos para mudar sua foto de perfil.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setSelectedImageUri(result.assets[0].uri);
+      setEditorVisible(true);
+    }
+  };
+
+  const handlePhotoSave = (imageUri: string, caption: string) => {
+    setProfilePhoto(imageUri);
+    setEditorVisible(false);
+    setSelectedImageUri(null);
+    Alert.alert('Sucesso', `Foto atualizada${caption ? ` com legenda: "${caption}"` : ''}!`);
+  };
+
   const myPosts = useMemo(
     () => posts.filter((x) => x.user === 'Você'),
     [posts],
