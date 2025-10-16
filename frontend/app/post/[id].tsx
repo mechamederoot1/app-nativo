@@ -277,7 +277,9 @@ export default function PostDetail() {
 
                 {post.image && (
                   <View style={styles.postImageContainer}>
-                    <Image source={{ uri: post.image }} style={styles.postImage} resizeMode="cover" />
+                    <TouchableOpacity activeOpacity={0.9} onPress={() => setShowMedia(true)}>
+                      <Image source={{ uri: post.image }} style={styles.postImage} resizeMode="cover" />
+                    </TouchableOpacity>
                     <View style={styles.viewsBadge}>
                       <Eye size={14} color="#ffffff" strokeWidth={2} />
                       <Text style={styles.viewsText}>8.2K</Text>
