@@ -16,8 +16,6 @@ import {
 import {
   Download,
   X,
-  ZoomIn,
-  ZoomOut,
   RotateCcw,
 } from 'lucide-react-native';
 
@@ -31,6 +29,8 @@ interface ProfilePhotoEditorProps {
 const { width } = Dimensions.get('window');
 const CIRCLE_SIZE = 280;
 const CIRCLE_RADIUS = CIRCLE_SIZE / 2;
+const MIN_SCALE = 1;
+const MAX_SCALE = 3;
 
 export default function ProfilePhotoEditor({
   imageUri,
@@ -42,10 +42,17 @@ export default function ProfilePhotoEditor({
   const [scale, setScale] = useState(1);
   const [offsetX, setOffsetX] = useState(0);
   const [offsetY, setOffsetY] = useState(0);
-  const [initialDistance, setInitialDistance] = useState(0);
-  const [initialScale, setInitialScale] = useState(1);
-  const [initialOffsetX, setInitialOffsetX] = useState(0);
-  const [initialOffsetY, setInitialOffsetY] = useState(0);
+
+  // Use refs to track gesture state without triggering re-renders
+  const gestureState = useRef({
+    initialDistance: 0,
+    initialScale: 1,
+    initialOffsetX: 0,
+    initialOffsetY: 0,
+    currentScale: 1,
+    currentOffsetX: 0,
+    currentOffsetY: 0,
+  });
 
   const panResponder = useRef(
     PanResponder.create({
@@ -53,52 +60,71 @@ export default function ProfilePhotoEditor({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (evt: GestureResponderEvent) => {
         const touches = evt.nativeEvent.touches;
+        
         if (touches.length === 2) {
+          // Start pinch gesture
           const dx = touches[0].pageX - touches[1].pageX;
           const dy = touches[0].pageY - touches[1].pageY;
           const distance = Math.sqrt(dx * dx + dy * dy);
-          setInitialDistance(distance);
-          setInitialScale(scale);
+          
+          gestureState.current.initialDistance = distance;
+          gestureState.current.initialScale = gestureState.current.currentScale;
+        } else if (touches.length === 1) {
+          // Start pan gesture
+          gestureState.current.initialOffsetX = gestureState.current.currentOffsetX;
+          gestureState.current.initialOffsetY = gestureState.current.currentOffsetY;
         }
       },
       onPanResponderMove: (evt: GestureResponderEvent) => {
         const touches = evt.nativeEvent.touches;
 
         if (touches.length === 2) {
-          // Two finger pinch
+          // Two finger pinch zoom
           const dx = touches[0].pageX - touches[1].pageX;
           const dy = touches[0].pageY - touches[1].pageY;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+          const currentDistance = Math.sqrt(dx * dx + dy * dy);
 
-          if (initialDistance > 0) {
-            const scaleFactor = distance / initialDistance;
-            const newScale = Math.max(1, Math.min(3, initialScale * scaleFactor));
+          if (gestureState.current.initialDistance > 0) {
+            const scaleFactor = currentDistance / gestureState.current.initialDistance;
+            const newScale = Math.max(
+              MIN_SCALE,
+              Math.min(MAX_SCALE, gestureState.current.initialScale * scaleFactor)
+            );
+            
+            gestureState.current.currentScale = newScale;
             setScale(newScale);
           }
-        } else if (touches.length === 1) {
-          // Single finger pan - only pan if zoomed in
-          if (scale > 1) {
-            const maxOffset = (CIRCLE_SIZE * (scale - 1)) / 2;
-            const newOffsetX = Math.max(
-              -maxOffset,
-              Math.min(maxOffset, initialOffsetX + evt.nativeEvent.dx),
-            );
-            const newOffsetY = Math.max(
-              -maxOffset,
-              Math.min(maxOffset, initialOffsetY + evt.nativeEvent.dy),
-            );
-            setOffsetX(newOffsetX);
-            setOffsetY(newOffsetY);
-          }
+        } else if (touches.length === 1 && gestureState.current.currentScale > MIN_SCALE) {
+          // Single finger pan - only enabled when zoomed in
+          const maxOffset = (CIRCLE_SIZE * (gestureState.current.currentScale - 1)) / 2;
+          
+          const newOffsetX = Math.max(
+            -maxOffset,
+            Math.min(
+              maxOffset,
+              gestureState.current.initialOffsetX + evt.nativeEvent.dx
+            )
+          );
+          const newOffsetY = Math.max(
+            -maxOffset,
+            Math.min(
+              maxOffset,
+              gestureState.current.initialOffsetY + evt.nativeEvent.dy
+            )
+          );
+          
+          gestureState.current.currentOffsetX = newOffsetX;
+          gestureState.current.currentOffsetY = newOffsetY;
+          
+          setOffsetX(newOffsetX);
+          setOffsetY(newOffsetY);
         }
       },
       onPanResponderRelease: () => {
-        setInitialDistance(0);
-        setInitialOffsetX(offsetX);
-        setInitialOffsetY(offsetY);
+        gestureState.current.initialDistance = 0;
       },
       onPanResponderTerminate: () => {
-        setInitialDistance(0);
+        gestureState.current.initialDistance = 0;
       },
     }),
   ).current;
@@ -107,16 +133,9 @@ export default function ProfilePhotoEditor({
     setScale(1);
     setOffsetX(0);
     setOffsetY(0);
-    setInitialOffsetX(0);
-    setInitialOffsetY(0);
-  };
-
-  const handleZoomIn = () => {
-    setScale((prev) => Math.min(3, prev + 0.2));
-  };
-
-  const handleZoomOut = () => {
-    setScale((prev) => Math.max(1, prev - 0.2));
+    gestureState.current.currentScale = 1;
+    gestureState.current.currentOffsetX = 0;
+    gestureState.current.currentOffsetY = 0;
   };
 
   const handleSave = () => {
@@ -147,6 +166,7 @@ export default function ProfilePhotoEditor({
           {/* Editor Canvas */}
           <View style={styles.editorSection}>
             <Text style={styles.sectionLabel}>Editar Foto</Text>
+            <Text style={styles.instructionHint}>Arraste com um dedo ou faça pinch com dois dedos</Text>
 
             <View style={styles.circleContainer} {...panResponder.panHandlers}>
               {/* Background container for circular crop */}
@@ -168,33 +188,13 @@ export default function ProfilePhotoEditor({
 
               {/* Circular border indicator */}
               <View style={styles.circleBorderIndicator} />
-            </View>
-
-            {/* Zoom Controls */}
-            <View style={styles.zoomControls}>
-              <TouchableOpacity
-                onPress={handleZoomOut}
-                style={styles.zoomBtn}
-                activeOpacity={0.7}
-              >
-                <ZoomOut size={20} color="#3b82f6" strokeWidth={2.5} />
-                <Text style={styles.zoomLabel}>Diminuir</Text>
-              </TouchableOpacity>
-
-              <View style={styles.zoomValue}>
-                <Text style={styles.zoomValueText}>
+              
+              {/* Zoom level display */}
+              <View style={styles.zoomDisplay}>
+                <Text style={styles.zoomDisplayText}>
                   {Math.round(scale * 100)}%
                 </Text>
               </View>
-
-              <TouchableOpacity
-                onPress={handleZoomIn}
-                style={styles.zoomBtn}
-                activeOpacity={0.7}
-              >
-                <ZoomIn size={20} color="#3b82f6" strokeWidth={2.5} />
-                <Text style={styles.zoomLabel}>Aumentar</Text>
-              </TouchableOpacity>
             </View>
 
             {/* Reset Button */}
@@ -227,18 +227,15 @@ export default function ProfilePhotoEditor({
 
           {/* Instructions */}
           <View style={styles.instructionsSection}>
-            <Text style={styles.instructionsTitle}>Dicas:</Text>
+            <Text style={styles.instructionsTitle}>Como usar:</Text>
             <Text style={styles.instructionText}>
-              • Arraste para posicionar a imagem
+              • Arraste com um dedo para posicionar (funciona quando ampliado)
             </Text>
             <Text style={styles.instructionText}>
-              • Use dois dedos para fazer zoom
+              • Coloque dois dedos e afaste ou aproxime para fazer zoom
             </Text>
             <Text style={styles.instructionText}>
-              • Clique em "Aumentar" e "Diminuir" para ajustar o zoom
-            </Text>
-            <Text style={styles.instructionText}>
-              • A foto será salva em formato circular
+              • Use "Resetar" para voltar ao padrão
             </Text>
           </View>
         </ScrollView>
@@ -304,8 +301,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#0f172a',
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+  },
+  instructionHint: {
+    fontSize: 13,
+    color: '#64748b',
     marginBottom: 16,
     alignSelf: 'flex-start',
+    fontStyle: 'italic',
   },
   circleContainer: {
     position: 'relative',
@@ -336,37 +340,20 @@ const styles = StyleSheet.create({
     borderColor: '#3b82f6',
     pointerEvents: 'none',
   },
-  zoomControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-    alignSelf: 'center',
-  },
-  zoomBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#eff6ff',
+  zoomDisplay: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
+    backgroundColor: 'rgba(59, 130, 246, 0.9)',
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingVertical: 6,
+    borderRadius: 12,
+    pointerEvents: 'none',
   },
-  zoomLabel: {
+  zoomDisplayText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#3b82f6',
-  },
-  zoomValue: {
-    backgroundColor: '#f1f5f9',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  zoomValueText: {
-    fontSize: 14,
     fontWeight: '700',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   resetBtn: {
     flexDirection: 'row',
@@ -455,9 +442,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#3b82f6',
     alignItems: 'center',
-  },
-  saveBtnDisabled: {
-    backgroundColor: '#cbd5e1',
   },
   saveBtnText: {
     fontSize: 16,
