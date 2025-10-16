@@ -26,6 +26,7 @@ import {
   Eye,
 } from 'lucide-react-native';
 import { addComment, getPost } from '../../store/posts';
+import MediaViewer from '../../components/MediaViewer';
 
 const { width } = Dimensions.get('window');
 
