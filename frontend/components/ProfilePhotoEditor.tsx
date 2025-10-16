@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,15 +10,10 @@ import {
   Dimensions,
   TextInput,
   Modal,
+  PanResponder,
+  Animated,
 } from 'react-native';
-import { Download, X, RotateCcw } from 'lucide-react-native';
-import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  interpolate,
-  Extrapolate,
-} from 'react-native-reanimated';
+import { Download, X, RotateCcw, Check } from 'lucide-react-native';
 
 interface ProfilePhotoEditorProps {
   imageUri: string;
@@ -43,192 +38,326 @@ export default function ProfilePhotoEditor({
   const [scale, setScale] = useState(1);
   const [offsetX, setOffsetX] = useState(0);
   const [offsetY, setOffsetY] = useState(0);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Shared values for gesture animations
-  const scale$ = useSharedValue(1);
-  const offsetX$ = useSharedValue(0);
-  const offsetY$ = useSharedValue(0);
+  // Animation values
+  const successScale = useRef(new Animated.Value(0)).current;
+  const successOpacity = useRef(new Animated.Value(0)).current;
 
-  const lastScale = useRef(1);
-  const lastOffsetX = useRef(0);
-  const lastOffsetY = useRef(0);
+  // Refs for gesture tracking
+  const gestureState = useRef({
+    initialDistance: 0,
+    initialScale: 1,
+    initialOffsetX: 0,
+    initialOffsetY: 0,
+    lastTouchX: 0,
+    lastTouchY: 0,
+    isPinching: false,
+  }).current;
 
-  // Pinch gesture
-  const pinch = Gesture.Pinch()
-    .onUpdate((event) => {
-      const newScale = Math.max(
-        MIN_SCALE,
-        Math.min(MAX_SCALE, lastScale.current * event.scale),
-      );
-      scale$.value = newScale;
-      setScale(newScale);
-    })
-    .onEnd(() => {
-      lastScale.current = scale$.value;
-    });
+  const getDistance = (touches: any[]) => {
+    const dx = touches[0].pageX - touches[1].pageX;
+    const dy = touches[0].pageY - touches[1].pageY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
 
-  // Pan gesture (only when zoomed)
-  const pan = Gesture.Pan()
-    .onUpdate((event) => {
-      if (scale$.value > MIN_SCALE) {
-        const maxOffset = (CIRCLE_SIZE * (scale$.value - 1)) / 2;
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderTerminationRequest: () => false,
 
-        const newOffsetX = Math.max(
-          -maxOffset,
-          Math.min(maxOffset, lastOffsetX.current + event.translationX),
-        );
-        const newOffsetY = Math.max(
-          -maxOffset,
-          Math.min(maxOffset, lastOffsetY.current + event.translationY),
-        );
+        onPanResponderGrant: (evt) => {
+          const touches = evt.nativeEvent.touches as any[];
 
-        offsetX$.value = newOffsetX;
-        offsetY$.value = newOffsetY;
-        setOffsetX(newOffsetX);
-        setOffsetY(newOffsetY);
-      }
-    })
-    .onEnd(() => {
-      lastOffsetX.current = offsetX$.value;
-      lastOffsetY.current = offsetY$.value;
-    });
+          if (touches.length === 2) {
+            // Start pinch
+            gestureState.isPinching = true;
+            gestureState.initialDistance = getDistance(touches);
+            gestureState.initialScale = scale;
+          } else if (touches.length === 1) {
+            // Start pan
+            gestureState.isPinching = false;
+            gestureState.lastTouchX = touches[0].pageX;
+            gestureState.lastTouchY = touches[0].pageY;
+            gestureState.initialOffsetX = offsetX;
+            gestureState.initialOffsetY = offsetY;
+          }
+        },
 
-  // Combine gestures
-  const composedGesture = Gesture.Simultaneous(pinch, pan);
+        onPanResponderMove: (evt) => {
+          const touches = evt.nativeEvent.touches as any[];
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: scale$.value },
-      { translateX: offsetX$.value },
-      { translateY: offsetY$.value },
-    ],
-  }));
+          if (touches.length === 2) {
+            // Pinch to zoom
+            if (!gestureState.isPinching) {
+              gestureState.isPinching = true;
+              gestureState.initialDistance = getDistance(touches);
+              gestureState.initialScale = scale;
+            }
+
+            const currentDistance = getDistance(touches);
+            const scaleFactor = currentDistance / gestureState.initialDistance;
+            const newScale = Math.max(
+              MIN_SCALE,
+              Math.min(MAX_SCALE, gestureState.initialScale * scaleFactor),
+            );
+
+            setScale(newScale);
+
+            // Reset offset when scale goes back to 1
+            if (newScale <= MIN_SCALE) {
+              setOffsetX(0);
+              setOffsetY(0);
+            }
+          } else if (touches.length === 1 && !gestureState.isPinching) {
+            // Pan (only when zoomed in)
+            if (scale > MIN_SCALE) {
+              const currentX = touches[0].pageX;
+              const currentY = touches[0].pageY;
+
+              const deltaX = currentX - gestureState.lastTouchX;
+              const deltaY = currentY - gestureState.lastTouchY;
+
+              const maxOffset = (CIRCLE_SIZE * (scale - 1)) / 2;
+
+              const newOffsetX = Math.max(
+                -maxOffset,
+                Math.min(maxOffset, gestureState.initialOffsetX + deltaX),
+              );
+              const newOffsetY = Math.max(
+                -maxOffset,
+                Math.min(maxOffset, gestureState.initialOffsetY + deltaY),
+              );
+
+              setOffsetX(newOffsetX);
+              setOffsetY(newOffsetY);
+            }
+          }
+        },
+
+        onPanResponderRelease: () => {
+          gestureState.isPinching = false;
+          gestureState.initialDistance = 0;
+        },
+      }),
+    [scale, offsetX, offsetY],
+  );
 
   const handleReset = () => {
     setScale(1);
     setOffsetX(0);
     setOffsetY(0);
-    scale$.value = 1;
-    offsetX$.value = 0;
-    offsetY$.value = 0;
-    lastScale.current = 1;
-    lastOffsetX.current = 0;
-    lastOffsetY.current = 0;
+  };
+
+  const showSuccessAnimation = () => {
+    setShowSuccessModal(true);
+
+    successScale.setValue(0);
+    successOpacity.setValue(0);
+
+    Animated.parallel([
+      Animated.spring(successScale, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+      Animated.timing(successOpacity, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    setTimeout(() => {
+      Animated.parallel([
+        Animated.timing(successScale, {
+          toValue: 0.8,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(successOpacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setShowSuccessModal(false);
+      });
+    }, 1500);
   };
 
   const handleSave = () => {
     onSave(imageUri, caption);
+    showSuccessAnimation();
   };
 
   return (
-    <Modal visible={isVisible} animationType="slide">
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onCancel} style={styles.headerBtn}>
-            <X size={24} color="#0f172a" strokeWidth={2.5} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Editar Foto</Text>
-          <TouchableOpacity onPress={handleSave} style={styles.headerBtn}>
-            <Download size={24} color="#0f172a" strokeWidth={2.5} />
-          </TouchableOpacity>
-        </View>
-
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          scrollEnabled={false}
-        >
-          {/* Editor Canvas */}
-          <View style={styles.editorSection}>
-            <Text style={styles.sectionLabel}>Editar Foto</Text>
-            <Text style={styles.instructionHint}>
-              Arraste com um dedo ou faça pinch com dois dedos
-            </Text>
-
-            <GestureDetector gesture={composedGesture}>
-              <View style={styles.circleContainer}>
-                {/* Background container for circular crop */}
-                <View style={styles.circleMask}>
-                  <Animated.Image
-                    source={{ uri: imageUri }}
-                    style={[styles.image, animatedStyle]}
-                  />
-                </View>
-
-                {/* Circular border indicator */}
-                <View style={styles.circleBorderIndicator} />
-
-                {/* Zoom level display */}
-                <View style={styles.zoomDisplay}>
-                  <Text style={styles.zoomDisplayText}>
-                    {Math.round(scale * 100)}%
-                  </Text>
-                </View>
-              </View>
-            </GestureDetector>
-
-            {/* Reset Button */}
-            <TouchableOpacity
-              onPress={handleReset}
-              style={styles.resetBtn}
-              activeOpacity={0.7}
-            >
-              <RotateCcw size={16} color="#64748b" strokeWidth={2.5} />
-              <Text style={styles.resetBtnText}>Resetar</Text>
+    <>
+      <Modal visible={isVisible} animationType="slide">
+        <SafeAreaView style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={onCancel} style={styles.headerBtn}>
+              <X size={24} color="#0f172a" strokeWidth={2.5} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Editar Foto</Text>
+            <TouchableOpacity onPress={handleSave} style={styles.headerBtn}>
+              <Download size={24} color="#0f172a" strokeWidth={2.5} />
             </TouchableOpacity>
           </View>
 
-          {/* Caption Section */}
-          <View style={styles.captionSection}>
-            <Text style={styles.sectionLabel}>Legenda (Opcional)</Text>
-            <TextInput
-              style={styles.captionInput}
-              placeholder="Adicione uma legenda para sua foto..."
-              placeholderTextColor="#94a3b8"
-              value={caption}
-              onChangeText={setCaption}
-              multiline
-              maxLength={150}
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-            <Text style={styles.charCount}>{caption.length}/150</Text>
-          </View>
-
-          {/* Instructions */}
-          <View style={styles.instructionsSection}>
-            <Text style={styles.instructionsTitle}>Como usar:</Text>
-            <Text style={styles.instructionText}>
-              • Arraste com um dedo para posicionar (funciona quando ampliado)
-            </Text>
-            <Text style={styles.instructionText}>
-              • Coloque dois dedos e afaste ou aproxime para fazer zoom
-            </Text>
-            <Text style={styles.instructionText}>
-              • Use "Resetar" para voltar ao padrão
-            </Text>
-          </View>
-        </ScrollView>
-
-        {/* Save Button */}
-        <View style={styles.footer}>
-          <TouchableOpacity
-            onPress={onCancel}
-            style={styles.cancelBtn}
-            activeOpacity={0.8}
+          <ScrollView
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+            scrollEnabled={false}
           >
-            <Text style={styles.cancelBtnText}>Cancelar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleSave}
-            style={styles.saveBtn}
-            activeOpacity={0.8}
+            <View style={styles.editorSection}>
+              <Text style={styles.sectionLabel}>Editar Foto</Text>
+              <Text style={styles.instructionHint}>
+                {scale > 1
+                  ? 'Arraste com um dedo para posicionar'
+                  : 'Use dois dedos para ampliar a imagem'}
+              </Text>
+
+              <View style={styles.circleContainer}>
+                <View style={styles.circleMask}>
+                  <Image
+                    source={{ uri: imageUri }}
+                    style={[
+                      styles.image,
+                      {
+                        transform: [
+                          { scale },
+                          { translateX: offsetX },
+                          { translateY: offsetY },
+                        ],
+                      },
+                    ]}
+                    resizeMode="cover"
+                  />
+                </View>
+
+                <View
+                  style={styles.gestureOverlay}
+                  {...panResponder.panHandlers}
+                />
+
+                <View
+                  style={styles.circleBorderIndicator}
+                  pointerEvents="none"
+                />
+
+                {scale > 1 && (
+                  <View style={styles.zoomDisplay} pointerEvents="none">
+                    <Text style={styles.zoomDisplayText}>
+                      {Math.round(scale * 100)}%
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              <View style={styles.debugInfo}>
+                <Text style={styles.debugText}>Zoom: {scale.toFixed(2)}x</Text>
+                <Text style={styles.debugText}>X: {offsetX.toFixed(0)}</Text>
+                <Text style={styles.debugText}>Y: {offsetY.toFixed(0)}</Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={handleReset}
+                style={[
+                  styles.resetBtn,
+                  scale === 1 && styles.resetBtnDisabled,
+                ]}
+                activeOpacity={scale === 1 ? 1 : 0.7}
+                disabled={scale === 1}
+              >
+                <RotateCcw
+                  size={16}
+                  color={scale === 1 ? '#cbd5e1' : '#64748b'}
+                  strokeWidth={2.5}
+                />
+                <Text
+                  style={[
+                    styles.resetBtnText,
+                    scale === 1 && styles.resetBtnTextDisabled,
+                  ]}
+                >
+                  Resetar
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.captionSection}>
+              <Text style={styles.sectionLabel}>Legenda (Opcional)</Text>
+              <TextInput
+                style={styles.captionInput}
+                placeholder="Adicione uma legenda para sua foto..."
+                placeholderTextColor="#94a3b8"
+                value={caption}
+                onChangeText={setCaption}
+                multiline
+                maxLength={150}
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
+              <Text style={styles.charCount}>{caption.length}/150</Text>
+            </View>
+
+            <View style={styles.instructionsSection}>
+              <Text style={styles.instructionsTitle}>Como usar:</Text>
+              <Text style={styles.instructionText}>
+                • Coloque dois dedos na imagem e afaste para ampliar
+              </Text>
+              <Text style={styles.instructionText}>
+                • Aproxime dois dedos para reduzir
+              </Text>
+              <Text style={styles.instructionText}>
+                • Arraste com um dedo para posicionar (quando ampliado)
+              </Text>
+              <Text style={styles.instructionText}>
+                • Use "Resetar" para voltar ao tamanho original
+              </Text>
+            </View>
+          </ScrollView>
+
+          <View style={styles.footer}>
+            <TouchableOpacity
+              onPress={onCancel}
+              style={styles.cancelBtn}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.cancelBtnText}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleSave}
+              style={styles.saveBtn}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.saveBtnText}>Salvar Foto</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </Modal>
+
+      {/* Success Modal */}
+      <Modal visible={showSuccessModal} transparent animationType="none">
+        <View style={styles.successOverlay}>
+          <Animated.View
+            style={[
+              styles.successCircle,
+              {
+                transform: [{ scale: successScale }],
+                opacity: successOpacity,
+              },
+            ]}
           >
-            <Text style={styles.saveBtnText}>Salvar Foto</Text>
-          </TouchableOpacity>
+            <Check size={60} color="#ffffff" strokeWidth={3} />
+          </Animated.View>
         </View>
-      </SafeAreaView>
-    </Modal>
+      </Modal>
+    </>
   );
 }
 
@@ -283,19 +412,26 @@ const styles = StyleSheet.create({
   },
   circleContainer: {
     position: 'relative',
-    marginBottom: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
     width: CIRCLE_SIZE,
     height: CIRCLE_SIZE,
+    marginBottom: 16,
   },
   circleMask: {
-    position: 'absolute',
     width: CIRCLE_SIZE,
     height: CIRCLE_SIZE,
     borderRadius: CIRCLE_RADIUS,
     overflow: 'hidden',
     backgroundColor: '#f8fafc',
+  },
+  gestureOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
+    borderRadius: CIRCLE_RADIUS,
+    backgroundColor: 'transparent',
+    zIndex: 10,
   },
   image: {
     width: CIRCLE_SIZE,
@@ -303,12 +439,14 @@ const styles = StyleSheet.create({
   },
   circleBorderIndicator: {
     position: 'absolute',
+    top: 0,
+    left: 0,
     width: CIRCLE_SIZE,
     height: CIRCLE_SIZE,
     borderRadius: CIRCLE_RADIUS,
     borderWidth: 3,
     borderColor: '#3b82f6',
-    pointerEvents: 'none',
+    zIndex: 20,
   },
   zoomDisplay: {
     position: 'absolute',
@@ -318,12 +456,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
-    pointerEvents: 'none',
+    zIndex: 30,
   },
   zoomDisplayText: {
     fontSize: 12,
     fontWeight: '700',
     color: '#ffffff',
+  },
+  debugInfo: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12,
+  },
+  debugText: {
+    fontSize: 11,
+    color: '#94a3b8',
   },
   resetBtn: {
     flexDirection: 'row',
@@ -337,10 +484,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
+  resetBtnDisabled: {
+    borderColor: '#f1f5f9',
+  },
   resetBtnText: {
     fontSize: 12,
     fontWeight: '600',
     color: '#64748b',
+  },
+  resetBtnTextDisabled: {
+    color: '#cbd5e1',
   },
   captionSection: {
     backgroundColor: '#ffffff',
@@ -417,5 +570,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#ffffff',
+  },
+  successOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#10b981',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });
