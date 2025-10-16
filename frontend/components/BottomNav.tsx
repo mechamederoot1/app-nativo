@@ -8,7 +8,13 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Home, Eye, User, Image as ImageIcon } from 'lucide-react-native';
+import {
+  Home,
+  Eye,
+  User,
+  Image as ImageIcon,
+  MessageCircle,
+} from 'lucide-react-native';
 
 import { useUnread } from '../contexts/UnreadContext';
 
@@ -29,14 +35,6 @@ type BottomNavProps = {
 function formatBadgeValue(value?: number) {
   if (!value) return '';
   return value > 99 ? '99+' : String(value);
-}
-
-function MessageBubble({ active }: { active?: boolean }) {
-  return (
-    <View style={[styles.msgBubble, active && styles.msgBubbleActive]}>
-      <View style={[styles.msgInner, active && styles.msgInnerActive]} />
-    </View>
-  );
 }
 
 function BottomNavInner({
@@ -84,7 +82,10 @@ function BottomNavInner({
 
       <TouchableOpacity style={styles.tab} onPress={go('/messages')}>
         <View style={styles.iconWrapper}>
-          <MessageBubble active={active === 'messages'} />
+          <MessageCircle
+            size={20}
+            color={active === 'messages' ? '#0856d6' : '#6b7280'}
+          />
           {unreadMessages > 0 && (
             <View style={[styles.badge, styles.badgeMessage]}>
               <Text style={styles.badgeText}>
@@ -171,26 +172,6 @@ const styles = StyleSheet.create({
   active: {
     color: '#0856d6',
     fontWeight: '700',
-  },
-  msgBubble: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#f1f5f9',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  msgBubbleActive: {
-    backgroundColor: '#0856d6',
-  },
-  msgInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#94a3b8',
-  },
-  msgInnerActive: {
-    backgroundColor: '#fff',
   },
   badge: {
     position: 'absolute',

@@ -45,6 +45,39 @@ let posts: Post[] = [
     liked: false,
     comments: [],
   },
+  {
+    id: '4',
+    user: 'Daniel',
+    content: 'Foto quadrada do meu novo projeto!',
+    time: '1h',
+    image: 'https://picsum.photos/400/400?random=3',
+    likes: 15,
+    liked: false,
+    comments: [{ id: 'c4', user: 'Eva', text: 'Lindo demais!' }],
+  },
+  {
+    id: '5',
+    user: 'Eva',
+    content: 'Story vertical do meu dia 📱',
+    time: '45m',
+    image: 'https://picsum.photos/400/700?random=4',
+    likes: 8,
+    liked: false,
+    comments: [],
+  },
+  {
+    id: '6',
+    user: 'Felipe',
+    content: 'Paisagem panor��mica perfeita!',
+    time: '30m',
+    image: 'https://picsum.photos/1200/400?random=5',
+    likes: 25,
+    liked: false,
+    comments: [
+      { id: 'c5', user: 'Grace', text: 'Que vista!' },
+      { id: 'c6', user: 'Henry', text: 'Incrível 🔥' },
+    ],
+  },
 ];
 
 const listeners = new Set<() => void>();

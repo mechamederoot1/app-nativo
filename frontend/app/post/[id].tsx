@@ -27,6 +27,7 @@ import {
 } from 'lucide-react-native';
 import { addComment, getPost } from '../../store/posts';
 import MediaViewer from '../../components/MediaViewer';
+import { useImageDimensions } from '../../hooks/useImageDimensions';
 
 const { width } = Dimensions.get('window');
 
@@ -56,6 +57,7 @@ export default function PostDetail() {
   const router = useRouter();
   const id = String(params.id ?? '');
   const post = useMemo(() => getPost(id), [id]);
+  const { dimensions: imageDimensions } = useImageDimensions(post?.image);
 
   const [comment, setComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -331,7 +333,7 @@ export default function PostDetail() {
 
                 <Text style={styles.postContent}>{post.content}</Text>
 
-                {post.image && (
+                {post.image && imageDimensions && (
                   <View style={styles.postImageContainer}>
                     <TouchableOpacity
                       activeOpacity={0.9}
@@ -339,8 +341,13 @@ export default function PostDetail() {
                     >
                       <Image
                         source={{ uri: post.image }}
-                        style={styles.postImage}
-                        resizeMode="cover"
+                        style={[
+                          styles.postImage,
+                          {
+                            aspectRatio: imageDimensions.aspectRatio,
+                          },
+                        ]}
+                        resizeMode="contain"
                       />
                     </TouchableOpacity>
                     <View style={styles.viewsBadge}>
@@ -630,7 +637,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#f1f5f9',
   },
-  postImage: { width: '100%', height: 300, backgroundColor: '#f1f5f9' },
+  postImage: { width: '100%', backgroundColor: '#f1f5f9' },
   viewsBadge: {
     position: 'absolute',
     bottom: 12,

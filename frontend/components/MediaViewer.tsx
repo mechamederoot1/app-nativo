@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   View,
   StyleSheet,
   TouchableOpacity,
   Platform,
+  Image as RNImage,
+  Dimensions,
 } from 'react-native';
 import { Image } from 'react-native';
 import { Video } from 'expo-av';
@@ -19,7 +21,57 @@ type Props = {
   onClose: () => void;
 };
 
+type ImageDimensions = {
+  width: number;
+  height: number;
+};
+
 export default function MediaViewer({ visible, type, uri, onClose }: Props) {
+  const [imageDimensions, setImageDimensions] =
+    useState<ImageDimensions | null>(null);
+
+  useEffect(() => {
+    if (!visible || type !== 'image' || !uri) return;
+
+    RNImage.getSize(
+      uri,
+      (width, height) => {
+        setImageDimensions({ width, height });
+      },
+      () => {
+        setImageDimensions(null);
+      },
+    );
+  }, [visible, type, uri]);
+
+  const getImageStyle = () => {
+    if (!imageDimensions) {
+      return styles.media;
+    }
+
+    const screenWidth = Dimensions.get('window').width;
+    const screenHeight = Dimensions.get('window').height;
+    const aspectRatio = imageDimensions.width / imageDimensions.height;
+
+    // Limitar a no máximo 80% da largura e 70% da altura da tela
+    const maxWidth = screenWidth * 0.8;
+    const maxHeight = screenHeight * 0.7;
+
+    let width = maxWidth;
+    let height = maxWidth / aspectRatio;
+
+    // Se a altura exceder o máximo, ajustar pela altura
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = maxHeight * aspectRatio;
+    }
+
+    return {
+      width,
+      height,
+      resizeMode: 'contain' as const,
+    };
+  };
   return (
     <Modal
       visible={visible}
@@ -38,18 +90,26 @@ export default function MediaViewer({ visible, type, uri, onClose }: Props) {
           <X size={22} color="#ffffff" />
         </TouchableOpacity>
 
-        {type === 'image' ? (
-          <Image source={{ uri }} style={styles.media} resizeMode="contain" />
-        ) : (
-          <Video
-            source={{ uri }}
-            style={styles.media}
-            resizeMode={Platform.OS === 'web' ? ('contain' as any) : undefined}
-            shouldPlay
-            useNativeControls
-            isLooping
-          />
-        )}
+        <View style={styles.mediaContainer}>
+          {type === 'image' ? (
+            <Image
+              source={{ uri }}
+              style={getImageStyle()}
+              resizeMode="contain"
+            />
+          ) : (
+            <Video
+              source={{ uri }}
+              style={getImageStyle()}
+              resizeMode={
+                Platform.OS === 'web' ? ('contain' as any) : undefined
+              }
+              shouldPlay
+              useNativeControls
+              isLooping
+            />
+          )}
+        </View>
       </View>
     </Modal>
   );
@@ -61,6 +121,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.96)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  mediaContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
   },
   media: {
     width: '100%',
