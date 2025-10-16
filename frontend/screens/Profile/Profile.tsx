@@ -573,6 +573,18 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
       <BottomNav active="profile" />
+
+      {selectedImageUri && (
+        <ProfilePhotoEditor
+          imageUri={selectedImageUri}
+          isVisible={editorVisible}
+          onSave={handlePhotoSave}
+          onCancel={() => {
+            setEditorVisible(false);
+            setSelectedImageUri(null);
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }
