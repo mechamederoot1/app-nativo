@@ -596,6 +596,25 @@ export default function ProfileScreen() {
       </ScrollView>
       <BottomNav active="profile" />
 
+      {selectedCoverUri && (
+        <CoverPhotoEditor
+          imageUri={selectedCoverUri}
+          isVisible={coverEditorVisible}
+          height={200}
+          initial={coverTransform}
+          onSave={({ imageUri, scale, offsetX, offsetY }) => {
+            setCoverPhoto(imageUri);
+            setCoverTransform({ scale, offsetX, offsetY });
+            setCoverEditorVisible(false);
+            setSelectedCoverUri(null);
+          }}
+          onCancel={() => {
+            setCoverEditorVisible(false);
+            setSelectedCoverUri(null);
+          }}
+        />
+      )}
+
       {selectedImageUri && (
         <ProfilePhotoEditor
           imageUri={selectedImageUri}
