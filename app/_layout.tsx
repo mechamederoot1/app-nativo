@@ -3,7 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '../hooks/useFrameworkReady';
 import '../global.css';
-import { UnreadProvider } from '../frontend/contexts/UnreadContext';
+import { UnreadProvider } from '../contexts/UnreadContext';
 
 export default function RootLayout() {
   useFrameworkReady();
