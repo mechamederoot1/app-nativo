@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import { Heart, MessageCircle, Share2 } from 'lucide-react-native';
 import { useImageDimensions } from '../hooks/useImageDimensions';
 

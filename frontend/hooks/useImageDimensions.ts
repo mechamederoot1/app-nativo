@@ -13,7 +13,9 @@ type UseImageDimensionsReturn = {
   error: string | null;
 };
 
-export function useImageDimensions(imageUri: string | undefined): UseImageDimensionsReturn {
+export function useImageDimensions(
+  imageUri: string | undefined,
+): UseImageDimensionsReturn {
   const [dimensions, setDimensions] = useState<ImageDimensions | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +49,7 @@ export function useImageDimensions(imageUri: string | undefined): UseImageDimens
           height: 300,
           aspectRatio: 4 / 3,
         });
-      }
+      },
     );
   }, [imageUri]);
 

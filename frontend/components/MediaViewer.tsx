@@ -27,7 +27,8 @@ type ImageDimensions = {
 };
 
 export default function MediaViewer({ visible, type, uri, onClose }: Props) {
-  const [imageDimensions, setImageDimensions] = useState<ImageDimensions | null>(null);
+  const [imageDimensions, setImageDimensions] =
+    useState<ImageDimensions | null>(null);
 
   useEffect(() => {
     if (!visible || type !== 'image' || !uri) return;
@@ -39,7 +40,7 @@ export default function MediaViewer({ visible, type, uri, onClose }: Props) {
       },
       () => {
         setImageDimensions(null);
-      }
+      },
     );
   }, [visible, type, uri]);
 
@@ -100,7 +101,9 @@ export default function MediaViewer({ visible, type, uri, onClose }: Props) {
             <Video
               source={{ uri }}
               style={getImageStyle()}
-              resizeMode={Platform.OS === 'web' ? ('contain' as any) : undefined}
+              resizeMode={
+                Platform.OS === 'web' ? ('contain' as any) : undefined
+              }
               shouldPlay
               useNativeControls
               isLooping
