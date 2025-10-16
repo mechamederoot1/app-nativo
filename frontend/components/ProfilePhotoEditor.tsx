@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,8 @@ import {
   X,
   RotateCcw,
 } from 'lucide-react-native';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import Animated, { useSharedValue, useAnimatedStyle, interpolate, Extrapolate } from 'react-native-reanimated';
 
 interface ProfilePhotoEditorProps {
   imageUri: string;
@@ -41,116 +43,76 @@ export default function ProfilePhotoEditor({
   const [offsetX, setOffsetX] = useState(0);
   const [offsetY, setOffsetY] = useState(0);
 
-  // Refs to track gesture state
-  const gestureState = useRef({
-    isGesturing: false,
-    initialDistance: 0,
-    initialScale: 1,
-    initialOffsetX: 0,
-    initialOffsetY: 0,
-    currentScale: 1,
-    currentOffsetX: 0,
-    currentOffsetY: 0,
-    lastX: 0,
-    lastY: 0,
-    touchCount: 0,
-  });
+  // Shared values for gesture animations
+  const scale$ = useSharedValue(1);
+  const offsetX$ = useSharedValue(0);
+  const offsetY$ = useSharedValue(0);
 
-  const circleContainerRef = useRef<View>(null);
+  const lastScale = useRef(1);
+  const lastOffsetX = useRef(0);
+  const lastOffsetY = useRef(0);
 
-  const getDistance = (touches: React.TouchList | any[]) => {
-    if (touches.length < 2) return 0;
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-  };
+  // Pinch gesture
+  const pinch = Gesture.Pinch()
+    .onUpdate((event) => {
+      const newScale = Math.max(
+        MIN_SCALE,
+        Math.min(MAX_SCALE, lastScale.current * event.scale)
+      );
+      scale$.value = newScale;
+      setScale(newScale);
+    })
+    .onEnd(() => {
+      lastScale.current = scale$.value;
+    });
 
-  const handleTouchStart = useCallback((e: any) => {
-    const touches = e.touches || e.nativeEvent.touches;
-    gestureState.current.touchCount = touches.length;
+  // Pan gesture (only when zoomed)
+  const pan = Gesture.Pan()
+    .onUpdate((event) => {
+      if (scale$.value > MIN_SCALE) {
+        const maxOffset = (CIRCLE_SIZE * (scale$.value - 1)) / 2;
 
-    if (touches.length === 2) {
-      // Start pinch
-      gestureState.current.isGesturing = true;
-      gestureState.current.initialDistance = getDistance(touches);
-      gestureState.current.initialScale = gestureState.current.currentScale;
-    } else if (touches.length === 1) {
-      // Start pan
-      gestureState.current.isGesturing = true;
-      gestureState.current.lastX = touches[0].clientX;
-      gestureState.current.lastY = touches[0].clientY;
-      gestureState.current.initialOffsetX = gestureState.current.currentOffsetX;
-      gestureState.current.initialOffsetY = gestureState.current.currentOffsetY;
-    }
-  }, []);
-
-  const handleTouchMove = useCallback((e: any) => {
-    if (!gestureState.current.isGesturing) return;
-
-    const touches = e.touches || e.nativeEvent.touches;
-
-    if (touches.length === 2) {
-      // Pinch zoom
-      const currentDistance = getDistance(touches);
-
-      if (gestureState.current.initialDistance > 0) {
-        const scaleFactor = currentDistance / gestureState.current.initialDistance;
-        const newScale = Math.max(
-          MIN_SCALE,
-          Math.min(MAX_SCALE, gestureState.current.initialScale * scaleFactor)
+        const newOffsetX = Math.max(
+          -maxOffset,
+          Math.min(maxOffset, lastOffsetX.current + event.translationX)
+        );
+        const newOffsetY = Math.max(
+          -maxOffset,
+          Math.min(maxOffset, lastOffsetY.current + event.translationY)
         );
 
-        gestureState.current.currentScale = newScale;
-        setScale(newScale);
+        offsetX$.value = newOffsetX;
+        offsetY$.value = newOffsetY;
+        setOffsetX(newOffsetX);
+        setOffsetY(newOffsetY);
       }
-    } else if (touches.length === 1 && gestureState.current.currentScale > MIN_SCALE) {
-      // Pan only when zoomed in
-      const deltaX = touches[0].clientX - gestureState.current.lastX;
-      const deltaY = touches[0].clientY - gestureState.current.lastY;
+    })
+    .onEnd(() => {
+      lastOffsetX.current = offsetX$.value;
+      lastOffsetY.current = offsetY$.value;
+    });
 
-      const maxOffset = (CIRCLE_SIZE * (gestureState.current.currentScale - 1)) / 2;
+  // Combine gestures
+  const composedGesture = Gesture.Simultaneous(pinch, pan);
 
-      const newOffsetX = Math.max(
-        -maxOffset,
-        Math.min(maxOffset, gestureState.current.initialOffsetX + deltaX)
-      );
-      const newOffsetY = Math.max(
-        -maxOffset,
-        Math.min(maxOffset, gestureState.current.initialOffsetY + deltaY)
-      );
-
-      gestureState.current.currentOffsetX = newOffsetX;
-      gestureState.current.currentOffsetY = newOffsetY;
-
-      setOffsetX(newOffsetX);
-      setOffsetY(newOffsetY);
-    }
-  }, []);
-
-  const handleTouchEnd = useCallback((e: any) => {
-    const touches = e.touches || e.nativeEvent.touches;
-
-    if (touches.length === 0) {
-      gestureState.current.isGesturing = false;
-      gestureState.current.initialDistance = 0;
-      gestureState.current.touchCount = 0;
-    } else if (touches.length === 1) {
-      // When one finger is lifted from pinch, start pan
-      gestureState.current.lastX = touches[0].clientX;
-      gestureState.current.lastY = touches[0].clientY;
-      gestureState.current.initialOffsetX = gestureState.current.currentOffsetX;
-      gestureState.current.initialOffsetY = gestureState.current.currentOffsetY;
-      gestureState.current.initialDistance = 0;
-    }
-  }, []);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: scale$.value },
+      { translateX: offsetX$.value },
+      { translateY: offsetY$.value },
+    ],
+  }));
 
   const handleReset = () => {
     setScale(1);
     setOffsetX(0);
     setOffsetY(0);
-    gestureState.current.currentScale = 1;
-    gestureState.current.currentOffsetX = 0;
-    gestureState.current.currentOffsetY = 0;
+    scale$.value = 1;
+    offsetX$.value = 0;
+    offsetY$.value = 0;
+    lastScale.current = 1;
+    lastOffsetX.current = 0;
+    lastOffsetY.current = 0;
   };
 
   const handleSave = () => {
@@ -177,7 +139,6 @@ export default function ProfilePhotoEditor({
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
           scrollEnabled={false}
-          onStartShouldSetResponder={() => gestureState.current.isGesturing}
         >
           {/* Editor Canvas */}
           <View style={styles.editorSection}>
@@ -186,40 +147,27 @@ export default function ProfilePhotoEditor({
               Arraste com um dedo ou faça pinch com dois dedos
             </Text>
 
-            <View
-              ref={circleContainerRef}
-              style={styles.circleContainer}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-            >
-              {/* Background container for circular crop */}
-              <View style={styles.circleMask} pointerEvents="none">
-                <Image
-                  source={{ uri: imageUri }}
-                  style={[
-                    styles.image,
-                    {
-                      transform: [
-                        { scale },
-                        { translateX: offsetX },
-                        { translateY: offsetY },
-                      ],
-                    },
-                  ]}
-                />
-              </View>
+            <GestureDetector gesture={composedGesture}>
+              <View style={styles.circleContainer}>
+                {/* Background container for circular crop */}
+                <View style={styles.circleMask}>
+                  <Animated.Image
+                    source={{ uri: imageUri }}
+                    style={[styles.image, animatedStyle]}
+                  />
+                </View>
 
-              {/* Circular border indicator */}
-              <View style={styles.circleBorderIndicator} pointerEvents="none" />
+                {/* Circular border indicator */}
+                <View style={styles.circleBorderIndicator} />
 
-              {/* Zoom level display */}
-              <View style={styles.zoomDisplay} pointerEvents="none">
-                <Text style={styles.zoomDisplayText}>
-                  {Math.round(scale * 100)}%
-                </Text>
+                {/* Zoom level display */}
+                <View style={styles.zoomDisplay}>
+                  <Text style={styles.zoomDisplayText}>
+                    {Math.round(scale * 100)}%
+                  </Text>
+                </View>
               </View>
-            </View>
+            </GestureDetector>
 
             {/* Reset Button */}
             <TouchableOpacity
@@ -362,6 +310,7 @@ const styles = StyleSheet.create({
     borderRadius: CIRCLE_RADIUS,
     borderWidth: 3,
     borderColor: '#3b82f6',
+    pointerEvents: 'none',
   },
   zoomDisplay: {
     position: 'absolute',
@@ -371,6 +320,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
+    pointerEvents: 'none',
   },
   zoomDisplayText: {
     fontSize: 12,
