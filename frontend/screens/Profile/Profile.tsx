@@ -17,6 +17,7 @@ import BottomNav from '../../components/BottomNav';
 import PostCard from '../../components/PostCard';
 import TopBar from '../../components/TopBar';
 import ProfilePhotoEditor from '../../components/ProfilePhotoEditor';
+import CoverPhotoEditor, { CoverTransform } from '../../components/CoverPhotoEditor';
 import {
   Heart,
   Home,
