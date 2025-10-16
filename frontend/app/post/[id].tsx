@@ -637,7 +637,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#f1f5f9',
   },
-  postImage: { width: '100%', height: 300, backgroundColor: '#f1f5f9' },
+  postImage: { width: '100%', backgroundColor: '#f1f5f9' },
   viewsBadge: {
     position: 'absolute',
     bottom: 12,
