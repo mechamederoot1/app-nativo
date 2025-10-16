@@ -1,5 +1,11 @@
 import React from 'react';
-import { Modal, View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import {
+  Modal,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
 import { Image } from 'react-native';
 import { Video } from 'expo-av';
 import { X } from 'lucide-react-native';
@@ -15,9 +21,20 @@ type Props = {
 
 export default function MediaViewer({ visible, type, uri, onClose }: Props) {
   return (
-    <Modal visible={visible} animationType="fade" onRequestClose={onClose} transparent>
+    <Modal
+      visible={visible}
+      animationType="fade"
+      onRequestClose={onClose}
+      transparent
+    >
       <View style={styles.backdrop}>
-        <TouchableOpacity accessibilityRole="button" accessibilityLabel="Fechar" style={styles.closeBtn} onPress={onClose} activeOpacity={0.8}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Fechar"
+          style={styles.closeBtn}
+          onPress={onClose}
+          activeOpacity={0.8}
+        >
           <X size={22} color="#ffffff" />
         </TouchableOpacity>
 
@@ -27,7 +44,7 @@ export default function MediaViewer({ visible, type, uri, onClose }: Props) {
           <Video
             source={{ uri }}
             style={styles.media}
-            resizeMode={Platform.OS === 'web' ? ("contain" as any) : undefined}
+            resizeMode={Platform.OS === 'web' ? ('contain' as any) : undefined}
             shouldPlay
             useNativeControls
             isLooping
