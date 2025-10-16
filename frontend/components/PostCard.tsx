@@ -154,9 +154,13 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 200,
+    maxHeight: 500,
     borderRadius: 10,
     marginTop: 10,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   actionsRow: {
     flexDirection: 'row',
