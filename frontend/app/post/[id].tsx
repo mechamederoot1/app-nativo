@@ -57,6 +57,7 @@ export default function PostDetail() {
   const router = useRouter();
   const id = String(params.id ?? '');
   const post = useMemo(() => getPost(id), [id]);
+  const { dimensions: imageDimensions } = useImageDimensions(post?.image);
 
   const [comment, setComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
