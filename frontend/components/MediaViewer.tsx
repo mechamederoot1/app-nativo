@@ -92,18 +92,24 @@ export default function MediaViewer({ visible, type, uri, onClose }: Props) {
           <X size={22} color="#ffffff" />
         </TouchableOpacity>
 
-        {type === 'image' ? (
-          <Image source={{ uri }} style={styles.media} resizeMode="contain" />
-        ) : (
-          <Video
-            source={{ uri }}
-            style={styles.media}
-            resizeMode={Platform.OS === 'web' ? ('contain' as any) : undefined}
-            shouldPlay
-            useNativeControls
-            isLooping
-          />
-        )}
+        <View style={styles.mediaContainer}>
+          {type === 'image' ? (
+            <Image
+              source={{ uri }}
+              style={getImageStyle()}
+              resizeMode="contain"
+            />
+          ) : (
+            <Video
+              source={{ uri }}
+              style={getImageStyle()}
+              resizeMode={Platform.OS === 'web' ? ('contain' as any) : undefined}
+              shouldPlay
+              useNativeControls
+              isLooping
+            />
+          )}
+        </View>
       </View>
     </Modal>
   );
