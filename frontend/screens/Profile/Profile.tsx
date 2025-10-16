@@ -152,7 +152,7 @@ export default function ProfileScreen() {
       >
         <View style={styles.headerSection}>
           <View style={styles.coverContainer}>
-            <Image source={{ uri: p.cover }} style={styles.coverImage} />
+            <Image source={{ uri: coverPhoto }} style={[styles.coverImage, { transform: [ { scale: coverTransform.scale }, { translateX: coverTransform.offsetX }, { translateY: coverTransform.offsetY } ] }]} resizeMode="cover" />
             <LinearGradient
               colors={['transparent', 'rgba(0,0,0,0.4)']}
               style={styles.coverGradient}
