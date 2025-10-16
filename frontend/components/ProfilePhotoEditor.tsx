@@ -134,7 +134,6 @@ export default function ProfilePhotoEditor({
           <TouchableOpacity
             onPress={handleSave}
             style={styles.headerBtn}
-            disabled={!caption.trim()}
           >
             <Download size={24} color="#0f172a" strokeWidth={2.5} />
           </TouchableOpacity>
