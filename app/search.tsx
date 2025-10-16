@@ -1,3 +1,3 @@
-import SearchScreen from '../frontend/screens/Search/Search';
+import SearchScreen from '../screens/Search/Search';
 
 export default SearchScreen;
