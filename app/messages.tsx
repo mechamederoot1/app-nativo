@@ -1,2 +1,2 @@
-import Messages from '../frontend/screens/Messages/Messages';
+import Messages from '../screens/Messages/Messages';
 export default Messages;
