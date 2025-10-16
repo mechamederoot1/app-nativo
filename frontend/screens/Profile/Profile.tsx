@@ -153,11 +153,12 @@ export default function ProfileScreen() {
 
           <View style={styles.mainContainer}>
             <View style={styles.avatarWrapper}>
-              <Image source={{ uri: p.avatar }} style={styles.avatar} />
+              <Image source={{ uri: profilePhoto }} style={styles.avatar} />
               <View style={styles.onlineDot} />
               <TouchableOpacity
                 style={styles.avatarEditBtn}
                 activeOpacity={0.8}
+                onPress={pickImage}
               >
                 <Camera size={14} color="#ffffff" strokeWidth={2.5} />
               </TouchableOpacity>
