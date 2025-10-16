@@ -52,21 +52,18 @@ export default function MediaViewer({ visible, type, uri, onClose }: Props) {
     const screenHeight = Dimensions.get('window').height;
     const aspectRatio = imageDimensions.width / imageDimensions.height;
 
-    let width = screenWidth;
-    let height = screenHeight;
+    // Limitar a no máximo 80% da largura e 70% da altura da tela
+    const maxWidth = screenWidth * 0.8;
+    const maxHeight = screenHeight * 0.7;
 
-    // Calcular dimensões mantendo aspect ratio
-    if (aspectRatio > screenWidth / screenHeight) {
-      // Imagem mais larga proporcionalmente
-      height = screenWidth / aspectRatio;
-    } else {
-      // Imagem mais alta proporcionalmente
-      width = screenHeight * aspectRatio;
+    let width = maxWidth;
+    let height = maxWidth / aspectRatio;
+
+    // Se a altura exceder o máximo, ajustar pela altura
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = maxHeight * aspectRatio;
     }
-
-    // Limitar a 90% da tela
-    width = Math.min(width, screenWidth * 0.9);
-    height = Math.min(height, screenHeight * 0.9);
 
     return {
       width,
