@@ -55,6 +55,10 @@ export default function ProfileScreen() {
   const [posts, setPosts] = useState(getPosts());
   const [editorVisible, setEditorVisible] = useState(false);
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
+  const [coverEditorVisible, setCoverEditorVisible] = useState(false);
+  const [selectedCoverUri, setSelectedCoverUri] = useState<string | null>(null);
+  const [coverPhoto, setCoverPhoto] = useState(p.cover);
+  const [coverTransform, setCoverTransform] = useState<CoverTransform>({ scale: 1, offsetX: 0, offsetY: 0 });
   const [profilePhoto, setProfilePhoto] = useState(p.avatar);
 
   useEffect(() => {
