@@ -1,2 +1,2 @@
-import Profile from '../frontend/screens/Profile/Profile';
+import Profile from '../screens/Profile/Profile';
 export default Profile;
