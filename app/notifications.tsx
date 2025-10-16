@@ -1,3 +1,3 @@
-import NotificationsScreen from '../frontend/screens/Notifications/Notifications';
+import NotificationsScreen from '../screens/Notifications/Notifications';
 
 export default NotificationsScreen;
