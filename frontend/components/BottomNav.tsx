@@ -77,7 +77,10 @@ function BottomNavInner({
 
       <TouchableOpacity style={styles.tab} onPress={go('/messages')}>
         <View style={styles.iconWrapper}>
-          <MessageBubble active={active === 'messages'} />
+          <MessageCircle
+            size={20}
+            color={active === 'messages' ? '#0856d6' : '#6b7280'}
+          />
           {unreadMessages > 0 && (
             <View style={[styles.badge, styles.badgeMessage]}>
               <Text style={styles.badgeText}>
