@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,20 +10,16 @@ import {
   Dimensions,
   TextInput,
   Modal,
-  Animated,
   GestureResponderEvent,
   PanResponder,
 } from 'react-native';
 import {
-  Camera,
   Download,
   X,
   ZoomIn,
   ZoomOut,
   RotateCcw,
 } from 'lucide-react-native';
-import Svg, { Circle, Defs, ClipPath, Image as SvgImage } from 'react-native-svg';
-import { LinearGradient } from 'expo-linear-gradient';
 
 interface ProfilePhotoEditorProps {
   imageUri: string;
@@ -32,7 +28,7 @@ interface ProfilePhotoEditorProps {
   onCancel: () => void;
 }
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 const CIRCLE_SIZE = 280;
 const CIRCLE_RADIUS = CIRCLE_SIZE / 2;
 
@@ -48,44 +44,58 @@ export default function ProfilePhotoEditor({
   const [offsetY, setOffsetY] = useState(0);
   const [initialDistance, setInitialDistance] = useState(0);
   const [initialScale, setInitialScale] = useState(1);
+  const [initialOffsetX, setInitialOffsetX] = useState(0);
+  const [initialOffsetY, setInitialOffsetY] = useState(0);
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (evt: GestureResponderEvent) => {
+        const touches = evt.nativeEvent.touches;
+        if (touches.length === 2) {
+          const dx = touches[0].pageX - touches[1].pageX;
+          const dy = touches[0].pageY - touches[1].pageY;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          setInitialDistance(distance);
+          setInitialScale(scale);
+        }
+      },
       onPanResponderMove: (evt: GestureResponderEvent) => {
         const touches = evt.nativeEvent.touches;
 
         if (touches.length === 2) {
           // Two finger pinch
-          const dx =
-            touches[0].pageX - touches[1].pageX;
-          const dy =
-            touches[0].pageY - touches[1].pageY;
+          const dx = touches[0].pageX - touches[1].pageX;
+          const dy = touches[0].pageY - touches[1].pageY;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (initialDistance === 0) {
-            setInitialDistance(distance);
-            setInitialScale(scale);
-          } else {
-            const newScale = Math.max(
-              1,
-              Math.min(3, (initialScale * distance) / initialDistance),
-            );
+          if (initialDistance > 0) {
+            const scaleFactor = distance / initialDistance;
+            const newScale = Math.max(1, Math.min(3, initialScale * scaleFactor));
             setScale(newScale);
           }
         } else if (touches.length === 1) {
-          // Single finger pan
-          setOffsetX(offsetX + evt.nativeEvent.dx);
-          setOffsetY(offsetY + evt.nativeEvent.dy);
+          // Single finger pan - only pan if zoomed in
+          if (scale > 1) {
+            const maxOffset = (CIRCLE_SIZE * (scale - 1)) / 2;
+            const newOffsetX = Math.max(
+              -maxOffset,
+              Math.min(maxOffset, initialOffsetX + evt.nativeEvent.dx),
+            );
+            const newOffsetY = Math.max(
+              -maxOffset,
+              Math.min(maxOffset, initialOffsetY + evt.nativeEvent.dy),
+            );
+            setOffsetX(newOffsetX);
+            setOffsetY(newOffsetY);
+          }
         }
       },
       onPanResponderRelease: () => {
         setInitialDistance(0);
-
-        // Constrain position
-        const maxOffset = (CIRCLE_SIZE * (scale - 1)) / 2;
-        setOffsetX(Math.max(-maxOffset, Math.min(maxOffset, offsetX)));
-        setOffsetY(Math.max(-maxOffset, Math.min(maxOffset, offsetY)));
+        setInitialOffsetX(offsetX);
+        setInitialOffsetY(offsetY);
       },
       onPanResponderTerminate: () => {
         setInitialDistance(0);
@@ -97,6 +107,8 @@ export default function ProfilePhotoEditor({
     setScale(1);
     setOffsetX(0);
     setOffsetY(0);
+    setInitialOffsetX(0);
+    setInitialOffsetY(0);
   };
 
   const handleZoomIn = () => {
@@ -131,43 +143,29 @@ export default function ProfilePhotoEditor({
         <ScrollView
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
+          scrollEnabled={false}
         >
           {/* Editor Canvas */}
           <View style={styles.editorSection}>
             <Text style={styles.sectionLabel}>Editar Foto</Text>
 
-            <View style={styles.circleContainer}>
-              {/* Background circle to show what will be cropped */}
-              <Svg width={CIRCLE_SIZE} height={CIRCLE_SIZE}>
-                <Defs>
-                  <ClipPath id="circleMask">
-                    <Circle
-                      cx={CIRCLE_RADIUS}
-                      cy={CIRCLE_RADIUS}
-                      r={CIRCLE_RADIUS}
-                    />
-                  </ClipPath>
-                </Defs>
-
-                {/* Image inside circular clip path */}
-                <SvgImage
-                  x={offsetX}
-                  y={offsetY}
-                  width={CIRCLE_SIZE * scale}
-                  height={CIRCLE_SIZE * scale}
-                  href={{ uri: imageUri }}
-                  clipPath="url(#circleMask)"
+            <View style={styles.circleContainer} {...panResponder.panHandlers}>
+              {/* Background container for circular crop */}
+              <View style={styles.circleMask}>
+                <Image
+                  source={{ uri: imageUri }}
+                  style={[
+                    styles.image,
+                    {
+                      transform: [
+                        { scale },
+                        { translateX: offsetX },
+                        { translateY: offsetY },
+                      ],
+                    },
+                  ]}
                 />
-              </Svg>
-
-              {/* Gesture handler on top of SVG */}
-              <View
-                style={[
-                  styles.gestureCatcher,
-                  { width: CIRCLE_SIZE, height: CIRCLE_SIZE },
-                ]}
-                {...panResponder.panHandlers}
-              />
+              </View>
 
               {/* Circular border indicator */}
               <View style={styles.circleBorderIndicator} />
@@ -185,7 +183,9 @@ export default function ProfilePhotoEditor({
               </TouchableOpacity>
 
               <View style={styles.zoomValue}>
-                <Text style={styles.zoomValueText}>{Math.round(scale * 100)}%</Text>
+                <Text style={styles.zoomValueText}>
+                  {Math.round(scale * 100)}%
+                </Text>
               </View>
 
               <TouchableOpacity
@@ -229,10 +229,18 @@ export default function ProfilePhotoEditor({
           {/* Instructions */}
           <View style={styles.instructionsSection}>
             <Text style={styles.instructionsTitle}>Dicas:</Text>
-            <Text style={styles.instructionText}>• Arraste para posicionar a imagem</Text>
-            <Text style={styles.instructionText}>• Use dois dedos para fazer zoom</Text>
-            <Text style={styles.instructionText}>• Clique em "Aumentar" e "Diminuir" para ajustar o zoom</Text>
-            <Text style={styles.instructionText}>• A foto será salva em formato circular</Text>
+            <Text style={styles.instructionText}>
+              • Arraste para posicionar a imagem
+            </Text>
+            <Text style={styles.instructionText}>
+              • Use dois dedos para fazer zoom
+            </Text>
+            <Text style={styles.instructionText}>
+              • Clique em "Aumentar" e "Diminuir" para ajustar o zoom
+            </Text>
+            <Text style={styles.instructionText}>
+              • A foto será salva em formato circular
+            </Text>
           </View>
         </ScrollView>
 
@@ -309,10 +317,20 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     alignItems: 'center',
     justifyContent: 'center',
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
   },
-  gestureCatcher: {
+  circleMask: {
     position: 'absolute',
-    backgroundColor: 'transparent',
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
+    borderRadius: CIRCLE_RADIUS,
+    overflow: 'hidden',
+    backgroundColor: '#f8fafc',
+  },
+  image: {
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
   },
   circleBorderIndicator: {
     position: 'absolute',
