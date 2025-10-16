@@ -1,6 +1,6 @@
 import React from 'react';
 import { SafeAreaView, View, Text } from 'react-native';
-import BottomNav from '../components/BottomNav';
+import BottomNav from './components/BottomNav';
 
 export default function CreateRoute() {
   return (

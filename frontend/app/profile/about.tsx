@@ -1,2 +1,2 @@
-import About from '../../screens/Profile/About';
+import About from '../screens/Profile/About';
 export default About;

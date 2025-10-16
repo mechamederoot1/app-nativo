@@ -1,8 +1,8 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, Image } from 'react-native';
-import TopBar from '../../components/TopBar';
-import BottomNav from '../../components/BottomNav';
+import TopBar from '../components/TopBar';
+import BottomNav from '../components/BottomNav';
 import { useLocalSearchParams } from 'expo-router';
 
 export default function PhotoView() {
