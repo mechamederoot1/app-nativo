@@ -53,13 +53,25 @@ export default function PostCard({
         <Text style={styles.content}>{post.content}</Text>
       </TouchableOpacity>
 
-      {post.image ? (
+      {post.image && dimensions ? (
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={() => onOpen && onOpen(post.id)}
         >
-          <Image source={{ uri: post.image }} style={styles.image} />
+          <Image
+            source={{ uri: post.image }}
+            style={[
+              styles.image,
+              {
+                aspectRatio: dimensions.aspectRatio,
+              },
+            ]}
+          />
         </TouchableOpacity>
+      ) : post.image && !dimensions ? (
+        <View style={[styles.image, styles.loadingContainer]}>
+          <ActivityIndicator size="large" color="#0ea5e9" />
+        </View>
       ) : null}
 
       <View style={styles.actionsRow}>
