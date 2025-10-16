@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   View,
   StyleSheet,
   TouchableOpacity,
   Platform,
+  Image as RNImage,
+  Dimensions,
 } from 'react-native';
 import { Image } from 'react-native';
 import { Video } from 'expo-av';
@@ -19,7 +21,59 @@ type Props = {
   onClose: () => void;
 };
 
+type ImageDimensions = {
+  width: number;
+  height: number;
+};
+
 export default function MediaViewer({ visible, type, uri, onClose }: Props) {
+  const [imageDimensions, setImageDimensions] = useState<ImageDimensions | null>(null);
+
+  useEffect(() => {
+    if (!visible || type !== 'image' || !uri) return;
+
+    RNImage.getSize(
+      uri,
+      (width, height) => {
+        setImageDimensions({ width, height });
+      },
+      () => {
+        setImageDimensions(null);
+      }
+    );
+  }, [visible, type, uri]);
+
+  const getImageStyle = () => {
+    if (!imageDimensions) {
+      return styles.media;
+    }
+
+    const screenWidth = Dimensions.get('window').width;
+    const screenHeight = Dimensions.get('window').height;
+    const aspectRatio = imageDimensions.width / imageDimensions.height;
+
+    let width = screenWidth;
+    let height = screenHeight;
+
+    // Calcular dimensões mantendo aspect ratio
+    if (aspectRatio > screenWidth / screenHeight) {
+      // Imagem mais larga proporcionalmente
+      height = screenWidth / aspectRatio;
+    } else {
+      // Imagem mais alta proporcionalmente
+      width = screenHeight * aspectRatio;
+    }
+
+    // Limitar a 90% da tela
+    width = Math.min(width, screenWidth * 0.9);
+    height = Math.min(height, screenHeight * 0.9);
+
+    return {
+      width,
+      height,
+      resizeMode: 'contain' as const,
+    };
+  };
   return (
     <Modal
       visible={visible}
