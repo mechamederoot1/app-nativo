@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Pressable,
   Dimensions,
   Alert,
+  PanResponder,
   Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -49,6 +50,8 @@ import { getPosts, subscribe, toggleLike } from '../../store/posts';
 
 const { width } = Dimensions.get('window');
 
+type CoverTransform = { scale: number; offsetX: number; offsetY: number };
+
 export default function ProfileScreen() {
   const router = useRouter();
   const p = profileData;
@@ -57,10 +60,91 @@ export default function ProfileScreen() {
   const [editorVisible, setEditorVisible] = useState(false);
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const [coverEditorVisible, setCoverEditorVisible] = useState(false);
-  const [selectedCoverUri, setSelectedCoverUri] = useState<string | null>(null);
   const [coverPhoto, setCoverPhoto] = useState(p.cover);
   const [coverTransform, setCoverTransform] = useState<CoverTransform>({ scale: 1, offsetX: 0, offsetY: 0 });
   const [profilePhoto, setProfilePhoto] = useState(p.avatar);
+  const [showAvatarMenu, setShowAvatarMenu] = useState(false);
+  const [showCoverMenu, setShowCoverMenu] = useState(false);
+  const hasStory = Boolean((p as any).hasStory);
+
+  const prevCoverTransformRef = useRef<CoverTransform>(coverTransform);
+  const prevCoverPhotoRef = useRef<string>(coverPhoto);
+
+  const COVER_HEIGHT = 200;
+
+  const gestureState = useRef({
+    initialDistance: 0,
+    initialScale: 1,
+    initialOffsetX: 0,
+    initialOffsetY: 0,
+    lastTouchX: 0,
+    lastTouchY: 0,
+    isPinching: false,
+  }).current;
+
+  const getDistance = (touches: any[]) => {
+    const dx = touches[0].pageX - touches[1].pageX;
+    const dy = touches[0].pageY - touches[1].pageY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => coverEditorVisible,
+        onMoveShouldSetPanResponder: () => coverEditorVisible,
+        onPanResponderTerminationRequest: () => false,
+        onPanResponderGrant: (evt) => {
+          const touches = evt.nativeEvent.touches as any[];
+          if (touches.length === 2) {
+            gestureState.isPinching = true;
+            gestureState.initialDistance = getDistance(touches);
+            gestureState.initialScale = coverTransform.scale;
+          } else if (touches.length === 1) {
+            gestureState.isPinching = false;
+            gestureState.lastTouchX = touches[0].pageX;
+            gestureState.lastTouchY = touches[0].pageY;
+            gestureState.initialOffsetX = coverTransform.offsetX;
+            gestureState.initialOffsetY = coverTransform.offsetY;
+          }
+        },
+        onPanResponderMove: (evt) => {
+          if (!coverEditorVisible) return;
+          const touches = evt.nativeEvent.touches as any[];
+          if (touches.length === 2) {
+            if (!gestureState.isPinching) {
+              gestureState.isPinching = true;
+              gestureState.initialDistance = getDistance(touches);
+              gestureState.initialScale = coverTransform.scale;
+            }
+            const currentDistance = getDistance(touches);
+            const scaleFactor = currentDistance / gestureState.initialDistance;
+            const newScale = Math.max(1, Math.min(3, gestureState.initialScale * scaleFactor));
+            setCoverTransform((prev) => ({ ...prev, scale: newScale }));
+            if (newScale <= 1) {
+              setCoverTransform((prev) => ({ ...prev, offsetX: 0, offsetY: 0 }));
+            }
+          } else if (touches.length === 1 && !gestureState.isPinching) {
+            if (coverTransform.scale > 1) {
+              const currentX = touches[0].pageX;
+              const currentY = touches[0].pageY;
+              const deltaX = currentX - gestureState.lastTouchX;
+              const deltaY = currentY - gestureState.lastTouchY;
+              const maxOffsetX = (width * (coverTransform.scale - 1)) / 2;
+              const maxOffsetY = (COVER_HEIGHT * (coverTransform.scale - 1)) / 2;
+              const newOffsetX = Math.max(-maxOffsetX, Math.min(maxOffsetX, gestureState.initialOffsetX + deltaX));
+              const newOffsetY = Math.max(-maxOffsetY, Math.min(maxOffsetY, gestureState.initialOffsetY + deltaY));
+              setCoverTransform((prev) => ({ ...prev, offsetX: newOffsetX, offsetY: newOffsetY }));
+            }
+          }
+        },
+        onPanResponderRelease: () => {
+          gestureState.isPinching = false;
+          gestureState.initialDistance = 0;
+        },
+      }),
+    [coverEditorVisible, coverTransform.scale, coverTransform.offsetX, coverTransform.offsetY],
+  );
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
   const hasStory = Boolean((p as any).hasStory);
 
@@ -156,6 +240,28 @@ export default function ProfileScreen() {
         <View style={styles.headerSection}>
           <View style={styles.coverContainer}>
             <Image source={{ uri: coverPhoto }} style={[styles.coverImage, { transform: [ { scale: coverTransform.scale }, { translateX: coverTransform.offsetX }, { translateY: coverTransform.offsetY } ] }]} resizeMode="cover" />
+            {!coverEditorVisible && (
+              <Pressable style={StyleSheet.absoluteFill} onPress={() => setShowCoverMenu(true)} />
+            )}
+            {coverEditorVisible && (
+              <View style={StyleSheet.absoluteFill} {...panResponder.panHandlers}>
+                <View style={{ position: 'absolute', bottom: 12, left: 12, right: 12, flexDirection: 'row', gap: 8 }}>
+                  <TouchableOpacity onPress={() => {
+                    setCoverEditorVisible(false);
+                    setCoverPhoto(prevCoverPhotoRef.current);
+                    setCoverTransform(prevCoverTransformRef.current);
+                  }} style={{ flex: 1, paddingVertical: 10, borderRadius: 12, backgroundColor: '#ffffff', alignItems: 'center', borderWidth: 1, borderColor: '#e2e8f0' }}>
+                    <Text style={{ fontWeight: '700', color: '#64748b' }}>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setCoverTransform({ scale: 1, offsetX: 0, offsetY: 0 })} style={{ paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12, backgroundColor: '#f8fafc', alignItems: 'center', borderWidth: 1, borderColor: '#e2e8f0' }}>
+                    <Text style={{ fontWeight: '700', color: '#64748b' }}>Resetar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setCoverEditorVisible(false)} style={{ flex: 1, paddingVertical: 10, borderRadius: 12, backgroundColor: '#3b82f6', alignItems: 'center' }}>
+                    <Text style={{ fontWeight: '700', color: '#ffffff' }}>Salvar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
             <LinearGradient
               colors={['transparent', 'rgba(0,0,0,0.4)']}
               style={styles.coverGradient}
@@ -168,7 +274,10 @@ export default function ProfileScreen() {
               }
               const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: false, quality: 1 });
               if (!result.canceled) {
-                setSelectedCoverUri(result.assets[0].uri);
+                prevCoverPhotoRef.current = coverPhoto;
+                prevCoverTransformRef.current = coverTransform;
+                setCoverPhoto(result.assets[0].uri);
+                setCoverTransform({ scale: 1, offsetX: 0, offsetY: 0 });
                 setCoverEditorVisible(true);
               }
             }}>
@@ -601,24 +710,24 @@ export default function ProfileScreen() {
       </ScrollView>
       <BottomNav active="profile" />
 
-      {selectedCoverUri && (
-        <CoverPhotoEditor
-          imageUri={selectedCoverUri}
-          isVisible={coverEditorVisible}
-          height={200}
-          initial={coverTransform}
-          onSave={({ imageUri, scale, offsetX, offsetY }) => {
-            setCoverPhoto(imageUri);
-            setCoverTransform({ scale, offsetX, offsetY });
-            setCoverEditorVisible(false);
-            setSelectedCoverUri(null);
-          }}
-          onCancel={() => {
-            setCoverEditorVisible(false);
-            setSelectedCoverUri(null);
-          }}
-        />
-      )}
+      <Modal visible={showCoverMenu} transparent animationType="fade">
+        <Pressable
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' }}
+          onPress={() => setShowCoverMenu(false)}
+        >
+          <View style={{ backgroundColor: '#ffffff', borderTopLeftRadius: 16, borderTopRightRadius: 16, paddingBottom: 20 }}>
+            <TouchableOpacity
+              style={{ paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' }}
+              onPress={() => {
+                setShowCoverMenu(false);
+                router.push(`/cover/${p.username}`);
+              }}
+            >
+              <Text style={{ fontSize: 16, color: '#0f172a', fontWeight: '600' }}>Ver foto da capa</Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
 
       {selectedImageUri && (
         <ProfilePhotoEditor
