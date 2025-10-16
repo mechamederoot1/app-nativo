@@ -254,12 +254,8 @@ export default function ProfilePhotoEditor({
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleSave}
-            style={[
-              styles.saveBtn,
-              !caption.trim() && styles.saveBtnDisabled,
-            ]}
+            style={styles.saveBtn}
             activeOpacity={0.8}
-            disabled={!caption.trim()}
           >
             <Text style={styles.saveBtnText}>Salvar Foto</Text>
           </TouchableOpacity>
