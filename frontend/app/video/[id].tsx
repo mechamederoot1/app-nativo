@@ -1,20 +1,20 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet } from 'react-native';
-import TopBar from '../../frontend/components/TopBar';
-import BottomNav from '../../frontend/components/BottomNav';
+import TopBar from '../../components/TopBar';
+import BottomNav from '../../components/BottomNav';
 import { useLocalSearchParams } from 'expo-router';
 
-export default function ProfileIdView() {
+export default function VideoView() {
   const { id } = useLocalSearchParams();
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <TopBar />
       <View style={styles.container}>
-        <Text style={styles.title}>Perfil</Text>
+        <Text style={styles.title}>Vídeo</Text>
         <Text style={styles.sub}>ID: {String(id ?? '')}</Text>
       </View>
-      <BottomNav active="profile" />
+      <BottomNav active="feed" />
     </SafeAreaView>
   );
 }

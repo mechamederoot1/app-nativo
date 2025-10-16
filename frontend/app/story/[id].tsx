@@ -24,7 +24,7 @@ import {
   Play,
 } from 'lucide-react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import BottomNav from '../../frontend/components/BottomNav';
+import BottomNav from '../../components/BottomNav';
 
 const { width, height } = Dimensions.get('window');
 
