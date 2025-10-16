@@ -168,26 +168,6 @@ const styles = StyleSheet.create({
     color: '#0856d6',
     fontWeight: '700',
   },
-  msgBubble: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#f1f5f9',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  msgBubbleActive: {
-    backgroundColor: '#0856d6',
-  },
-  msgInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#94a3b8',
-  },
-  msgInnerActive: {
-    backgroundColor: '#fff',
-  },
   badge: {
     position: 'absolute',
     top: -6,
