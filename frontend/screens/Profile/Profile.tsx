@@ -157,7 +157,18 @@ export default function ProfileScreen() {
               colors={['transparent', 'rgba(0,0,0,0.4)']}
               style={styles.coverGradient}
             />
-            <TouchableOpacity style={styles.coverEditBtn} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.coverEditBtn} activeOpacity={0.8} onPress={async () => {
+              const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+              if (status !== 'granted') {
+                Alert.alert('Permissão necessária', 'Permitir acesso à galeria para alterar sua capa.');
+                return;
+              }
+              const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: false, quality: 1 });
+              if (!result.canceled) {
+                setSelectedCoverUri(result.assets[0].uri);
+                setCoverEditorVisible(true);
+              }
+            }}>
               <Camera size={18} color="#ffffff" strokeWidth={2.5} />
             </TouchableOpacity>
           </View>
