@@ -84,6 +84,7 @@ export const profileData: UserProfile = {
     { id: 'g2', name: 'Design Systems', members: 6421 },
     { id: 'g3', name: 'Café e Código', members: 2204 },
   ],
+  hasStory: true,
   recentFriends: [
     {
       id: 'f1',
