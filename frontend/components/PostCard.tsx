@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Heart, MessageCircle, Share2 } from 'lucide-react-native';
+import { useImageDimensions } from '../hooks/useImageDimensions';
 
 type Comment = { id: string; user: string; text: string };
 
@@ -25,6 +26,7 @@ export default function PostCard({
   onLike?: (id: string) => void;
   onOpen?: (id: string) => void;
 }) {
+  const { dimensions } = useImageDimensions(post.image);
   return (
     <View style={styles.card}>
       <TouchableOpacity
