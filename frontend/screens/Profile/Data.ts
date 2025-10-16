@@ -36,6 +36,7 @@ export type UserProfile = {
   groups: Group[];
   recentFriends: Friend[];
   testimonials: Testimonial[];
+  hasStory?: boolean;
 };
 
 export const profileData: UserProfile = {
