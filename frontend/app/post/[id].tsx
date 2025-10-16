@@ -27,6 +27,7 @@ import {
 } from 'lucide-react-native';
 import { addComment, getPost } from '../../store/posts';
 import MediaViewer from '../../components/MediaViewer';
+import { useImageDimensions } from '../../hooks/useImageDimensions';
 
 const { width } = Dimensions.get('window');
 
