@@ -52,6 +52,9 @@ export default function ProfileScreen() {
   const p = profileData;
   const [tab, setTab] = useState<'posts' | 'about' | 'photos'>('posts');
   const [posts, setPosts] = useState(getPosts());
+  const [editorVisible, setEditorVisible] = useState(false);
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
+  const [profilePhoto, setProfilePhoto] = useState(p.avatar);
 
   useEffect(() => {
     const unsub = subscribe(() => setPosts(getPosts()));
