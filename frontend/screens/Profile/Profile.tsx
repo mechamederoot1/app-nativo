@@ -64,7 +64,10 @@ export default function ProfileScreen() {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permissão necessária', 'Permitir acesso à galeria de fotos para mudar sua foto de perfil.');
+      Alert.alert(
+        'Permissão necessária',
+        'Permitir acesso à galeria de fotos para mudar sua foto de perfil.',
+      );
       return;
     }
 
@@ -85,7 +88,10 @@ export default function ProfileScreen() {
     setProfilePhoto(imageUri);
     setEditorVisible(false);
     setSelectedImageUri(null);
-    Alert.alert('Sucesso', `Foto atualizada${caption ? ` com legenda: "${caption}"` : ''}!`);
+    Alert.alert(
+      'Sucesso',
+      `Foto atualizada${caption ? ` com legenda: "${caption}"` : ''}!`,
+    );
   };
 
   const myPosts = useMemo(

@@ -11,13 +11,14 @@ import {
   TextInput,
   Modal,
 } from 'react-native';
-import {
-  Download,
-  X,
-  RotateCcw,
-} from 'lucide-react-native';
+import { Download, X, RotateCcw } from 'lucide-react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import Animated, { useSharedValue, useAnimatedStyle, interpolate, Extrapolate } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolate,
+} from 'react-native-reanimated';
 
 interface ProfilePhotoEditorProps {
   imageUri: string;
@@ -57,7 +58,7 @@ export default function ProfilePhotoEditor({
     .onUpdate((event) => {
       const newScale = Math.max(
         MIN_SCALE,
-        Math.min(MAX_SCALE, lastScale.current * event.scale)
+        Math.min(MAX_SCALE, lastScale.current * event.scale),
       );
       scale$.value = newScale;
       setScale(newScale);
@@ -74,11 +75,11 @@ export default function ProfilePhotoEditor({
 
         const newOffsetX = Math.max(
           -maxOffset,
-          Math.min(maxOffset, lastOffsetX.current + event.translationX)
+          Math.min(maxOffset, lastOffsetX.current + event.translationX),
         );
         const newOffsetY = Math.max(
           -maxOffset,
-          Math.min(maxOffset, lastOffsetY.current + event.translationY)
+          Math.min(maxOffset, lastOffsetY.current + event.translationY),
         );
 
         offsetX$.value = newOffsetX;
@@ -127,10 +128,7 @@ export default function ProfilePhotoEditor({
             <X size={24} color="#0f172a" strokeWidth={2.5} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Editar Foto</Text>
-          <TouchableOpacity
-            onPress={handleSave}
-            style={styles.headerBtn}
-          >
+          <TouchableOpacity onPress={handleSave} style={styles.headerBtn}>
             <Download size={24} color="#0f172a" strokeWidth={2.5} />
           </TouchableOpacity>
         </View>
