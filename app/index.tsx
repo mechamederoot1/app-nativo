@@ -1,2 +1,2 @@
-import Login from '../frontend/screens/Auth/Login';
+import Login from '../screens/Auth/Login';
 export default Login;
