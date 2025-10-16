@@ -10,6 +10,7 @@ import {
   Pressable,
   Dimensions,
   Alert,
+  Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
@@ -60,6 +61,8 @@ export default function ProfileScreen() {
   const [coverPhoto, setCoverPhoto] = useState(p.cover);
   const [coverTransform, setCoverTransform] = useState<CoverTransform>({ scale: 1, offsetX: 0, offsetY: 0 });
   const [profilePhoto, setProfilePhoto] = useState(p.avatar);
+  const [showAvatarMenu, setShowAvatarMenu] = useState(false);
+  const hasStory = Boolean((p as any).hasStory);
 
   useEffect(() => {
     const unsub = subscribe(() => setPosts(getPosts()));
@@ -175,7 +178,9 @@ export default function ProfileScreen() {
 
           <View style={styles.mainContainer}>
             <View style={styles.avatarWrapper}>
-              <Image source={{ uri: profilePhoto }} style={styles.avatar} />
+              <Pressable onPress={() => setShowAvatarMenu(true)}>
+                <Image source={{ uri: profilePhoto }} style={styles.avatar} />
+              </Pressable>
               <View style={styles.onlineDot} />
               <TouchableOpacity
                 style={styles.avatarEditBtn}
@@ -626,6 +631,36 @@ export default function ProfileScreen() {
           }}
         />
       )}
+
+      <Modal visible={showAvatarMenu} transparent animationType="fade">
+        <Pressable
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' }}
+          onPress={() => setShowAvatarMenu(false)}
+        >
+          <View style={{ backgroundColor: '#ffffff', borderTopLeftRadius: 16, borderTopRightRadius: 16, paddingBottom: 20 }}>
+            <TouchableOpacity
+              style={{ paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' }}
+              onPress={() => {
+                setShowAvatarMenu(false);
+                router.push(`/photo/${p.username}`);
+              }}
+            >
+              <Text style={{ fontSize: 16, color: '#0f172a', fontWeight: '600' }}>Ver foto de perfil</Text>
+            </TouchableOpacity>
+            {hasStory && (
+              <TouchableOpacity
+                style={{ paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' }}
+                onPress={() => {
+                  setShowAvatarMenu(false);
+                  router.push(`/story/${p.username}`);
+                }}
+              >
+                <Text style={{ fontSize: 16, color: '#0f172a', fontWeight: '600' }}>Ver story</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
