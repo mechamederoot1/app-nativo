@@ -25,7 +25,7 @@ import {
   Reply,
   Eye,
 } from 'lucide-react-native';
-import { addComment, getPost } from '../../frontend/store/posts';
+import { addComment, getPost } from '../../store/posts';
 
 const { width } = Dimensions.get('window');
 
