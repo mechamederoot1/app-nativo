@@ -18,9 +18,9 @@ import {
   Zap,
   Heart,
 } from 'lucide-react-native';
-import TopBar from '../frontend/components/TopBar';
-import BottomNav from '../frontend/components/BottomNav';
-import StoryViewer, { StorySegment, StoryUser } from '../frontend/components/StoryViewer';
+import TopBar from '../components/TopBar';
+import BottomNav from '../components/BottomNav';
+import StoryViewer, { StorySegment, StoryUser } from '../components/StoryViewer';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
