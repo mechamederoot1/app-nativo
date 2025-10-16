@@ -333,7 +333,7 @@ export default function PostDetail() {
 
                 <Text style={styles.postContent}>{post.content}</Text>
 
-                {post.image && (
+                {post.image && imageDimensions && (
                   <View style={styles.postImageContainer}>
                     <TouchableOpacity
                       activeOpacity={0.9}
@@ -341,8 +341,13 @@ export default function PostDetail() {
                     >
                       <Image
                         source={{ uri: post.image }}
-                        style={styles.postImage}
-                        resizeMode="cover"
+                        style={[
+                          styles.postImage,
+                          {
+                            aspectRatio: imageDimensions.aspectRatio,
+                          },
+                        ]}
+                        resizeMode="contain"
                       />
                     </TouchableOpacity>
                     <View style={styles.viewsBadge}>
