@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Home, Eye, User, Image as ImageIcon } from 'lucide-react-native';
+import { Home, Eye, User, Image as ImageIcon, MessageCircle } from 'lucide-react-native';
 
 import { useUnread } from '../contexts/UnreadContext';
 
