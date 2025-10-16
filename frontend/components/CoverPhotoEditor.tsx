@@ -164,13 +164,19 @@ export default function CoverPhotoEditor({
           </Text>
 
           <View style={[styles.rectContainer, { height }]}>
-            <View style={[styles.rectMask, { height, width: SCREEN_WIDTH }] }>
+            <View style={[styles.rectMask, { height, width: SCREEN_WIDTH }]}>
               <Image
                 source={{ uri: imageUri }}
                 style={[
                   styles.image,
                   { height, width: SCREEN_WIDTH },
-                  { transform: [ { scale }, { translateX: offsetX }, { translateY: offsetY } ] },
+                  {
+                    transform: [
+                      { scale },
+                      { translateX: offsetX },
+                      { translateY: offsetY },
+                    ],
+                  },
                 ]}
                 resizeMode="cover"
               />
@@ -185,8 +191,19 @@ export default function CoverPhotoEditor({
             activeOpacity={scale === 1 ? 1 : 0.7}
             disabled={scale === 1}
           >
-            <RotateCcw size={16} color={scale === 1 ? '#cbd5e1' : '#64748b'} strokeWidth={2.5} />
-            <Text style={[styles.resetBtnText, scale === 1 && styles.resetBtnTextDisabled]}>Resetar</Text>
+            <RotateCcw
+              size={16}
+              color={scale === 1 ? '#cbd5e1' : '#64748b'}
+              strokeWidth={2.5}
+            />
+            <Text
+              style={[
+                styles.resetBtnText,
+                scale === 1 && styles.resetBtnTextDisabled,
+              ]}
+            >
+              Resetar
+            </Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -215,11 +232,36 @@ const styles = StyleSheet.create({
     margin: 16,
     alignItems: 'center',
   },
-  sectionLabel: { fontSize: 16, fontWeight: '700', color: '#0f172a', alignSelf: 'flex-start' },
-  instructionHint: { fontSize: 13, color: '#64748b', marginTop: 6, marginBottom: 12, alignSelf: 'flex-start', fontStyle: 'italic' },
-  rectContainer: { position: 'relative', width: '100%', overflow: 'hidden', borderRadius: 12, backgroundColor: '#e2e8f0' },
+  sectionLabel: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0f172a',
+    alignSelf: 'flex-start',
+  },
+  instructionHint: {
+    fontSize: 13,
+    color: '#64748b',
+    marginTop: 6,
+    marginBottom: 12,
+    alignSelf: 'flex-start',
+    fontStyle: 'italic',
+  },
+  rectContainer: {
+    position: 'relative',
+    width: '100%',
+    overflow: 'hidden',
+    borderRadius: 12,
+    backgroundColor: '#e2e8f0',
+  },
   rectMask: { overflow: 'hidden' },
-  gestureOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'transparent' },
+  gestureOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'transparent',
+  },
   image: {},
   resetBtn: {
     marginTop: 12,

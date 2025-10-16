@@ -13,12 +13,7 @@ import {
   PanResponder,
   Animated,
 } from 'react-native';
-import {
-  Download,
-  X,
-  RotateCcw,
-  Check,
-} from 'lucide-react-native';
+import { Download, X, RotateCcw, Check } from 'lucide-react-native';
 
 interface ProfilePhotoEditorProps {
   imageUri: string;
@@ -106,7 +101,7 @@ export default function ProfilePhotoEditor({
             const scaleFactor = currentDistance / gestureState.initialDistance;
             const newScale = Math.max(
               MIN_SCALE,
-              Math.min(MAX_SCALE, gestureState.initialScale * scaleFactor)
+              Math.min(MAX_SCALE, gestureState.initialScale * scaleFactor),
             );
 
             setScale(newScale);
@@ -129,11 +124,11 @@ export default function ProfilePhotoEditor({
 
               const newOffsetX = Math.max(
                 -maxOffset,
-                Math.min(maxOffset, gestureState.initialOffsetX + deltaX)
+                Math.min(maxOffset, gestureState.initialOffsetX + deltaX),
               );
               const newOffsetY = Math.max(
                 -maxOffset,
-                Math.min(maxOffset, gestureState.initialOffsetY + deltaY)
+                Math.min(maxOffset, gestureState.initialOffsetY + deltaY),
               );
 
               setOffsetX(newOffsetX);
@@ -147,7 +142,7 @@ export default function ProfilePhotoEditor({
           gestureState.initialDistance = 0;
         },
       }),
-    [scale, offsetX, offsetY]
+    [scale, offsetX, offsetY],
   );
 
   const handleReset = () => {
@@ -249,7 +244,10 @@ export default function ProfilePhotoEditor({
                   {...panResponder.panHandlers}
                 />
 
-                <View style={styles.circleBorderIndicator} pointerEvents="none" />
+                <View
+                  style={styles.circleBorderIndicator}
+                  pointerEvents="none"
+                />
 
                 {scale > 1 && (
                   <View style={styles.zoomDisplay} pointerEvents="none">
@@ -268,7 +266,10 @@ export default function ProfilePhotoEditor({
 
               <TouchableOpacity
                 onPress={handleReset}
-                style={[styles.resetBtn, scale === 1 && styles.resetBtnDisabled]}
+                style={[
+                  styles.resetBtn,
+                  scale === 1 && styles.resetBtnDisabled,
+                ]}
                 activeOpacity={scale === 1 ? 1 : 0.7}
                 disabled={scale === 1}
               >
