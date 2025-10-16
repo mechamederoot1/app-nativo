@@ -448,6 +448,10 @@ export default function PostDetail() {
           </View>
         </View>
       </KeyboardAvoidingView>
+
+      {post.image && (
+        <MediaViewer visible={showMedia} type="image" uri={post.image} onClose={() => setShowMedia(false)} />
+      )}
     </SafeAreaView>
   );
 }
