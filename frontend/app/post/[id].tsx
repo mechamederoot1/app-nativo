@@ -62,6 +62,7 @@ export default function PostDetail() {
 
   const [userReaction, setUserReaction] = useState<string | null>(null);
   const [bookmarked, setBookmarked] = useState(false);
+  const [showMedia, setShowMedia] = useState(false);
   const [reactionCounts, setReactionCounts] = useState({
     amei: 234,
     uau: 156,
