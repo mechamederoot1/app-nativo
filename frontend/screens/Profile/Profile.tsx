@@ -9,11 +9,14 @@ import {
   TouchableOpacity,
   Pressable,
   Dimensions,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
 import BottomNav from '../../components/BottomNav';
 import PostCard from '../../components/PostCard';
 import TopBar from '../../components/TopBar';
+import ProfilePhotoEditor from '../../components/ProfilePhotoEditor';
 import {
   Heart,
   Home,
