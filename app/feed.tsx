@@ -1,2 +1,2 @@
-import Feed from '../frontend/screens/Feed/Feed';
+import Feed from '../screens/Feed/Feed';
 export default Feed;
