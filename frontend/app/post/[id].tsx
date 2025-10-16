@@ -83,9 +83,11 @@ export default function PostDetail() {
     }).start(() => {
       setTimeout(() => {
         // @ts-ignore
-        menuRef.current?.measureInWindow?.((x: number, y: number, w: number, h: number) => {
-          setMenuRect({ x, y, width: w, height: h });
-        });
+        menuRef.current?.measureInWindow?.(
+          (x: number, y: number, w: number, h: number) => {
+            setMenuRect({ x, y, width: w, height: h });
+          },
+        );
       }, 0);
     });
   };
@@ -104,9 +106,17 @@ export default function PostDetail() {
   const handleMoveOnPicker = (pageX: number, pageY: number) => {
     const insideX = pageX - menuRect.x;
     const insideY = pageY - menuRect.y;
-    if (insideX >= 0 && insideX <= menuRect.width && insideY >= -24 && insideY <= menuRect.height + 24) {
+    if (
+      insideX >= 0 &&
+      insideX <= menuRect.width &&
+      insideY >= -24 &&
+      insideY <= menuRect.height + 24
+    ) {
       const slot = menuRect.width / REACTIONS.length;
-      const idx = Math.max(0, Math.min(REACTIONS.length - 1, Math.floor(insideX / slot)));
+      const idx = Math.max(
+        0,
+        Math.min(REACTIONS.length - 1, Math.floor(insideX / slot)),
+      );
       setHovered(REACTIONS[idx].id);
     } else {
       setHovered(null);
@@ -120,18 +130,28 @@ export default function PostDetail() {
     }
     if (userReaction === reactionId) {
       setUserReaction(null);
-      setReactionCounts(prev => ({ ...prev, [reactionId]: prev[reactionId as keyof typeof prev] - 1 }));
+      setReactionCounts((prev) => ({
+        ...prev,
+        [reactionId]: prev[reactionId as keyof typeof prev] - 1,
+      }));
     } else {
       if (userReaction) {
-        setReactionCounts(prev => ({ ...prev, [userReaction]: prev[userReaction as keyof typeof prev] - 1 }));
+        setReactionCounts((prev) => ({
+          ...prev,
+          [userReaction]: prev[userReaction as keyof typeof prev] - 1,
+        }));
       }
       setUserReaction(reactionId);
-      setReactionCounts(prev => ({ ...prev, [reactionId]: prev[reactionId as keyof typeof prev] + 1 }));
+      setReactionCounts((prev) => ({
+        ...prev,
+        [reactionId]: prev[reactionId as keyof typeof prev] + 1,
+      }));
     }
     closePicker();
   };
 
-  const toggleAmeiQuick = () => applyReaction(userReaction === 'amei' ? 'amei' : 'amei');
+  const toggleAmeiQuick = () =>
+    applyReaction(userReaction === 'amei' ? 'amei' : 'amei');
 
   if (!post) {
     return (
@@ -159,24 +179,36 @@ export default function PostDetail() {
     setReplyingTo(null);
   };
 
-  const totalReactions = Object.values(reactionCounts).reduce((a, b) => a + b, 0);
+  const totalReactions = Object.values(reactionCounts).reduce(
+    (a, b) => a + b,
+    0,
+  );
 
   const renderComment = ({ item }: any) => {
     const isReply = item.parentId !== undefined;
     const hasReplies = post.comments.some((c: any) => c.parentId === item.id);
 
     return (
-      <Animated.View style={[styles.commentWrapper, isReply && styles.replyWrapper]}>
+      <Animated.View
+        style={[styles.commentWrapper, isReply && styles.replyWrapper]}
+      >
         {isReply && <View style={styles.replyLine} />}
 
-        <View style={[styles.commentContainer, isReply && styles.replyContainer]}>
-          <Image source={{ uri: item.userAvatar || MOCK_USER.avatar }} style={styles.commentAvatar} />
+        <View
+          style={[styles.commentContainer, isReply && styles.replyContainer]}
+        >
+          <Image
+            source={{ uri: item.userAvatar || MOCK_USER.avatar }}
+            style={styles.commentAvatar}
+          />
 
           <View style={styles.commentContent}>
             <View style={styles.commentHeader}>
               <View>
                 <Text style={styles.commentAuthor}>{item.user}</Text>
-                <Text style={styles.commentMeta}>{item.timestamp || 'agora'}</Text>
+                <Text style={styles.commentMeta}>
+                  {item.timestamp || 'agora'}
+                </Text>
               </View>
               {!isReply && (
                 <TouchableOpacity style={styles.moreBtn}>
@@ -193,7 +225,10 @@ export default function PostDetail() {
                 <Text style={styles.actionBtnText}>Reagir</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.actionBtn} onPress={() => setReplyingTo(item.id)}>
+              <TouchableOpacity
+                style={styles.actionBtn}
+                onPress={() => setReplyingTo(item.id)}
+              >
                 <Reply size={14} color="#64748b" strokeWidth={2} />
                 <Text style={styles.actionBtnText}>Responder</Text>
               </TouchableOpacity>
@@ -201,7 +236,12 @@ export default function PostDetail() {
               {hasReplies && (
                 <TouchableOpacity style={styles.viewReplies}>
                   <Text style={styles.viewRepliesText}>
-                    Ver respostas ({post.comments.filter((c: any) => c.parentId === item.id).length})
+                    Ver respostas (
+                    {
+                      post.comments.filter((c: any) => c.parentId === item.id)
+                        .length
+                    }
+                    )
                   </Text>
                 </TouchableOpacity>
               )}
@@ -212,11 +252,16 @@ export default function PostDetail() {
               .slice(0, 1)
               .map((reply: any) => (
                 <View key={reply.id} style={styles.inlineReply}>
-                  <Image source={{ uri: reply.userAvatar || MOCK_USER.avatar }} style={styles.replyAvatar} />
+                  <Image
+                    source={{ uri: reply.userAvatar || MOCK_USER.avatar }}
+                    style={styles.replyAvatar}
+                  />
                   <View style={styles.replyContent}>
                     <View style={styles.replyHeader}>
                       <Text style={styles.replyAuthor}>{reply.user}</Text>
-                      <Text style={styles.replyMeta}>{reply.timestamp || 'agora'}</Text>
+                      <Text style={styles.replyMeta}>
+                        {reply.timestamp || 'agora'}
+                      </Text>
                     </View>
                     <Text style={styles.replyText}>{reply.text}</Text>
                   </View>
@@ -230,7 +275,11 @@ export default function PostDetail() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
             <ChevronLeft size={24} color="#0f172a" strokeWidth={2.5} />
@@ -249,7 +298,10 @@ export default function PostDetail() {
             <View>
               <View style={styles.postPreview}>
                 <View style={styles.authorRow}>
-                  <Image source={{ uri: MOCK_AUTHOR.avatar }} style={styles.authorAvatar} />
+                  <Image
+                    source={{ uri: MOCK_AUTHOR.avatar }}
+                    style={styles.authorAvatar}
+                  />
                   <View style={styles.authorInfo}>
                     <View style={styles.authorNameRow}>
                       <Text style={styles.authorName}>{MOCK_AUTHOR.name}</Text>
@@ -259,7 +311,9 @@ export default function PostDetail() {
                         </View>
                       )}
                     </View>
-                    <Text style={styles.authorUsername}>{MOCK_AUTHOR.username}</Text>
+                    <Text style={styles.authorUsername}>
+                      {MOCK_AUTHOR.username}
+                    </Text>
                   </View>
                 </View>
 
@@ -267,7 +321,11 @@ export default function PostDetail() {
 
                 {post.image && (
                   <View style={styles.postImageContainer}>
-                    <Image source={{ uri: post.image }} style={styles.postImage} resizeMode="cover" />
+                    <Image
+                      source={{ uri: post.image }}
+                      style={styles.postImage}
+                      resizeMode="cover"
+                    />
                     <View style={styles.viewsBadge}>
                       <Eye size={14} color="#ffffff" strokeWidth={2} />
                       <Text style={styles.viewsText}>8.2K</Text>
@@ -278,15 +336,23 @@ export default function PostDetail() {
                 {totalReactions > 0 && (
                   <View style={styles.reactionsBar}>
                     <View style={styles.reactionsDisplay}>
-                      {REACTIONS.map(r =>
-                        reactionCounts[r.id as keyof typeof reactionCounts] > 0 && (
-                          <View key={r.id} style={styles.reactionBubble}>
-                            <Text style={styles.reactionEmoji}>{r.emoji}</Text>
-                            <Text style={styles.reactionCount}>
-                              {reactionCounts[r.id as keyof typeof reactionCounts]}
-                            </Text>
-                          </View>
-                        )
+                      {REACTIONS.map(
+                        (r) =>
+                          reactionCounts[r.id as keyof typeof reactionCounts] >
+                            0 && (
+                            <View key={r.id} style={styles.reactionBubble}>
+                              <Text style={styles.reactionEmoji}>
+                                {r.emoji}
+                              </Text>
+                              <Text style={styles.reactionCount}>
+                                {
+                                  reactionCounts[
+                                    r.id as keyof typeof reactionCounts
+                                  ]
+                                }
+                              </Text>
+                            </View>
+                          ),
                       )}
                     </View>
                     <Text style={styles.totalReactions}>{totalReactions}</Text>
@@ -316,24 +382,40 @@ export default function PostDetail() {
                           {
                             opacity: pickerAnim,
                             transform: [
-                              { scale: pickerAnim.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1] }) },
-                              { translateY: pickerAnim.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) },
+                              {
+                                scale: pickerAnim.interpolate({
+                                  inputRange: [0, 1],
+                                  outputRange: [0.9, 1],
+                                }),
+                              },
+                              {
+                                translateY: pickerAnim.interpolate({
+                                  inputRange: [0, 1],
+                                  outputRange: [10, 0],
+                                }),
+                              },
                             ],
                           },
                         ]}
                         onLayout={(e: LayoutChangeEvent) => {}}
                       >
-                        {REACTIONS.map(r => (
+                        {REACTIONS.map((r) => (
                           <View
                             key={r.id}
                             style={[
                               styles.reactionOption,
                               hovered === r.id && styles.reactionOptionActive,
-                              hovered === r.id && { transform: [{ scale: 1.12 }] },
+                              hovered === r.id && {
+                                transform: [{ scale: 1.12 }],
+                              },
                             ]}
                           >
-                            <Text style={styles.reactionOptionEmoji}>{r.emoji}</Text>
-                            <Text style={styles.reactionOptionLabel}>{r.label}</Text>
+                            <Text style={styles.reactionOptionEmoji}>
+                              {r.emoji}
+                            </Text>
+                            <Text style={styles.reactionOptionLabel}>
+                              {r.label}
+                            </Text>
                           </View>
                         ))}
                       </Animated.View>
@@ -360,7 +442,14 @@ export default function PostDetail() {
                       fill={bookmarked ? '#f59e0b' : 'none'}
                       strokeWidth={2}
                     />
-                    <Text style={[styles.actionButtonText, bookmarked && { color: '#f59e0b' }]}>Salvar</Text>
+                    <Text
+                      style={[
+                        styles.actionButtonText,
+                        bookmarked && { color: '#f59e0b' },
+                      ]}
+                    >
+                      Salvar
+                    </Text>
                   </TouchableOpacity>
                 </View>
 
@@ -370,7 +459,10 @@ export default function PostDetail() {
                     onStartShouldSetResponder={() => true}
                     onMoveShouldSetResponder={() => true}
                     onResponderMove={(e) => {
-                      handleMoveOnPicker(e.nativeEvent.pageX, e.nativeEvent.pageY);
+                      handleMoveOnPicker(
+                        e.nativeEvent.pageX,
+                        e.nativeEvent.pageY,
+                      );
                     }}
                     onResponderRelease={() => {
                       applyReaction(hovered);
@@ -384,7 +476,9 @@ export default function PostDetail() {
                 <View style={styles.commentsHeader}>
                   <Text style={styles.commentsTitle}>Comentários</Text>
                   <View style={styles.commentsBadge}>
-                    <Text style={styles.commentsBadgeText}>{post.comments.length}</Text>
+                    <Text style={styles.commentsBadgeText}>
+                      {post.comments.length}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -397,25 +491,38 @@ export default function PostDetail() {
 
         <View style={styles.inputBarContainer}>
           <View style={styles.inputBar}>
-            <Image source={{ uri: MOCK_USER.avatar }} style={styles.inputAvatar} />
+            <Image
+              source={{ uri: MOCK_USER.avatar }}
+              style={styles.inputAvatar}
+            />
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
                 value={comment}
                 onChangeText={setComment}
-                placeholder={replyingTo ? 'Escrever uma resposta...' : 'Adicionar um comentário...'}
+                placeholder={
+                  replyingTo
+                    ? 'Escrever uma resposta...'
+                    : 'Adicionar um comentário...'
+                }
                 placeholderTextColor="#94a3b8"
                 multiline
                 maxLength={500}
               />
               {replyingTo && (
-                <TouchableOpacity onPress={() => setReplyingTo(null)} style={styles.cancelReply}>
+                <TouchableOpacity
+                  onPress={() => setReplyingTo(null)}
+                  style={styles.cancelReply}
+                >
                   <Text style={styles.cancelReplyText}>Cancelar</Text>
                 </TouchableOpacity>
               )}
             </View>
             <TouchableOpacity
-              style={[styles.sendBtn, !comment.trim() && styles.sendBtnDisabled]}
+              style={[
+                styles.sendBtn,
+                !comment.trim() && styles.sendBtnDisabled,
+              ]}
               onPress={handleAddComment}
               disabled={!comment.trim()}
             >
@@ -431,49 +538,120 @@ export default function PostDetail() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#ffffff' },
   header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f1f5f9',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
   },
   headerTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
   emptyContainer: { flex: 1, padding: 20, justifyContent: 'center' },
   title: { fontSize: 18, fontWeight: '700', color: '#0f172a' },
   sub: { marginTop: 8, fontSize: 14, color: '#64748b' },
   postPreview: {
-    backgroundColor: '#ffffff', paddingHorizontal: 16, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#f1f5f9',
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
   },
   authorRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  authorAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#f1f5f9', marginRight: 12 },
+  authorAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#f1f5f9',
+    marginRight: 12,
+  },
   authorInfo: { flex: 1 },
   authorNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   authorName: { fontSize: 15, fontWeight: '700', color: '#0f172a' },
-  verifiedBadge: { backgroundColor: '#3b82f6', width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+  verifiedBadge: {
+    backgroundColor: '#3b82f6',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   verifiedText: { color: '#ffffff', fontSize: 11, fontWeight: '800' },
   authorUsername: { fontSize: 13, color: '#64748b', marginTop: 2 },
-  postContent: { fontSize: 15, color: '#0f172a', lineHeight: 24, marginBottom: 12 },
-  postImageContainer: { position: 'relative', marginBottom: 12, borderRadius: 12, overflow: 'hidden', backgroundColor: '#f1f5f9' },
+  postContent: {
+    fontSize: 15,
+    color: '#0f172a',
+    lineHeight: 24,
+    marginBottom: 12,
+  },
+  postImageContainer: {
+    position: 'relative',
+    marginBottom: 12,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#f1f5f9',
+  },
   postImage: { width: '100%', height: 300, backgroundColor: '#f1f5f9' },
   viewsBadge: {
-    position: 'absolute', bottom: 12, left: 12, flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: 'rgba(0,0,0,0.7)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16,
+    position: 'absolute',
+    bottom: 12,
+    left: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
   },
   viewsText: { color: '#ffffff', fontSize: 12, fontWeight: '600' },
   reactionsBar: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: '#f8fafc', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 12, marginBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f8fafc',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 16,
   },
   reactionsDisplay: { flexDirection: 'row', gap: 6 },
   reactionBubble: {
-    flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#ffffff',
-    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   reactionEmoji: { fontSize: 14 },
   reactionCount: { fontSize: 11, fontWeight: '700', color: '#475569' },
   totalReactions: { fontSize: 12, fontWeight: '600', color: '#64748b' },
-  actionsBar: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 8, position: 'relative' },
-  actionButtonRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8, paddingHorizontal: 12 },
+  actionsBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 8,
+    position: 'relative',
+  },
+  actionButtonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
   actionButtonText: { fontSize: 13, fontWeight: '600', color: '#64748b' },
   reactionsButtonContainer: { position: 'relative' },
-  reactionTrigger: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8, paddingHorizontal: 12 },
+  reactionTrigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
   reactionTriggerEmoji: { fontSize: 18 },
   reactionTriggerText: { fontSize: 13, fontWeight: '600', color: '#64748b' },
   reactionsMenu: {
@@ -493,10 +671,21 @@ const styles = StyleSheet.create({
     gap: 4,
     zIndex: 100,
   },
-  reactionOption: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10, paddingVertical: 8, borderRadius: 12 },
+  reactionOption: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
   reactionOptionActive: { backgroundColor: '#f0f9ff' },
   reactionOptionEmoji: { fontSize: 24 },
-  reactionOptionLabel: { fontSize: 9, color: '#64748b', fontWeight: '600', marginTop: 2 },
+  reactionOptionLabel: {
+    fontSize: 9,
+    color: '#64748b',
+    fontWeight: '600',
+    marginTop: 2,
+  },
   pickerOverlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 99,
@@ -504,50 +693,132 @@ const styles = StyleSheet.create({
   divider: { height: 1, backgroundColor: '#f1f5f9', marginVertical: 12 },
   commentsHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   commentsTitle: { fontSize: 16, fontWeight: '800', color: '#0f172a' },
-  commentsBadge: { backgroundColor: '#3b82f6', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
+  commentsBadge: {
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
   commentsBadgeText: { color: '#ffffff', fontSize: 12, fontWeight: '700' },
   listContent: { paddingBottom: 120 },
   commentWrapper: { paddingHorizontal: 16, paddingVertical: 12 },
   replyWrapper: { paddingLeft: 50, marginTop: 4 },
-  replyLine: { position: 'absolute', left: 35, top: -12, width: 2, height: 36, backgroundColor: '#e2e8f0' },
+  replyLine: {
+    position: 'absolute',
+    left: 35,
+    top: -12,
+    width: 2,
+    height: 36,
+    backgroundColor: '#e2e8f0',
+  },
   commentContainer: { flexDirection: 'row', gap: 12 },
-  replyContainer: { backgroundColor: '#f8fafc', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, borderLeftWidth: 3, borderLeftColor: '#dbeafe' },
-  commentAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#f1f5f9' },
-  replyAvatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#f1f5f9' },
+  replyContainer: {
+    backgroundColor: '#f8fafc',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: '#dbeafe',
+  },
+  commentAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#f1f5f9',
+  },
+  replyAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#f1f5f9',
+  },
   commentContent: { flex: 1 },
-  commentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 },
+  commentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 6,
+  },
   commentAuthor: { fontSize: 14, fontWeight: '700', color: '#0f172a' },
   commentMeta: { fontSize: 12, color: '#94a3b8', marginTop: 2 },
   moreBtn: { padding: 4 },
-  commentText: { fontSize: 14, color: '#0f172a', lineHeight: 22, marginBottom: 8 },
+  commentText: {
+    fontSize: 14,
+    color: '#0f172a',
+    lineHeight: 22,
+    marginBottom: 8,
+  },
   commentActions: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   actionEmoji: { fontSize: 16 },
   actionBtnText: { fontSize: 12, color: '#64748b', fontWeight: '600' },
   viewReplies: { marginLeft: 'auto' },
   viewRepliesText: { fontSize: 12, color: '#3b82f6', fontWeight: '700' },
-  inlineReply: { flexDirection: 'row', gap: 8, marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#f1f5f9' },
+  inlineReply: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+  },
   replyContent: { flex: 1 },
-  replyHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  replyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   replyAuthor: { fontSize: 13, fontWeight: '700', color: '#0f172a' },
   replyMeta: { fontSize: 11, color: '#94a3b8' },
   replyText: { fontSize: 13, color: '#0f172a', lineHeight: 20 },
   inputBarContainer: {
-    position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#ffffff',
-    borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingHorizontal: 12, paddingVertical: 12,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
     paddingBottom: 12 + (Platform.OS === 'ios' ? 20 : 0),
   },
   inputBar: {
-    flexDirection: 'row', alignItems: 'flex-end', gap: 10, backgroundColor: '#f8fafc',
-    borderRadius: 24, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: '#e2e8f0',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 10,
+    backgroundColor: '#f8fafc',
+    borderRadius: 24,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
-  inputAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#e2e8f0' },
+  inputAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#e2e8f0',
+  },
   inputWrapper: { flex: 1 },
-  input: { paddingHorizontal: 12, paddingVertical: 8, fontSize: 14, color: '#0f172a', maxHeight: 100 },
+  input: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 14,
+    color: '#0f172a',
+    maxHeight: 100,
+  },
   cancelReply: { paddingHorizontal: 8, paddingVertical: 4, marginBottom: 4 },
   cancelReplyText: { fontSize: 11, color: '#ef4444', fontWeight: '600' },
   sendBtn: {
-    backgroundColor: '#3b82f6', width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginBottom: 0,
+    backgroundColor: '#3b82f6',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 0,
   },
   sendBtnDisabled: { backgroundColor: '#cbd5e1' },
 });

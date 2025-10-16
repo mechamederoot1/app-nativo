@@ -38,7 +38,8 @@ const MOCK_STORIES = [
       isVerified: true,
       isPremium: true,
     },
-    image: 'https://images.unsplash.com/photo-1527766833261-b09c3163a791?auto=format&fit=crop&w=1200&q=80',
+    image:
+      'https://images.unsplash.com/photo-1527766833261-b09c3163a791?auto=format&fit=crop&w=1200&q=80',
     caption: 'Explorando novas referências para o próximo projeto! ✨',
     postedAt: 'há 1h',
     views: 2340,
@@ -55,7 +56,8 @@ const MOCK_STORIES = [
       isVerified: true,
       isPremium: false,
     },
-    image: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1200&q=80',
+    image:
+      'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1200&q=80',
     caption: 'Lançamos a nova feature hoje! 🚀',
     postedAt: 'há 2h',
     views: 5670,
@@ -100,7 +102,8 @@ const ProgressBar = ({ segments, currentIndex }: any) => {
           style={[
             styles.progressBar,
             {
-              backgroundColor: index < currentIndex ? '#ffffff' : 'rgba(255,255,255,0.3)',
+              backgroundColor:
+                index < currentIndex ? '#ffffff' : 'rgba(255,255,255,0.3)',
             },
           ]}
         />
@@ -163,12 +166,18 @@ export default function StoryView() {
       <StatusBar barStyle="light-content" />
 
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.headerBtn}
+        >
           <ChevronLeft size={24} color="#ffffff" strokeWidth={2.5} />
         </TouchableOpacity>
 
         <View style={styles.authorInfo}>
-          <Image source={{ uri: story.author.avatar }} style={styles.headerAvatar} />
+          <Image
+            source={{ uri: story.author.avatar }}
+            style={styles.headerAvatar}
+          />
           <View>
             <View style={styles.authorNameRow}>
               <Text style={styles.authorNameHeader}>{story.author.name}</Text>
@@ -261,7 +270,9 @@ export default function StoryView() {
               fill={liked ? '#ff1744' : 'none'}
               strokeWidth={2}
             />
-            <Text style={styles.actionLabel}>{liked ? 'Curtido' : 'Curtir'}</Text>
+            <Text style={styles.actionLabel}>
+              {liked ? 'Curtido' : 'Curtir'}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -293,7 +304,10 @@ export default function StoryView() {
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <View style={styles.commentCard}>
-                <Image source={{ uri: item.avatar }} style={styles.commentAvatar} />
+                <Image
+                  source={{ uri: item.avatar }}
+                  style={styles.commentAvatar}
+                />
                 <View style={styles.commentContent}>
                   <View style={styles.commentHeader}>
                     <Text style={styles.commentAuthor}>{item.author}</Text>
@@ -306,7 +320,11 @@ export default function StoryView() {
                       <Text style={styles.commentActionText}>{item.likes}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.commentActionBtn}>
-                      <MessageCircle size={14} color="#64748b" strokeWidth={2} />
+                      <MessageCircle
+                        size={14}
+                        color="#64748b"
+                        strokeWidth={2}
+                      />
                       <Text style={styles.commentActionText}>Responder</Text>
                     </TouchableOpacity>
                   </View>
@@ -318,7 +336,10 @@ export default function StoryView() {
           />
 
           <View style={styles.commentInputContainer}>
-            <Image source={{ uri: MOCK_USER.avatar }} style={styles.inputAvatar} />
+            <Image
+              source={{ uri: MOCK_USER.avatar }}
+              style={styles.inputAvatar}
+            />
             <View style={styles.commentInputWrapper}>
               <Text style={styles.commentInputPlaceholder}>
                 {comment || 'Adicionar um comentário...'}

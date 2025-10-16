@@ -11,12 +11,7 @@ import {
 } from 'react-native';
 import TopBar from './components/TopBar';
 import BottomNav from './components/BottomNav';
-import {
-  ChevronRight,
-  Shield,
-  Star,
-  Clock
-} from 'lucide-react-native';
+import { ChevronRight, Shield, Star, Clock } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -29,7 +24,7 @@ const MOCK_VISITS = [
     isPremium: true,
     isVerified: true,
     hasInvite: true,
-    timeAgo: 'Hoje'
+    timeAgo: 'Hoje',
   },
   {
     id: 'v2',
@@ -39,7 +34,7 @@ const MOCK_VISITS = [
     isPremium: false,
     isVerified: true,
     hasInvite: false,
-    timeAgo: 'Hoje'
+    timeAgo: 'Hoje',
   },
   {
     id: 'v3',
@@ -48,7 +43,7 @@ const MOCK_VISITS = [
     avatar: 'https://i.pravatar.cc/100?img=33',
     isPremium: true,
     hasInvite: true,
-    timeAgo: 'Essa semana'
+    timeAgo: 'Essa semana',
   },
   {
     id: 'v4',
@@ -57,14 +52,14 @@ const MOCK_VISITS = [
     avatar: 'https://i.pravatar.cc/100?img=44',
     isPremium: false,
     hasInvite: false,
-    timeAgo: 'Esse mês'
+    timeAgo: 'Esse mês',
   },
 ];
 
 export default function VisitsScreen() {
   const [timeFilter, setTimeFilter] = useState('all');
 
-  const filteredVisits = MOCK_VISITS.filter(visit => {
+  const filteredVisits = MOCK_VISITS.filter((visit) => {
     if (timeFilter === 'all') return true;
     return visit.timeAgo.toLowerCase() === timeFilter;
   });
@@ -82,37 +77,69 @@ export default function VisitsScreen() {
 
         <View style={styles.filters}>
           <TouchableOpacity
-            style={[styles.filterBtn, timeFilter === 'all' && styles.filterActive]}
+            style={[
+              styles.filterBtn,
+              timeFilter === 'all' && styles.filterActive,
+            ]}
             onPress={() => setTimeFilter('all')}
           >
-            <Text style={[styles.filterText, timeFilter === 'all' && styles.filterTextActive]}>
+            <Text
+              style={[
+                styles.filterText,
+                timeFilter === 'all' && styles.filterTextActive,
+              ]}
+            >
               Todas
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.filterBtn, timeFilter === 'hoje' && styles.filterActive]}
+            style={[
+              styles.filterBtn,
+              timeFilter === 'hoje' && styles.filterActive,
+            ]}
             onPress={() => setTimeFilter('hoje')}
           >
-            <Text style={[styles.filterText, timeFilter === 'hoje' && styles.filterTextActive]}>
+            <Text
+              style={[
+                styles.filterText,
+                timeFilter === 'hoje' && styles.filterTextActive,
+              ]}
+            >
               Hoje
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.filterBtn, timeFilter === 'essa semana' && styles.filterActive]}
+            style={[
+              styles.filterBtn,
+              timeFilter === 'essa semana' && styles.filterActive,
+            ]}
             onPress={() => setTimeFilter('essa semana')}
           >
-            <Text style={[styles.filterText, timeFilter === 'essa semana' && styles.filterTextActive]}>
+            <Text
+              style={[
+                styles.filterText,
+                timeFilter === 'essa semana' && styles.filterTextActive,
+              ]}
+            >
               Essa semana
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.filterBtn, timeFilter === 'esse mês' && styles.filterActive]}
+            style={[
+              styles.filterBtn,
+              timeFilter === 'esse mês' && styles.filterActive,
+            ]}
             onPress={() => setTimeFilter('esse mês')}
           >
-            <Text style={[styles.filterText, timeFilter === 'esse mês' && styles.filterTextActive]}>
+            <Text
+              style={[
+                styles.filterText,
+                timeFilter === 'esse mês' && styles.filterTextActive,
+              ]}
+            >
               Esse mês
             </Text>
           </TouchableOpacity>
@@ -130,10 +157,20 @@ export default function VisitsScreen() {
                   <View style={styles.nameRow}>
                     <Text style={styles.name}>{item.name}</Text>
                     {item.isPremium && (
-                      <Star size={14} color="#eab308" fill="#eab308" strokeWidth={2} />
+                      <Star
+                        size={14}
+                        color="#eab308"
+                        fill="#eab308"
+                        strokeWidth={2}
+                      />
                     )}
                     {item.isVerified && (
-                      <Shield size={14} color="#3b82f6" fill="#3b82f6" strokeWidth={2} />
+                      <Shield
+                        size={14}
+                        color="#3b82f6"
+                        fill="#3b82f6"
+                        strokeWidth={2}
+                      />
                     )}
                   </View>
 
