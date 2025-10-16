@@ -31,13 +31,6 @@ function formatBadgeValue(value?: number) {
   return value > 99 ? '99+' : String(value);
 }
 
-function MessageBubble({ active }: { active?: boolean }) {
-  return (
-    <View style={[styles.msgBubble, active && styles.msgBubbleActive]}>
-      <View style={[styles.msgInner, active && styles.msgInnerActive]} />
-    </View>
-  );
-}
 
 function BottomNavInner({
   active,
