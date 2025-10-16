@@ -9,11 +9,14 @@ import {
   TouchableOpacity,
   Pressable,
   Dimensions,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
 import BottomNav from '../../components/BottomNav';
 import PostCard from '../../components/PostCard';
 import TopBar from '../../components/TopBar';
+import ProfilePhotoEditor from '../../components/ProfilePhotoEditor';
 import {
   Heart,
   Home,
@@ -49,11 +52,47 @@ export default function ProfileScreen() {
   const p = profileData;
   const [tab, setTab] = useState<'posts' | 'about' | 'photos'>('posts');
   const [posts, setPosts] = useState(getPosts());
+  const [editorVisible, setEditorVisible] = useState(false);
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
+  const [profilePhoto, setProfilePhoto] = useState(p.avatar);
 
   useEffect(() => {
     const unsub = subscribe(() => setPosts(getPosts()));
     return unsub;
   }, []);
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permissão necessária',
+        'Permitir acesso à galeria de fotos para mudar sua foto de perfil.',
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setSelectedImageUri(result.assets[0].uri);
+      setEditorVisible(true);
+    }
+  };
+
+  const handlePhotoSave = (imageUri: string, caption: string) => {
+    setProfilePhoto(imageUri);
+    setEditorVisible(false);
+    setSelectedImageUri(null);
+    Alert.alert(
+      'Sucesso',
+      `Foto atualizada${caption ? ` com legenda: "${caption}"` : ''}!`,
+    );
+  };
 
   const myPosts = useMemo(
     () => posts.filter((x) => x.user === 'Você'),
@@ -120,11 +159,12 @@ export default function ProfileScreen() {
 
           <View style={styles.mainContainer}>
             <View style={styles.avatarWrapper}>
-              <Image source={{ uri: p.avatar }} style={styles.avatar} />
+              <Image source={{ uri: profilePhoto }} style={styles.avatar} />
               <View style={styles.onlineDot} />
               <TouchableOpacity
                 style={styles.avatarEditBtn}
                 activeOpacity={0.8}
+                onPress={pickImage}
               >
                 <Camera size={14} color="#ffffff" strokeWidth={2.5} />
               </TouchableOpacity>
@@ -539,6 +579,18 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
       <BottomNav active="profile" />
+
+      {selectedImageUri && (
+        <ProfilePhotoEditor
+          imageUri={selectedImageUri}
+          isVisible={editorVisible}
+          onSave={handlePhotoSave}
+          onCancel={() => {
+            setEditorVisible(false);
+            setSelectedImageUri(null);
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }
