@@ -442,16 +442,16 @@ export default function ProfileScreen() {
                       setCoverTransform({ scale: 1, offsetX: 0, offsetY: 0 })
                     }
                     style={{
-                      paddingVertical: 10,
-                      paddingHorizontal: 16,
-                      borderRadius: 12,
+                      paddingVertical: 8,
+                      paddingHorizontal: 12,
+                      borderRadius: 10,
                       backgroundColor: '#f8fafc',
                       alignItems: 'center',
                       borderWidth: 1,
                       borderColor: '#e2e8f0',
                     }}
                   >
-                    <Text style={{ fontWeight: '700', color: '#64748b' }}>
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: '#64748b' }}>
                       Resetar
                     </Text>
                   </TouchableOpacity>
