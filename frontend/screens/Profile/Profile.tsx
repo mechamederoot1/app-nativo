@@ -494,6 +494,22 @@ export default function ProfileScreen() {
                           );
                         } catch {}
 
+                        try {
+                          const api = await import('../../utils/api');
+                          const data = await api.getPosts();
+                          const mapped = data.map((p) => ({
+                            id: String(p.id),
+                            user: p.user_name,
+                            content: p.content,
+                            time: 'agora',
+                            image: p.media_url || undefined,
+                            likes: 0,
+                            liked: false,
+                            comments: [],
+                          }));
+                          setPosts(mapped);
+                        } catch {}
+
                         Alert.alert('Sucesso', 'Foto de capa atualizada!');
                       } catch (error: any) {
                         console.error('Erro ao salvar foto de capa:', error);
@@ -505,13 +521,13 @@ export default function ProfileScreen() {
                     }}
                     style={{
                       flex: 1,
-                      paddingVertical: 10,
-                      borderRadius: 12,
+                      paddingVertical: 8,
+                      borderRadius: 10,
                       backgroundColor: '#3b82f6',
                       alignItems: 'center',
                     }}
                   >
-                    <Text style={{ fontWeight: '700', color: '#ffffff' }}>
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: '#ffffff' }}>
                       Salvar
                     </Text>
                   </TouchableOpacity>
