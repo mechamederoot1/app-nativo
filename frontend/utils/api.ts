@@ -97,6 +97,21 @@ export async function createPost(content: string, file?: File | Blob) {
   });
 }
 
+// React Native helper: upload image from local URI
+export async function createPostWithImage(
+  content: string,
+  file: { uri: string; type: string; name?: string }
+) {
+  const form = new FormData();
+  form.append('content', content);
+  form.append('file', {
+    uri: file.uri,
+    type: file.type,
+    name: file.name || 'upload.jpg',
+  } as any);
+  return request('/posts/upload', { method: 'POST', body: form });
+}
+
 export function logout() {
   setToken(null);
 }
