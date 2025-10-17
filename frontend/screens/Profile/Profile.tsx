@@ -59,7 +59,7 @@ export default function ProfileScreen() {
   const [userData, setUserData] = useState(profileData);
   const p = userData;
   const [tab, setTab] = useState<'posts' | 'about' | 'photos'>('posts');
-  const [posts, setPosts] = useState(getPosts());
+  const [posts, setPosts] = useState<StorePost[]>([]);
   const [editorVisible, setEditorVisible] = useState(false);
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const [coverEditorVisible, setCoverEditorVisible] = useState(false);
