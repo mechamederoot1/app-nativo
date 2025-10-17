@@ -315,7 +315,7 @@ export default function ProfileScreen() {
       setSelectedImageUri(null);
 
       try {
-        await postImageToFeed(profilePhotoUrl, 'Atualizou a foto de perfil');
+        await postImageToFeed(profilePhotoUrl, caption || '');
         try {
           const api = await import('../../utils/api');
           const data = await api.getPosts();
