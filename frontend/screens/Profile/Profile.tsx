@@ -403,7 +403,7 @@ export default function ProfileScreen() {
             )}
             {coverEditorVisible && (
               <View
-                style={StyleSheet.absoluteFill}
+                style={[StyleSheet.absoluteFill, { zIndex: 50 }]}
                 {...panResponder.panHandlers}
               >
                 <View
