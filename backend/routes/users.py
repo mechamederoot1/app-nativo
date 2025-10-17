@@ -71,7 +71,14 @@ async def update_cover_photo(
         db.commit()
         db.refresh(current)
 
-        return {"success": True, "cover_photo": media_url}
+        return {
+            "success": True,
+            "cover_photo": media_url,
+            "message": "Cover photo updated successfully"
+        }
     except Exception as e:
         db.rollback()
-        raise Exception(f"Error uploading cover photo: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"Error uploading cover photo: {str(e)}")
