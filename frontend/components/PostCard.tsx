@@ -22,6 +22,7 @@ type Post = {
   likes?: number;
   liked?: boolean;
   comments?: Comment[];
+  statusLabel?: string;
 };
 
 export default function PostCard({
@@ -35,6 +36,11 @@ export default function PostCard({
 }) {
   const { dimensions } = useImageDimensions(post.image);
   const username = '@' + post.user.replace(/\s+/g, '').toLowerCase();
+  const isUpdateContent =
+    post.content &&
+    ['Atualizou a foto de perfil', 'Atualizou a foto de capa'].includes(
+      post.content.trim(),
+    );
   return (
     <View style={styles.card}>
       <TouchableOpacity
@@ -52,18 +58,31 @@ export default function PostCard({
           </View>
         )}
         <View style={{ marginLeft: 12, flex: 1 }}>
-          <Text style={styles.user}>{post.user}</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
+            <Text style={styles.user}>{post.user}</Text>
+            {!!post.statusLabel && (
+              <Text style={styles.statusLabel}> ({post.statusLabel})</Text>
+            )}
+          </View>
           <Text style={styles.time}>{`${username} · ${post.time}`}</Text>
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        activeOpacity={0.85}
-        onPress={() => onOpen && onOpen(post.id)}
-        style={{ marginTop: 10 }}
-      >
-        <Text style={styles.content}>{post.content}</Text>
-      </TouchableOpacity>
+      {!!post.content && !isUpdateContent && (
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => onOpen && onOpen(post.id)}
+          style={{ marginTop: 10 }}
+        >
+          <Text style={styles.content}>{post.content}</Text>
+        </TouchableOpacity>
+      )}
 
       {post.image && dimensions ? (
         <TouchableOpacity
@@ -164,6 +183,12 @@ const styles = StyleSheet.create({
   time: {
     fontSize: 12,
     color: '#6b7280',
+  },
+  statusLabel: {
+    marginLeft: 6,
+    color: '#6b7280',
+    fontSize: 12,
+    fontWeight: '600',
   },
   content: {
     fontSize: 13,

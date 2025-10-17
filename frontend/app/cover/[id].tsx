@@ -1,24 +1,22 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, Image } from 'react-native';
-import TopBar from '../../components/TopBar';
-import BottomNav from '../../components/BottomNav';
 import { useLocalSearchParams } from 'expo-router';
 
 export default function CoverView() {
-  const { id } = useLocalSearchParams();
+  const params = useLocalSearchParams();
+  const id = String(params.id ?? '');
+  const src = typeof params.src === 'string' ? params.src : undefined;
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <TopBar />
       <View style={styles.container}>
-        <Text style={styles.title}>Capa</Text>
-        <Text style={styles.sub}>ID: {String(id ?? '')}</Text>
+        <Text style={styles.title}>Foto de capa</Text>
+        <Text style={styles.sub}>@{id}</Text>
         <Image
-          source={{ uri: 'https://picsum.photos/1200/400' }}
+          source={{ uri: src || 'https://picsum.photos/1200/400' }}
           style={styles.image}
         />
       </View>
-      <BottomNav active="profile" />
     </SafeAreaView>
   );
 }

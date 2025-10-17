@@ -48,7 +48,7 @@ import {
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { profileData } from './Data';
-import { getPosts, subscribe, toggleLike } from '../../store/posts';
+import type { Post as StorePost } from '../../store/posts';
 
 const { width } = Dimensions.get('window');
 
@@ -59,7 +59,7 @@ export default function ProfileScreen() {
   const [userData, setUserData] = useState(profileData);
   const p = userData;
   const [tab, setTab] = useState<'posts' | 'about' | 'photos'>('posts');
-  const [posts, setPosts] = useState(getPosts());
+  const [posts, setPosts] = useState<StorePost[]>([]);
   const [editorVisible, setEditorVisible] = useState(false);
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const [coverEditorVisible, setCoverEditorVisible] = useState(false);
@@ -224,8 +224,44 @@ export default function ProfileScreen() {
     };
 
     loadUserData();
-    const unsub = subscribe(() => setPosts(getPosts()));
-    return unsub;
+    (async () => {
+      try {
+        const api = await import('../../utils/api');
+        const data = await api.getPosts();
+        const BASE_URL =
+          (typeof process !== 'undefined' &&
+            (process as any).env &&
+            (process as any).env.EXPO_PUBLIC_API_URL) ||
+          'http://localhost:5050';
+        const abs = (u?: string | null) =>
+          u ? (u.startsWith('http') ? u : `${BASE_URL}${u}`) : undefined;
+        const mapped = data.map((p) => {
+          const media = abs(p.media_url);
+          const avatar = abs(p.user_profile_photo);
+          const cover = abs(p.user_cover_photo);
+          let statusLabel: string | undefined;
+          if (media && avatar && media === avatar)
+            statusLabel = 'atualizou a foto de perfil';
+          else if (media && cover && media === cover)
+            statusLabel = 'atualizou a foto de capa';
+          return {
+            id: String(p.id),
+            user: p.user_name,
+            content: p.content,
+            time: 'agora',
+            image: media,
+            likes: 0,
+            liked: false,
+            comments: [],
+            statusLabel,
+          };
+        });
+        setPosts(mapped);
+      } catch {
+        setPosts([]);
+      }
+    })();
+    return () => {};
   }, []);
 
   const pickImage = async () => {
@@ -297,7 +333,40 @@ export default function ProfileScreen() {
       setSelectedImageUri(null);
 
       try {
-        await postImageToFeed(profilePhotoUrl, 'Atualizou a foto de perfil');
+        await postImageToFeed(profilePhotoUrl, caption || '');
+        try {
+          const api = await import('../../utils/api');
+          const data = await api.getPosts();
+          const BASE_URL =
+            (typeof process !== 'undefined' &&
+              (process as any).env &&
+              (process as any).env.EXPO_PUBLIC_API_URL) ||
+            'http://localhost:5050';
+          const abs = (u?: string | null) =>
+            u ? (u.startsWith('http') ? u : `${BASE_URL}${u}`) : undefined;
+          const mapped = data.map((p) => {
+            const media = abs(p.media_url);
+            const avatar = abs(p.user_profile_photo);
+            const cover = abs(p.user_cover_photo);
+            let statusLabel: string | undefined;
+            if (media && avatar && media === avatar)
+              statusLabel = 'atualizou a foto de perfil';
+            else if (media && cover && media === cover)
+              statusLabel = 'atualizou a foto de capa';
+            return {
+              id: String(p.id),
+              user: p.user_name,
+              content: p.content,
+              time: 'agora',
+              image: media,
+              likes: 0,
+              liked: false,
+              comments: [],
+              statusLabel,
+            };
+          });
+          setPosts(mapped);
+        } catch {}
       } catch {}
 
       Alert.alert(
@@ -311,8 +380,8 @@ export default function ProfileScreen() {
   };
 
   const myPosts = useMemo(
-    () => posts.filter((x) => x.user === 'Você'),
-    [posts],
+    () => posts.filter((x) => x.user === p.name),
+    [posts, p.name],
   );
   const postCount = myPosts.length;
   const connectionsCount = p.connectionsCount;
@@ -336,6 +405,22 @@ export default function ProfileScreen() {
     legal: false,
     sexy: false,
   });
+
+  const handleLike = (id: string) => {
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              liked: !p.liked,
+              likes: p.liked
+                ? Math.max((p.likes || 0) - 1, 0)
+                : (p.likes || 0) + 1,
+            }
+          : p,
+      ),
+    );
+  };
 
   const handleRating = (type: 'confiavel' | 'legal' | 'sexy') => {
     if (userVotes[type]) {
@@ -385,7 +470,7 @@ export default function ProfileScreen() {
             )}
             {coverEditorVisible && (
               <View
-                style={StyleSheet.absoluteFill}
+                style={[StyleSheet.absoluteFill, { zIndex: 50 }]}
                 {...panResponder.panHandlers}
               >
                 <View
@@ -396,6 +481,7 @@ export default function ProfileScreen() {
                     right: 12,
                     flexDirection: 'row',
                     gap: 8,
+                    zIndex: 60,
                   }}
                 >
                   <TouchableOpacity
@@ -406,34 +492,22 @@ export default function ProfileScreen() {
                     }}
                     style={{
                       flex: 1,
-                      paddingVertical: 10,
-                      borderRadius: 12,
+                      paddingVertical: 8,
+                      borderRadius: 10,
                       backgroundColor: '#ffffff',
                       alignItems: 'center',
                       borderWidth: 1,
                       borderColor: '#e2e8f0',
                     }}
                   >
-                    <Text style={{ fontWeight: '700', color: '#64748b' }}>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontWeight: '700',
+                        color: '#64748b',
+                      }}
+                    >
                       Cancelar
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() =>
-                      setCoverTransform({ scale: 1, offsetX: 0, offsetY: 0 })
-                    }
-                    style={{
-                      paddingVertical: 10,
-                      paddingHorizontal: 16,
-                      borderRadius: 12,
-                      backgroundColor: '#f8fafc',
-                      alignItems: 'center',
-                      borderWidth: 1,
-                      borderColor: '#e2e8f0',
-                    }}
-                  >
-                    <Text style={{ fontWeight: '700', color: '#64748b' }}>
-                      Resetar
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -475,6 +549,44 @@ export default function ProfileScreen() {
                           );
                         } catch {}
 
+                        try {
+                          const api = await import('../../utils/api');
+                          const data = await api.getPosts();
+                          const BASE_URL =
+                            (typeof process !== 'undefined' &&
+                              (process as any).env &&
+                              (process as any).env.EXPO_PUBLIC_API_URL) ||
+                            'http://localhost:5050';
+                          const abs = (u?: string | null) =>
+                            u
+                              ? u.startsWith('http')
+                                ? u
+                                : `${BASE_URL}${u}`
+                              : undefined;
+                          const mapped = data.map((p) => {
+                            const media = abs(p.media_url);
+                            const avatar = abs(p.user_profile_photo);
+                            const cover = abs(p.user_cover_photo);
+                            let statusLabel: string | undefined;
+                            if (media && avatar && media === avatar)
+                              statusLabel = 'atualizou a foto de perfil';
+                            else if (media && cover && media === cover)
+                              statusLabel = 'atualizou a foto de capa';
+                            return {
+                              id: String(p.id),
+                              user: p.user_name,
+                              content: p.content,
+                              time: 'agora',
+                              image: media,
+                              likes: 0,
+                              liked: false,
+                              comments: [],
+                              statusLabel,
+                            };
+                          });
+                          setPosts(mapped);
+                        } catch {}
+
                         Alert.alert('Sucesso', 'Foto de capa atualizada!');
                       } catch (error: any) {
                         console.error('Erro ao salvar foto de capa:', error);
@@ -486,13 +598,19 @@ export default function ProfileScreen() {
                     }}
                     style={{
                       flex: 1,
-                      paddingVertical: 10,
-                      borderRadius: 12,
+                      paddingVertical: 8,
+                      borderRadius: 10,
                       backgroundColor: '#3b82f6',
                       alignItems: 'center',
                     }}
                   >
-                    <Text style={{ fontWeight: '700', color: '#ffffff' }}>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontWeight: '700',
+                        color: '#ffffff',
+                      }}
+                    >
                       Salvar
                     </Text>
                   </TouchableOpacity>
@@ -502,6 +620,7 @@ export default function ProfileScreen() {
             <LinearGradient
               colors={['transparent', 'rgba(0,0,0,0.4)']}
               style={styles.coverGradient}
+              pointerEvents="none"
             />
             <TouchableOpacity
               style={styles.coverEditBtn}
@@ -900,11 +1019,7 @@ export default function ProfileScreen() {
               </View>
             ) : (
               myPosts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  onLike={() => toggleLike(post.id)}
-                />
+                <PostCard key={post.id} post={post} onLike={handleLike} />
               ))
             ))}
 
@@ -989,7 +1104,10 @@ export default function ProfileScreen() {
               }}
               onPress={() => {
                 setShowCoverMenu(false);
-                router.push(`/cover/${p.username}`);
+                router.push({
+                  pathname: `/cover/${p.username}` as any,
+                  params: { src: coverPhoto },
+                });
               }}
             >
               <Text
@@ -1044,7 +1162,10 @@ export default function ProfileScreen() {
               }}
               onPress={() => {
                 setShowAvatarMenu(false);
-                router.push(`/photo/${p.username}`);
+                router.push({
+                  pathname: `/photo/${p.username}` as any,
+                  params: { src: profilePhoto },
+                });
               }}
             >
               <Text
