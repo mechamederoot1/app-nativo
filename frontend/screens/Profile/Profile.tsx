@@ -262,12 +262,17 @@ export default function ProfileScreen() {
       const { type, name } = guessMime(imageUri);
       const response = await uploadProfilePhoto({ uri: imageUri, type, name });
 
-      setProfilePhoto(response.profile_photo);
+      const profilePhotoUrl = response.profile_photo;
+      setProfilePhoto(profilePhotoUrl);
+      setUserData((prev) => ({
+        ...prev,
+        avatar: profilePhotoUrl,
+      }));
       setEditorVisible(false);
       setSelectedImageUri(null);
 
       try {
-        await postImageToFeed(response.profile_photo, 'Atualizou a foto de perfil');
+        await postImageToFeed(profilePhotoUrl, 'Atualizou a foto de perfil');
       } catch {}
 
       Alert.alert(
