@@ -222,16 +222,26 @@ export default function ProfileScreen() {
   };
 
   const handlePhotoSave = async (imageUri: string, caption: string) => {
-    setProfilePhoto(imageUri);
-    setEditorVisible(false);
-    setSelectedImageUri(null);
     try {
-      await postImageToFeed(imageUri, 'Atualizou a foto de perfil');
-    } catch {}
-    Alert.alert(
-      'Sucesso',
-      `Foto atualizada${caption ? ` com legenda: "${caption}"` : ''}!`,
-    );
+      const { uploadProfilePhoto } = await import('../../utils/api');
+      const { type, name } = guessMime(imageUri);
+      const response = await uploadProfilePhoto({ uri: imageUri, type, name });
+
+      setProfilePhoto(response.profile_photo);
+      setEditorVisible(false);
+      setSelectedImageUri(null);
+
+      try {
+        await postImageToFeed(response.profile_photo, 'Atualizou a foto de perfil');
+      } catch {}
+
+      Alert.alert(
+        'Sucesso',
+        `Foto de perfil atualizada${caption ? ` com legenda: "${caption}"` : ''}!`,
+      );
+    } catch (error: any) {
+      Alert.alert('Erro', error?.message || 'Falha ao salvar foto de perfil');
+    }
   };
 
   const myPosts = useMemo(
