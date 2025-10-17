@@ -201,13 +201,13 @@ export default function ProfileScreen() {
             ? user.profile_photo.startsWith('http')
               ? user.profile_photo
               : `${BASE_URL}${user.profile_photo}`
-            : prev.avatar;
+            : p.avatar;
 
           const coverPhotoUrl = user.cover_photo
             ? user.cover_photo.startsWith('http')
               ? user.cover_photo
               : `${BASE_URL}${user.cover_photo}`
-            : prev.cover;
+            : p.cover;
 
           setUserData((prev) => ({
             ...prev,
