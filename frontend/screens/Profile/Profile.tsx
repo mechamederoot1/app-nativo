@@ -69,10 +69,8 @@ export default function ProfileScreen() {
     offsetY: 0,
   });
   const [profilePhoto, setProfilePhoto] = useState(p.avatar);
-  const [showAvatarMenu, setShowAvatarMenu] = useState(false);
   const [showCoverMenu, setShowCoverMenu] = useState(false);
   const hasStory = Boolean((p as any).hasStory);
-
   const prevCoverTransformRef = useRef<CoverTransform>(coverTransform);
   const prevCoverPhotoRef = useRef<string>(coverPhoto);
 
@@ -175,7 +173,6 @@ export default function ProfileScreen() {
     ],
   );
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
-  const hasStory = Boolean((p as any).hasStory);
 
   useEffect(() => {
     const unsub = subscribe(() => setPosts(getPosts()));
