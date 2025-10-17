@@ -112,6 +112,34 @@ export async function createPostWithImage(
   return request('/posts/upload', { method: 'POST', body: form });
 }
 
+export async function uploadProfilePhoto(file: {
+  uri: string;
+  type: string;
+  name?: string;
+}) {
+  const form = new FormData();
+  form.append('file', {
+    uri: file.uri,
+    type: file.type,
+    name: file.name || 'profile.jpg',
+  } as any);
+  return request('/users/profile-photo', { method: 'POST', body: form });
+}
+
+export async function uploadCoverPhoto(file: {
+  uri: string;
+  type: string;
+  name?: string;
+}) {
+  const form = new FormData();
+  form.append('file', {
+    uri: file.uri,
+    type: file.type,
+    name: file.name || 'cover.jpg',
+  } as any);
+  return request('/users/cover-photo', { method: 'POST', body: form });
+}
+
 export function logout() {
   setToken(null);
 }
