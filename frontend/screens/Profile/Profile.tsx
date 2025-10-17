@@ -56,7 +56,8 @@ type CoverTransform = { scale: number; offsetX: number; offsetY: number };
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const p = profileData;
+  const [userData, setUserData] = useState(profileData);
+  const p = userData;
   const [tab, setTab] = useState<'posts' | 'about' | 'photos'>('posts');
   const [posts, setPosts] = useState(getPosts());
   const [editorVisible, setEditorVisible] = useState(false);
