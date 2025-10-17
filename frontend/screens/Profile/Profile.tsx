@@ -414,6 +414,7 @@ export default function ProfileScreen() {
                     right: 12,
                     flexDirection: 'row',
                     gap: 8,
+                    zIndex: 60,
                   }}
                 >
                   <TouchableOpacity
