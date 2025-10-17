@@ -88,4 +88,6 @@ def create_post_with_upload(
         media_url=post.media_url,
         created_at=post.created_at,
         user_name=f"{current.first_name} {current.last_name}",
+        user_profile_photo=current.profile_photo,
+        user_cover_photo=current.cover_photo,
     )
