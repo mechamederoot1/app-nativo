@@ -2,10 +2,10 @@ import os
 from typing import List
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.orm import Session
-from ..database.session import get_db
-from ..database.models import Post
-from ..schemas.post import PostCreate, PostOut
-from ..dependencies import get_current_user
+from database.session import get_db
+from database.models import Post
+from schemas.post import PostCreate, PostOut
+from dependencies import get_current_user
 
 router = APIRouter()
 
