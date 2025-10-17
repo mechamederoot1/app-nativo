@@ -38,10 +38,17 @@ async def update_profile_photo(
         db.commit()
         db.refresh(current)
 
-        return {"success": True, "profile_photo": media_url}
+        return {
+            "success": True,
+            "profile_photo": media_url,
+            "message": "Profile photo updated successfully"
+        }
     except Exception as e:
         db.rollback()
-        raise Exception(f"Error uploading profile photo: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"Error uploading profile photo: {str(e)}")
 
 @router.post("/cover-photo")
 async def update_cover_photo(
