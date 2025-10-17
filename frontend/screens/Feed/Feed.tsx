@@ -6,6 +6,7 @@ import PostCard from '../../components/PostCard';
 import BottomNav from '../../components/BottomNav';
 import CreatePost from '../../components/CreatePost';
 import TopBar from '../../components/TopBar';
+import { formatPostTime } from '../../utils/time';
 import { useRouter } from 'expo-router';
 import { subscribe, toggleLike, Post as StorePost } from '../../store/posts';
 
@@ -25,7 +26,7 @@ export default function FeedScreen() {
           id: String(p.id),
           user: p.user_name,
           content: p.content,
-          time: new Date(p.created_at).toLocaleTimeString(),
+          time: formatPostTime(p.created_at),
           image: p.media_url || undefined,
           likes: 0,
           liked: false,
@@ -52,7 +53,7 @@ export default function FeedScreen() {
           id: String(p.id),
           user: p.user_name,
           content: p.content,
-          time: new Date(p.created_at).toLocaleTimeString(),
+          time: formatPostTime(p.created_at),
           image: p.media_url || undefined,
           likes: 0,
           liked: false,
