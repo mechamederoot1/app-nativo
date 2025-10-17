@@ -1,23 +1,11 @@
-import os, sys
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-# Allow running from project root or backend/ directory
-if __package__ is None or __package__ == "":
-    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-try:
-    from backend.database.session import Base, engine
-    from backend.routes import auth as _auth, users as _users, posts as _posts
-except ModuleNotFoundError:
-    from database.session import Base, engine
-    from routes import auth as _auth, users as _users, posts as _posts
-
-try:
-    import backend.database.models as _models  # noqa: F401
-except ModuleNotFoundError:
-    import database.models as _models  # noqa: F401
+from database.session import Base, engine
+from routes import auth as _auth, users as _users, posts as _posts
+import database.models as _models  # ensure models are registered
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="App Backend", version="1.0.0")
