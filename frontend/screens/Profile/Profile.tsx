@@ -316,6 +316,21 @@ export default function ProfileScreen() {
 
       try {
         await postImageToFeed(profilePhotoUrl, 'Atualizou a foto de perfil');
+        try {
+          const api = await import('../../utils/api');
+          const data = await api.getPosts();
+          const mapped = data.map((p) => ({
+            id: String(p.id),
+            user: p.user_name,
+            content: p.content,
+            time: 'agora',
+            image: p.media_url || undefined,
+            likes: 0,
+            liked: false,
+            comments: [],
+          }));
+          setPosts(mapped);
+        } catch {}
       } catch {}
 
       Alert.alert(
