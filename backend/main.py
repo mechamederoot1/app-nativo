@@ -14,6 +14,10 @@ except ModuleNotFoundError:
     from database.session import Base, engine
     from routes import auth as _auth, users as _users, posts as _posts
 
+try:
+    import backend.database.models as _models  # noqa: F401
+except ModuleNotFoundError:
+    import database.models as _models  # noqa: F401
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="App Backend", version="1.0.0")
