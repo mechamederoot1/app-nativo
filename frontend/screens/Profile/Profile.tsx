@@ -443,7 +443,18 @@ export default function ProfileScreen() {
                         const { type, name } = guessMime(coverPhoto);
                         const response = await uploadCoverPhoto({ uri: coverPhoto, type, name });
 
-                        const coverPhotoUrl = response.cover_photo;
+                        const BASE_URL =
+                          (typeof process !== 'undefined' &&
+                            (process as any).env &&
+                            (process as any).env.EXPO_PUBLIC_API_URL) ||
+                          'http://localhost:5050';
+
+                        const coverPhotoUrl = response.cover_photo
+                          ? response.cover_photo.startsWith('http')
+                            ? response.cover_photo
+                            : `${BASE_URL}${response.cover_photo}`
+                          : coverPhoto;
+
                         setCoverPhoto(coverPhotoUrl);
                         setUserData((prev) => ({
                           ...prev,
@@ -460,6 +471,7 @@ export default function ProfileScreen() {
 
                         Alert.alert('Sucesso', 'Foto de capa atualizada!');
                       } catch (error: any) {
+                        console.error('Erro ao salvar foto de capa:', error);
                         Alert.alert('Erro', error?.message || 'Falha ao salvar foto de capa');
                       }
                     }}
