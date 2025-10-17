@@ -276,7 +276,18 @@ export default function ProfileScreen() {
       const { type, name } = guessMime(imageUri);
       const response = await uploadProfilePhoto({ uri: imageUri, type, name });
 
-      const profilePhotoUrl = response.profile_photo;
+      const BASE_URL =
+        (typeof process !== 'undefined' &&
+          (process as any).env &&
+          (process as any).env.EXPO_PUBLIC_API_URL) ||
+        'http://localhost:5050';
+
+      const profilePhotoUrl = response.profile_photo
+        ? response.profile_photo.startsWith('http')
+          ? response.profile_photo
+          : `${BASE_URL}${response.profile_photo}`
+        : profilePhoto;
+
       setProfilePhoto(profilePhotoUrl);
       setUserData((prev) => ({
         ...prev,
@@ -294,6 +305,7 @@ export default function ProfileScreen() {
         `Foto de perfil atualizada${caption ? ` com legenda: "${caption}"` : ''}!`,
       );
     } catch (error: any) {
+      console.error('Erro ao salvar foto de perfil:', error);
       Alert.alert('Erro', error?.message || 'Falha ao salvar foto de perfil');
     }
   };
