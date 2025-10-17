@@ -425,15 +425,15 @@ export default function ProfileScreen() {
                     }}
                     style={{
                       flex: 1,
-                      paddingVertical: 10,
-                      borderRadius: 12,
+                      paddingVertical: 8,
+                      borderRadius: 10,
                       backgroundColor: '#ffffff',
                       alignItems: 'center',
                       borderWidth: 1,
                       borderColor: '#e2e8f0',
                     }}
                   >
-                    <Text style={{ fontWeight: '700', color: '#64748b' }}>
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: '#64748b' }}>
                       Cancelar
                     </Text>
                   </TouchableOpacity>
