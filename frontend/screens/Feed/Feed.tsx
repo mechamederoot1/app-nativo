@@ -54,6 +54,8 @@ export default function FeedScreen() {
         const mapped = data.map((p) => ({
           id: String(p.id),
           user: p.user_name,
+          avatar: p.user_profile_photo || undefined,
+          cover: p.user_cover_photo || undefined,
           content: p.content,
           time: formatPostTime(p.created_at),
           image: p.media_url || undefined,
