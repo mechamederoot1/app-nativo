@@ -43,10 +43,7 @@ export default function PostCard({
         onPress={() => onOpen && onOpen(post.id)}
       >
         {post.avatar ? (
-          <Image
-            source={{ uri: post.avatar }}
-            style={styles.avatarImage}
-          />
+          <Image source={{ uri: post.avatar }} style={styles.avatarImage} />
         ) : (
           <View style={styles.avatarPlaceholder}>
             <Text style={styles.avatarText}>
