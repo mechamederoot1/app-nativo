@@ -7,32 +7,63 @@ import BottomNav from '../../components/BottomNav';
 import CreatePost from '../../components/CreatePost';
 import TopBar from '../../components/TopBar';
 import { useRouter } from 'expo-router';
-import {
-  getPosts,
-  subscribe,
-  toggleLike,
-  addPost,
-  Post as StorePost,
-} from '../../store/posts';
+import { subscribe, toggleLike, Post as StorePost } from '../../store/posts';
 
 type Post = StorePost;
 
 export default function FeedScreen() {
   const router = useRouter();
-  const [posts, setPosts] = useState<Post[]>(getPosts());
+  const [posts, setPosts] = useState<Post[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    const unsub = subscribe(() => setPosts(getPosts()));
+    const load = async () => {
+      try {
+        const api = await import('../../utils/api');
+        const data = await api.getPosts();
+        const mapped = data.map((p) => ({
+          id: String(p.id),
+          user: p.user_name,
+          content: p.content,
+          time: new Date(p.created_at).toLocaleTimeString(),
+          image: p.media_url || undefined,
+          likes: 0,
+          liked: false,
+          comments: [],
+        }));
+        setPosts(mapped);
+      } catch (e) {
+        // fallback: keep empty if backend unavailable
+        setPosts([]);
+      }
+    };
+    load();
+    const unsub = subscribe(() => {});
     return unsub;
   }, []);
 
   const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    setTimeout(() => {
-      setPosts(getPosts());
-      setRefreshing(false);
-    }, 400);
+    (async () => {
+      setRefreshing(true);
+      try {
+        const api = await import('../../utils/api');
+        const data = await api.getPosts();
+        const mapped = data.map((p) => ({
+          id: String(p.id),
+          user: p.user_name,
+          content: p.content,
+          time: new Date(p.created_at).toLocaleTimeString(),
+          image: p.media_url || undefined,
+          likes: 0,
+          liked: false,
+          comments: [],
+        }));
+        setPosts(mapped);
+      } catch {
+      } finally {
+        setRefreshing(false);
+      }
+    })();
   }, []);
 
   const handleLike = useCallback((id: string) => {
@@ -40,7 +71,25 @@ export default function FeedScreen() {
   }, []);
 
   const handleCreate = useCallback((content: string) => {
-    addPost(content);
+    (async () => {
+      try {
+        const api = await import('../../utils/api');
+        const created = await api.createPost(content);
+        const newPost: Post = {
+          id: String(created.id),
+          user: created.user_name,
+          content: created.content,
+          time: new Date(created.created_at).toLocaleTimeString(),
+          image: created.media_url || undefined,
+          likes: 0,
+          liked: false,
+          comments: [],
+        };
+        setPosts((prev) => [newPost, ...prev]);
+      } catch (e: any) {
+        alert(e?.message || 'Falha ao publicar');
+      }
+    })();
   }, []);
 
   return (
