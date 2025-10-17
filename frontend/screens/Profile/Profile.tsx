@@ -48,7 +48,7 @@ import {
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { profileData } from './Data';
-import { getPosts, subscribe, toggleLike } from '../../store/posts';
+import type { Post as StorePost } from '../../store/posts';
 
 const { width } = Dimensions.get('window');
 
