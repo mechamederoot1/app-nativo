@@ -329,8 +329,8 @@ export default function ProfileScreen() {
   };
 
   const myPosts = useMemo(
-    () => posts.filter((x) => x.user === 'Você'),
-    [posts],
+    () => posts.filter((x) => x.user === p.name),
+    [posts, p.name],
   );
   const postCount = myPosts.length;
   const connectionsCount = p.connectionsCount;
