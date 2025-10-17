@@ -1080,7 +1080,7 @@ export default function ProfileScreen() {
               }}
               onPress={() => {
                 setShowAvatarMenu(false);
-                router.push(`/photo/${p.username}`);
+                router.push({ pathname: `/photo/${p.username}` as any, params: { src: profilePhoto } });
               }}
             >
               <Text
