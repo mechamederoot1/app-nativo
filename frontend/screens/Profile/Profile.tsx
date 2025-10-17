@@ -202,10 +202,32 @@ export default function ProfileScreen() {
     }
   };
 
-  const handlePhotoSave = (imageUri: string, caption: string) => {
+  const guessMime = (uri: string) => {
+    const u = uri.toLowerCase();
+    if (u.endsWith('.png')) return { type: 'image/png', name: 'image.png' };
+    if (u.endsWith('.jpg') || u.endsWith('.jpeg'))
+      return { type: 'image/jpeg', name: 'image.jpg' };
+    if (u.endsWith('.webp')) return { type: 'image/webp', name: 'image.webp' };
+    return { type: 'image/jpeg', name: 'image.jpg' };
+  };
+
+  const postImageToFeed = async (uri: string, content: string) => {
+    try {
+      const { createPostWithImage } = await import('../../utils/api');
+      const { type, name } = guessMime(uri);
+      await createPostWithImage(content, { uri, type, name });
+    } catch (e) {
+      // ignore feed post failure for now; user still updated local photo
+    }
+  };
+
+  const handlePhotoSave = async (imageUri: string, caption: string) => {
     setProfilePhoto(imageUri);
     setEditorVisible(false);
     setSelectedImageUri(null);
+    try {
+      await postImageToFeed(imageUri, 'Atualizou a foto de perfil');
+    } catch {}
     Alert.alert(
       'Sucesso',
       `Foto atualizada${caption ? ` com legenda: "${caption}"` : ''}!`,
@@ -339,7 +361,15 @@ export default function ProfileScreen() {
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={() => setCoverEditorVisible(false)}
+                    onPress={async () => {
+                      try {
+                        await postImageToFeed(
+                          coverPhoto,
+                          'Atualizou a foto de capa',
+                        );
+                      } catch {}
+                      setCoverEditorVisible(false);
+                    }}
                     style={{
                       flex: 1,
                       paddingVertical: 10,

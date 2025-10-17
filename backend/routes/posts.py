@@ -26,6 +26,19 @@ def list_posts(db: Session = Depends(get_db)):
         ) for p in posts
     ]
 
+@router.get("/{post_id}", response_model=PostOut)
+def get_post(post_id: int, db: Session = Depends(get_db)):
+    p = db.query(Post).filter(Post.id == post_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Post não encontrado")
+    return PostOut(
+        id=p.id,
+        content=p.content,
+        media_url=p.media_url,
+        created_at=p.created_at,
+        user_name=f"{p.author.first_name} {p.author.last_name}" if p.author else "Anônimo",
+    )
+
 @router.post("/", response_model=PostOut)
 def create_post(payload: PostCreate, db: Session = Depends(get_db), current=Depends(get_current_user)):
     post = Post(user_id=current.id, content=payload.content, media_url=payload.media_url)

@@ -34,6 +34,7 @@ export default function PostCard({
   onOpen?: (id: string) => void;
 }) {
   const { dimensions } = useImageDimensions(post.image);
+  const username = '@' + post.user.replace(/\s+/g, '').toLowerCase();
   return (
     <View style={styles.card}>
       <TouchableOpacity
@@ -48,7 +49,7 @@ export default function PostCard({
         </View>
         <View style={{ marginLeft: 12, flex: 1 }}>
           <Text style={styles.user}>{post.user}</Text>
-          <Text style={styles.time}>{post.time}</Text>
+          <Text style={styles.time}>{`${username} · ${post.time}`}</Text>
         </View>
       </TouchableOpacity>
 

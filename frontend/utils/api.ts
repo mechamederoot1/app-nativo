@@ -80,6 +80,10 @@ export async function getPosts(): Promise<ApiPost[]> {
   return request('/posts');
 }
 
+export async function getPostById(id: number | string): Promise<ApiPost> {
+  return request(`/posts/${id}`);
+}
+
 export async function createPost(content: string, file?: File | Blob) {
   if (file) {
     const form = new FormData();
@@ -91,6 +95,21 @@ export async function createPost(content: string, file?: File | Blob) {
     method: 'POST',
     body: JSON.stringify({ content }),
   });
+}
+
+// React Native helper: upload image from local URI
+export async function createPostWithImage(
+  content: string,
+  file: { uri: string; type: string; name?: string },
+) {
+  const form = new FormData();
+  form.append('content', content);
+  form.append('file', {
+    uri: file.uri,
+    type: file.type,
+    name: file.name || 'upload.jpg',
+  } as any);
+  return request('/posts/upload', { method: 'POST', body: form });
 }
 
 export function logout() {

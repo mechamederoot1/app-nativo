@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
@@ -25,23 +25,11 @@ import {
   Reply,
   Eye,
 } from 'lucide-react-native';
-import { addComment, getPost } from '../../store/posts';
+import type { ApiPost } from '../../utils/api';
 import MediaViewer from '../../components/MediaViewer';
 import { useImageDimensions } from '../../hooks/useImageDimensions';
 
 const { width } = Dimensions.get('window');
-
-const MOCK_AUTHOR = {
-  name: 'Alice Martins',
-  username: '@alice.martins',
-  avatar: 'https://i.pravatar.cc/160?img=21',
-  verified: true,
-};
-
-const MOCK_USER = {
-  name: 'Você',
-  avatar: 'https://i.pravatar.cc/160?img=1',
-};
 
 // Reações disponíveis
 const REACTIONS = [
@@ -56,29 +44,56 @@ export default function PostDetail() {
   const params = useLocalSearchParams();
   const router = useRouter();
   const id = String(params.id ?? '');
-  const post = useMemo(() => getPost(id), [id]);
-  const { dimensions: imageDimensions } = useImageDimensions(post?.image);
+
+  const [post, setPost] = useState<ApiPost | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const { dimensions: imageDimensions } = useImageDimensions(post?.media_url);
 
   const [comment, setComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [comments, setComments] = useState<any[]>([]);
 
   const [userReaction, setUserReaction] = useState<string | null>(null);
   const [bookmarked, setBookmarked] = useState(false);
   const [showMedia, setShowMedia] = useState(false);
   const [reactionCounts, setReactionCounts] = useState({
-    amei: 234,
-    uau: 156,
-    nojinho: 12,
-    triste: 28,
-    apaixonado: 89,
+    amei: 0,
+    uau: 0,
+    nojinho: 0,
+    triste: 0,
+    apaixonado: 0,
   });
 
-  // Picker de reações: long press + deslizar
+  // Picker de reações
   const [isPicking, setIsPicking] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
   const pickerAnim = useRef(new Animated.Value(0)).current;
   const menuRef = useRef<View>(null);
   const [menuRect, setMenuRect] = useState({ x: 0, y: 0, width: 1, height: 1 });
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const api = await import('../../utils/api');
+        const data = await api.getPostById(id);
+        if (!mounted) return;
+        setPost(data);
+      } catch (e: any) {
+        if (!mounted) return;
+        setError(e?.message || 'Falha ao carregar publicação');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [id]);
 
   const openPicker = () => {
     setIsPicking(true);
@@ -87,7 +102,6 @@ export default function PostDetail() {
       duration: 140,
       useNativeDriver: true,
     }).start(() => {
-      // mede a posição do menu após abrir
       setTimeout(() => {
         // @ts-ignore
         menuRef.current?.measureInWindow?.(
@@ -111,7 +125,6 @@ export default function PostDetail() {
   };
 
   const handleMoveOnPicker = (pageX: number, pageY: number) => {
-    // calcula índice de reação conforme a posição x do dedo sobre o menu
     const insideX = pageX - menuRect.x;
     const insideY = pageY - menuRect.y;
     if (
@@ -136,16 +149,13 @@ export default function PostDetail() {
       closePicker();
       return;
     }
-    // Alterna contadores ao aplicar nova reação
     if (userReaction === reactionId) {
-      // já selecionada: remover
       setUserReaction(null);
       setReactionCounts((prev) => ({
         ...prev,
         [reactionId]: prev[reactionId as keyof typeof prev] - 1,
       }));
     } else {
-      // trocar de reação (se houver anterior)
       if (userReaction) {
         setReactionCounts((prev) => ({
           ...prev,
@@ -161,11 +171,46 @@ export default function PostDetail() {
     closePicker();
   };
 
-  // Toque curto no "Amei" alterna amei (sem abrir picker)
   const toggleAmeiQuick = () =>
     applyReaction(userReaction === 'amei' ? 'amei' : 'amei');
 
-  if (!post) {
+  const handleAddComment = () => {
+    const t = comment.trim();
+    if (!t) return;
+    const newComment = {
+      id: `${Date.now()}`,
+      user: 'Você',
+      text: t,
+      timestamp: 'agora',
+    };
+    setComments((prev) => [newComment, ...prev]);
+    setComment('');
+    setReplyingTo(null);
+  };
+
+  const totalReactions = Object.values(reactionCounts).reduce(
+    (a, b) => a + b,
+    0,
+  );
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <ChevronLeft size={24} color="#0f172a" strokeWidth={2.5} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Post</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.sub}>Carregando...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error || !post) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -177,43 +222,29 @@ export default function PostDetail() {
         </View>
         <View style={styles.emptyContainer}>
           <Text style={styles.title}>Publicação não encontrada</Text>
-          <Text style={styles.sub}>ID: {id}</Text>
+          <Text style={styles.sub}>{error || `ID: ${id}`}</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  const handleAddComment = () => {
-    const t = comment.trim();
-    if (!t) return;
-    addComment(post.id, t);
-    setComment('');
-    setReplyingTo(null);
-  };
-
-  const totalReactions = Object.values(reactionCounts).reduce(
-    (a, b) => a + b,
-    0,
-  );
-
   const renderComment = ({ item }: any) => {
     const isReply = item.parentId !== undefined;
-    const hasReplies = post.comments.some((c: any) => c.parentId === item.id);
+    const hasReplies = comments.some((c: any) => c.parentId === item.id);
 
     return (
       <Animated.View
         style={[styles.commentWrapper, isReply && styles.replyWrapper]}
       >
         {isReply && <View style={styles.replyLine} />}
-
         <View
           style={[styles.commentContainer, isReply && styles.replyContainer]}
         >
-          <Image
-            source={{ uri: item.userAvatar || MOCK_USER.avatar }}
-            style={styles.commentAvatar}
-          />
-
+          <View style={styles.commentAvatarPlaceholder}>
+            <Text style={styles.commentAvatarText}>
+              {String(item.user || 'V')[0]}
+            </Text>
+          </View>
           <View style={styles.commentContent}>
             <View style={styles.commentHeader}>
               <View>
@@ -228,15 +259,12 @@ export default function PostDetail() {
                 </TouchableOpacity>
               )}
             </View>
-
             <Text style={styles.commentText}>{item.text}</Text>
-
             <View style={styles.commentActions}>
               <TouchableOpacity style={styles.actionBtn}>
                 <Text style={styles.actionEmoji}>👍</Text>
                 <Text style={styles.actionBtnText}>Reagir</Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={styles.actionBtn}
                 onPress={() => setReplyingTo(item.id)}
@@ -244,41 +272,16 @@ export default function PostDetail() {
                 <Reply size={14} color="#64748b" strokeWidth={2} />
                 <Text style={styles.actionBtnText}>Responder</Text>
               </TouchableOpacity>
-
               {hasReplies && (
                 <TouchableOpacity style={styles.viewReplies}>
                   <Text style={styles.viewRepliesText}>
                     Ver respostas (
-                    {
-                      post.comments.filter((c: any) => c.parentId === item.id)
-                        .length
-                    }
+                    {comments.filter((c: any) => c.parentId === item.id).length}
                     )
                   </Text>
                 </TouchableOpacity>
               )}
             </View>
-
-            {post.comments
-              .filter((c: any) => c.parentId === item.id)
-              .slice(0, 1)
-              .map((reply: any) => (
-                <View key={reply.id} style={styles.inlineReply}>
-                  <Image
-                    source={{ uri: reply.userAvatar || MOCK_USER.avatar }}
-                    style={styles.replyAvatar}
-                  />
-                  <View style={styles.replyContent}>
-                    <View style={styles.replyHeader}>
-                      <Text style={styles.replyAuthor}>{reply.user}</Text>
-                      <Text style={styles.replyMeta}>
-                        {reply.timestamp || 'agora'}
-                      </Text>
-                    </View>
-                    <Text style={styles.replyText}>{reply.text}</Text>
-                  </View>
-                </View>
-              ))}
           </View>
         </View>
       </Animated.View>
@@ -304,7 +307,7 @@ export default function PostDetail() {
         </View>
 
         <FlatList
-          data={post.comments.filter((c: any) => !c.parentId)}
+          data={comments.filter((c: any) => !c.parentId)}
           keyExtractor={(c) => c.id}
           renderItem={renderComment}
           ListHeaderComponent={
@@ -312,40 +315,39 @@ export default function PostDetail() {
               {/* Post Preview */}
               <View style={styles.postPreview}>
                 <View style={styles.authorRow}>
-                  <Image
-                    source={{ uri: MOCK_AUTHOR.avatar }}
-                    style={styles.authorAvatar}
-                  />
+                  <View style={styles.authorAvatarPlaceholder}>
+                    <Text style={styles.authorAvatarText}>
+                      {post.user_name?.charAt(0) || 'U'}
+                    </Text>
+                  </View>
                   <View style={styles.authorInfo}>
                     <View style={styles.authorNameRow}>
-                      <Text style={styles.authorName}>{MOCK_AUTHOR.name}</Text>
-                      {MOCK_AUTHOR.verified && (
-                        <View style={styles.verifiedBadge}>
-                          <Text style={styles.verifiedText}>✓</Text>
-                        </View>
-                      )}
+                      <Text style={styles.authorName}>
+                        {post.user_name || 'Anônimo'}
+                      </Text>
                     </View>
                     <Text style={styles.authorUsername}>
-                      {MOCK_AUTHOR.username}
+                      @
+                      {(post.user_name || 'usuario')
+                        .replace(/\s+/g, '')
+                        .toLowerCase()}
                     </Text>
                   </View>
                 </View>
 
                 <Text style={styles.postContent}>{post.content}</Text>
 
-                {post.image && imageDimensions && (
+                {post.media_url && imageDimensions && (
                   <View style={styles.postImageContainer}>
                     <TouchableOpacity
                       activeOpacity={0.9}
                       onPress={() => setShowMedia(true)}
                     >
                       <Image
-                        source={{ uri: post.image }}
+                        source={{ uri: post.media_url }}
                         style={[
                           styles.postImage,
-                          {
-                            aspectRatio: imageDimensions.aspectRatio,
-                          },
+                          { aspectRatio: imageDimensions.aspectRatio },
                         ]}
                         resizeMode="contain"
                       />
@@ -386,7 +388,6 @@ export default function PostDetail() {
 
                 {/* Ações */}
                 <View style={styles.actionsBar}>
-                  {/* Amei: toque curto alterna; segurar abre picker */}
                   <View style={styles.reactionsButtonContainer}>
                     <TouchableOpacity
                       activeOpacity={0.8}
@@ -400,8 +401,6 @@ export default function PostDetail() {
                       </Text>
                       <Text style={styles.reactionTriggerText}>Amei</Text>
                     </TouchableOpacity>
-
-                    {/* Menu (ancorado ao botão) */}
                     {isPicking && (
                       <Animated.View
                         ref={menuRef}
@@ -425,9 +424,6 @@ export default function PostDetail() {
                             ],
                           },
                         ]}
-                        onLayout={(e: LayoutChangeEvent) => {
-                          // opcional: captura do tamanho local (posição absoluta via measureInWindow no openPicker)
-                        }}
                       >
                         {REACTIONS.map((r) => (
                           <View
@@ -483,7 +479,6 @@ export default function PostDetail() {
                   </TouchableOpacity>
                 </View>
 
-                {/* Layer para capturar o gesto (enquanto o picker está aberto) */}
                 {isPicking && (
                   <View
                     style={styles.pickerOverlay}
@@ -502,15 +497,13 @@ export default function PostDetail() {
                   />
                 )}
 
-                {/* Divider */}
                 <View style={styles.divider} />
 
-                {/* Comments Header */}
                 <View style={styles.commentsHeader}>
                   <Text style={styles.commentsTitle}>Comentários</Text>
                   <View style={styles.commentsBadge}>
                     <Text style={styles.commentsBadgeText}>
-                      {post.comments.length}
+                      {comments.length}
                     </Text>
                   </View>
                 </View>
@@ -525,10 +518,9 @@ export default function PostDetail() {
         {/* Input Bar */}
         <View style={styles.inputBarContainer}>
           <View style={styles.inputBar}>
-            <Image
-              source={{ uri: MOCK_USER.avatar }}
-              style={styles.inputAvatar}
-            />
+            <View style={styles.inputAvatarPlaceholder}>
+              <Text style={styles.inputAvatarText}>V</Text>
+            </View>
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
@@ -566,11 +558,11 @@ export default function PostDetail() {
         </View>
       </KeyboardAvoidingView>
 
-      {post.image && (
+      {post.media_url && (
         <MediaViewer
           visible={showMedia}
           type="image"
-          uri={post.image}
+          uri={post.media_url}
           onClose={() => setShowMedia(false)}
         />
       )}
@@ -603,25 +595,19 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f1f5f9',
   },
   authorRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  authorAvatar: {
+  authorAvatarPlaceholder: {
     width: 44,
     height: 44,
     borderRadius: 22,
     backgroundColor: '#f1f5f9',
     marginRight: 12,
-  },
-  authorInfo: { flex: 1 },
-  authorNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  authorName: { fontSize: 15, fontWeight: '700', color: '#0f172a' },
-  verifiedBadge: {
-    backgroundColor: '#3b82f6',
-    width: 18,
-    height: 18,
-    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  verifiedText: { color: '#ffffff', fontSize: 11, fontWeight: '800' },
+  authorAvatarText: { color: '#0856d6', fontWeight: '800' },
+  authorInfo: { flex: 1 },
+  authorNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  authorName: { fontSize: 15, fontWeight: '700', color: '#0f172a' },
   authorUsername: { fontSize: 13, color: '#64748b', marginTop: 2 },
 
   postContent: {
@@ -652,7 +638,6 @@ const styles = StyleSheet.create({
   },
   viewsText: { color: '#ffffff', fontSize: 12, fontWeight: '600' },
 
-  // Contadores de reações
   reactionsBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -679,7 +664,6 @@ const styles = StyleSheet.create({
   reactionCount: { fontSize: 11, fontWeight: '700', color: '#475569' },
   totalReactions: { fontSize: 12, fontWeight: '600', color: '#64748b' },
 
-  // Ações
   actionsBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -695,7 +679,6 @@ const styles = StyleSheet.create({
   },
   actionButtonText: { fontSize: 13, fontWeight: '600', color: '#64748b' },
 
-  // Trigger e Menu
   reactionsButtonContainer: { position: 'relative' },
   reactionTrigger: {
     flexDirection: 'row',
@@ -708,7 +691,7 @@ const styles = StyleSheet.create({
   reactionTriggerText: { fontSize: 13, fontWeight: '600', color: '#64748b' },
   reactionsMenu: {
     position: 'absolute',
-    top: -78, // acima do botão, não encobre contadores
+    top: -78,
     left: -8,
     backgroundColor: '#ffffff',
     borderRadius: 16,
@@ -739,12 +722,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Overlay para capturar o gesto enquanto seleciona
-  pickerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 99,
-    // transparente; captura eventos enquanto o picker está aberto
-  },
+  pickerOverlay: { ...StyleSheet.absoluteFillObject, zIndex: 99 },
 
   divider: { height: 1, backgroundColor: '#f1f5f9', marginVertical: 12 },
   commentsHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -779,12 +757,15 @@ const styles = StyleSheet.create({
     borderLeftWidth: 3,
     borderLeftColor: '#dbeafe',
   },
-  commentAvatar: {
+  commentAvatarPlaceholder: {
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: '#f1f5f9',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  commentAvatarText: { color: '#0856d6', fontWeight: '800' },
   replyAvatar: {
     width: 32,
     height: 32,
@@ -855,12 +836,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
-  inputAvatar: {
+  inputAvatarPlaceholder: {
     width: 36,
     height: 36,
     borderRadius: 18,
     backgroundColor: '#e2e8f0',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  inputAvatarText: { color: '#0856d6', fontWeight: '800' },
   inputWrapper: { flex: 1 },
   input: {
     paddingHorizontal: 12,
