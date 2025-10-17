@@ -79,5 +79,4 @@ async def update_cover_photo(
         db.rollback()
         import traceback
         traceback.print_exc()
-        from fastapi import HTTPException
         raise HTTPException(status_code=500, detail=f"Error uploading cover photo: {str(e)}")
