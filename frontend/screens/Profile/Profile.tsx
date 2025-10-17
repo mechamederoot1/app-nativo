@@ -1025,7 +1025,7 @@ export default function ProfileScreen() {
               }}
               onPress={() => {
                 setShowCoverMenu(false);
-                router.push(`/cover/${p.username}`);
+                router.push({ pathname: `/cover/${p.username}` as any, params: { src: coverPhoto } });
               }}
             >
               <Text
