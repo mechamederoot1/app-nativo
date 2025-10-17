@@ -80,6 +80,10 @@ export async function getPosts(): Promise<ApiPost[]> {
   return request('/posts');
 }
 
+export async function getPostById(id: number | string): Promise<ApiPost> {
+  return request(`/posts/${id}`);
+}
+
 export async function createPost(content: string, file?: File | Blob) {
   if (file) {
     const form = new FormData();
