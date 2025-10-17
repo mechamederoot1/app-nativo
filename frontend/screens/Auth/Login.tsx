@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AuthButton from '../../components/AuthButton';
@@ -33,7 +42,14 @@ export default function LoginScreen() {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingVertical: 40 }} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: 'center',
+            paddingVertical: 40,
+          }}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.container}>
             <Text style={styles.logo}>Vibe</Text>
             <Text style={styles.subtitle}>Entre na sua conta</Text>
@@ -61,8 +77,15 @@ export default function LoginScreen() {
                   style={[styles.input, { paddingRight: 40 }]}
                   returnKeyType="done"
                 />
-                <TouchableOpacity style={styles.eye} onPress={() => setShowPassword(!showPassword)}>
-                  {showPassword ? <EyeOff size={18} color="#6b7280" /> : <Eye size={18} color="#6b7280" />}
+                <TouchableOpacity
+                  style={styles.eye}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff size={18} color="#6b7280" />
+                  ) : (
+                    <Eye size={18} color="#6b7280" />
+                  )}
                 </TouchableOpacity>
               </View>
 

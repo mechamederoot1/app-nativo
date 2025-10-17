@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Modal } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Modal,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AuthButton from '../../components/AuthButton';
@@ -52,17 +62,22 @@ export default function SignupScreen() {
 
   const validateStep2 = () => {
     const e: Record<string, string> = {};
-    if (!password || password.length < 6) e.password = 'Senha deve ter ao menos 6 caracteres';
-    if (confirmPassword !== password) e.confirmPassword = 'Senhas não coincidem';
+    if (!password || password.length < 6)
+      e.password = 'Senha deve ter ao menos 6 caracteres';
+    if (confirmPassword !== password)
+      e.confirmPassword = 'Senhas não coincidem';
     if (!accepted) e.accepted = 'Você precisa aceitar os termos';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   // Pure validators (do NOT call setErrors) — safe to use during render
-  const isStep0ValidPure = () => firstName.trim().length > 0 && lastName.trim().length > 0;
-  const isStep1ValidPure = () => validateEmail(email) && validateDob(dob) && gender.trim().length > 0;
-  const isStep2ValidPure = () => password.length >= 6 && confirmPassword === password && accepted === true;
+  const isStep0ValidPure = () =>
+    firstName.trim().length > 0 && lastName.trim().length > 0;
+  const isStep1ValidPure = () =>
+    validateEmail(email) && validateDob(dob) && gender.trim().length > 0;
+  const isStep2ValidPure = () =>
+    password.length >= 6 && confirmPassword === password && accepted === true;
 
   const validateCurrent = (current: number) => {
     if (current === 0) return validateStep0();
@@ -73,17 +88,22 @@ export default function SignupScreen() {
   const next = () => {
     // call the stateful validators here so errors are set when user presses next
     if (!validateCurrent(step)) return;
-    setStep(s => Math.min(totalSteps - 1, s + 1));
+    setStep((s) => Math.min(totalSteps - 1, s + 1));
   };
 
-  const back = () => setStep(s => Math.max(0, s - 1));
+  const back = () => setStep((s) => Math.max(0, s - 1));
 
   const handleCreate = async () => {
     if (!validateStep2()) return;
     try {
       setLoading(true);
       const { signup } = await import('../../utils/api');
-      await signup({ first_name: firstName.trim(), last_name: lastName.trim(), email: email.trim(), password });
+      await signup({
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        email: email.trim(),
+        password,
+      });
       router.push('/feed');
     } catch (e: any) {
       setLoading(false);
@@ -95,22 +115,41 @@ export default function SignupScreen() {
   const progressPct = Math.round(((step + 1) / totalSteps) * 100);
 
   // pure validity for current step — safe to use during render
-  const isCurrentValidPure = step === 0 ? isStep0ValidPure() : step === 1 ? isStep1ValidPure() : isStep2ValidPure();
+  const isCurrentValidPure =
+    step === 0
+      ? isStep0ValidPure()
+      : step === 1
+        ? isStep1ValidPure()
+        : isStep2ValidPure();
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}
+    >
       <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingVertical: 40 }} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: 'center',
+            paddingVertical: 40,
+          }}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.container}>
             {/* Header and progress */}
             <View style={styles.progressWrap}>
               <View style={styles.progressHeader}>
                 <Text style={styles.stepLabel}>Etapa {step + 1}</Text>
-                <Text style={styles.stepCounter}>{step + 1} de {totalSteps}</Text>
+                <Text style={styles.stepCounter}>
+                  {step + 1} de {totalSteps}
+                </Text>
               </View>
 
               <View style={styles.progressBarBg}>
-                <View style={[styles.progressBarFill, { width: `${progressPct}%` }]} />
+                <View
+                  style={[styles.progressBarFill, { width: `${progressPct}%` }]}
+                />
               </View>
             </View>
 
@@ -123,65 +162,165 @@ export default function SignupScreen() {
             <View style={styles.form}>
               {step === 0 && (
                 <>
-                  <TextInput placeholder="Nome" placeholderTextColor="#9aa0a6" value={firstName} onChangeText={setFirstName} style={styles.input} />
-                  {errors.firstName ? <Text style={styles.error}>{errors.firstName}</Text> : null}
-                  <TextInput placeholder="Sobrenome" placeholderTextColor="#9aa0a6" value={lastName} onChangeText={setLastName} style={styles.input} />
-                  {errors.lastName ? <Text style={styles.error}>{errors.lastName}</Text> : null}
+                  <TextInput
+                    placeholder="Nome"
+                    placeholderTextColor="#9aa0a6"
+                    value={firstName}
+                    onChangeText={setFirstName}
+                    style={styles.input}
+                  />
+                  {errors.firstName ? (
+                    <Text style={styles.error}>{errors.firstName}</Text>
+                  ) : null}
+                  <TextInput
+                    placeholder="Sobrenome"
+                    placeholderTextColor="#9aa0a6"
+                    value={lastName}
+                    onChangeText={setLastName}
+                    style={styles.input}
+                  />
+                  {errors.lastName ? (
+                    <Text style={styles.error}>{errors.lastName}</Text>
+                  ) : null}
                 </>
               )}
 
               {step === 1 && (
                 <>
-                  <TextInput placeholder="E-mail" placeholderTextColor="#9aa0a6" value={email} onChangeText={setEmail} keyboardType="email-address" style={styles.input} />
-                  {errors.email ? <Text style={styles.error}>{errors.email}</Text> : null}
-                  <TextInput placeholder="Data de nascimento (DD/MM/AAAA)" placeholderTextColor="#9aa0a6" value={dob} onChangeText={setDob} style={styles.input} />
-                  {errors.dob ? <Text style={styles.error}>{errors.dob}</Text> : null}
-                  <TextInput placeholder="Gênero" placeholderTextColor="#9aa0a6" value={gender} onChangeText={setGender} style={styles.input} />
-                  {errors.gender ? <Text style={styles.error}>{errors.gender}</Text> : null}
+                  <TextInput
+                    placeholder="E-mail"
+                    placeholderTextColor="#9aa0a6"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    style={styles.input}
+                  />
+                  {errors.email ? (
+                    <Text style={styles.error}>{errors.email}</Text>
+                  ) : null}
+                  <TextInput
+                    placeholder="Data de nascimento (DD/MM/AAAA)"
+                    placeholderTextColor="#9aa0a6"
+                    value={dob}
+                    onChangeText={setDob}
+                    style={styles.input}
+                  />
+                  {errors.dob ? (
+                    <Text style={styles.error}>{errors.dob}</Text>
+                  ) : null}
+                  <TextInput
+                    placeholder="Gênero"
+                    placeholderTextColor="#9aa0a6"
+                    value={gender}
+                    onChangeText={setGender}
+                    style={styles.input}
+                  />
+                  {errors.gender ? (
+                    <Text style={styles.error}>{errors.gender}</Text>
+                  ) : null}
                 </>
               )}
 
               {step === 2 && (
                 <>
-                  <TextInput placeholder="Senha" placeholderTextColor="#9aa0a6" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
-                  {errors.password ? <Text style={styles.error}>{errors.password}</Text> : null}
-                  <TextInput placeholder="Confirmar senha" placeholderTextColor="#9aa0a6" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry style={styles.input} />
-                  {errors.confirmPassword ? <Text style={styles.error}>{errors.confirmPassword}</Text> : null}
+                  <TextInput
+                    placeholder="Senha"
+                    placeholderTextColor="#9aa0a6"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    style={styles.input}
+                  />
+                  {errors.password ? (
+                    <Text style={styles.error}>{errors.password}</Text>
+                  ) : null}
+                  <TextInput
+                    placeholder="Confirmar senha"
+                    placeholderTextColor="#9aa0a6"
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    secureTextEntry
+                    style={styles.input}
+                  />
+                  {errors.confirmPassword ? (
+                    <Text style={styles.error}>{errors.confirmPassword}</Text>
+                  ) : null}
 
                   <View style={styles.termsRow}>
-                    <TouchableOpacity onPress={() => setAccepted(a => !a)} style={styles.checkbox}>
+                    <TouchableOpacity
+                      onPress={() => setAccepted((a) => !a)}
+                      style={styles.checkbox}
+                    >
                       {accepted ? <View style={styles.checkboxInner} /> : null}
                     </TouchableOpacity>
-                    <Text style={{ flex: 1, color: '#374151' }}>Aceito os termos de privacidade e segurança</Text>
+                    <Text style={{ flex: 1, color: '#374151' }}>
+                      Aceito os termos de privacidade e segurança
+                    </Text>
                     <TouchableOpacity onPress={() => setShowTerms(true)}>
-                      <Text style={{ color: '#0856d6', marginLeft: 8 }}>Termos</Text>
+                      <Text style={{ color: '#0856d6', marginLeft: 8 }}>
+                        Termos
+                      </Text>
                     </TouchableOpacity>
                   </View>
-                  {errors.accepted ? <Text style={styles.error}>{errors.accepted}</Text> : null}
-
+                  {errors.accepted ? (
+                    <Text style={styles.error}>{errors.accepted}</Text>
+                  ) : null}
                 </>
               )}
 
               {/* Error box (top) */}
               {Object.keys(errors).length > 0 && (
                 <View style={styles.errorBox}>
-                  <Text style={styles.errorBoxText}>{Object.values(errors)[0]}</Text>
+                  <Text style={styles.errorBoxText}>
+                    {Object.values(errors)[0]}
+                  </Text>
                 </View>
               )}
 
               {/* Navigation buttons */}
               <View style={styles.navRow}>
-                <TouchableOpacity onPress={back} disabled={step === 0} style={[styles.navButton, step === 0 && styles.navButtonDisabled]}>
-                  <Text style={[styles.navButtonText, step === 0 && styles.navButtonTextDisabled]}>Voltar</Text>
+                <TouchableOpacity
+                  onPress={back}
+                  disabled={step === 0}
+                  style={[
+                    styles.navButton,
+                    step === 0 && styles.navButtonDisabled,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.navButtonText,
+                      step === 0 && styles.navButtonTextDisabled,
+                    ]}
+                  >
+                    Voltar
+                  </Text>
                 </TouchableOpacity>
 
                 {step < totalSteps - 1 ? (
-                  <TouchableOpacity onPress={next} disabled={!isCurrentValidPure} style={[styles.nextButton, !isCurrentValidPure && styles.nextButtonDisabled]}>
+                  <TouchableOpacity
+                    onPress={next}
+                    disabled={!isCurrentValidPure}
+                    style={[
+                      styles.nextButton,
+                      !isCurrentValidPure && styles.nextButtonDisabled,
+                    ]}
+                  >
                     <Text style={styles.nextButtonText}>Próximo</Text>
                   </TouchableOpacity>
                 ) : (
-                  <TouchableOpacity onPress={handleCreate} disabled={loading || !isCurrentValidPure} style={[styles.createButton, (loading || !isCurrentValidPure) && styles.createButtonDisabled]}>
-                    <Text style={styles.createButtonText}>{loading ? 'Criando conta...' : 'Criar conta'}</Text>
+                  <TouchableOpacity
+                    onPress={handleCreate}
+                    disabled={loading || !isCurrentValidPure}
+                    style={[
+                      styles.createButton,
+                      (loading || !isCurrentValidPure) &&
+                        styles.createButtonDisabled,
+                    ]}
+                  >
+                    <Text style={styles.createButtonText}>
+                      {loading ? 'Criando conta...' : 'Criar conta'}
+                    </Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -194,25 +333,61 @@ export default function SignupScreen() {
               <View style={styles.modalBg}>
                 <View style={styles.modalCard}>
                   <ScrollView style={{ maxHeight: 420 }}>
-                    <Text style={styles.modalTitle}>Termos de Uso e Política de Privacidade</Text>
-                    <Text style={styles.modalText}>Ao usar o Vibe Social, você concorda em seguir nossas diretrizes da comunidade e usar a plataforma de forma respeitosa e legal.</Text>
-                    <Text style={styles.modalText}>Seus dados pessoais são protegidos e utilizados apenas para melhorar sua experiência na plataforma. Não compartilhamos suas informações pessoais com terceiros sem seu consentimento.</Text>
-                    <Text style={styles.modalText}>Você é responsável pelo conteúdo que publica. Não permitimos spam, discurso de ódio, ou conteúdo ilegal.</Text>
-                    <Text style={styles.modalText}>Implementamos medidas de segurança para proteger sua conta. Use uma senha forte e não compartilhe suas credenciais.</Text>
+                    <Text style={styles.modalTitle}>
+                      Termos de Uso e Política de Privacidade
+                    </Text>
+                    <Text style={styles.modalText}>
+                      Ao usar o Vibe Social, você concorda em seguir nossas
+                      diretrizes da comunidade e usar a plataforma de forma
+                      respeitosa e legal.
+                    </Text>
+                    <Text style={styles.modalText}>
+                      Seus dados pessoais são protegidos e utilizados apenas
+                      para melhorar sua experiência na plataforma. Não
+                      compartilhamos suas informações pessoais com terceiros sem
+                      seu consentimento.
+                    </Text>
+                    <Text style={styles.modalText}>
+                      Você é responsável pelo conteúdo que publica. Não
+                      permitimos spam, discurso de ódio, ou conteúdo ilegal.
+                    </Text>
+                    <Text style={styles.modalText}>
+                      Implementamos medidas de segurança para proteger sua
+                      conta. Use uma senha forte e não compartilhe suas
+                      credenciais.
+                    </Text>
                   </ScrollView>
 
-                  <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 12 }}>
-                    <TouchableOpacity onPress={() => setShowTerms(false)} style={{ padding: 10, marginRight: 8 }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'flex-end',
+                      marginTop: 12,
+                    }}
+                  >
+                    <TouchableOpacity
+                      onPress={() => setShowTerms(false)}
+                      style={{ padding: 10, marginRight: 8 }}
+                    >
                       <Text style={{ color: '#6b7280' }}>Fechar</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => { setAccepted(true); setShowTerms(false); }} style={{ padding: 10, backgroundColor: '#0856d6', borderRadius: 8 }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setAccepted(true);
+                        setShowTerms(false);
+                      }}
+                      style={{
+                        padding: 10,
+                        backgroundColor: '#0856d6',
+                        borderRadius: 8,
+                      }}
+                    >
                       <Text style={{ color: '#fff' }}>Aceitar Termos</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
               </View>
             </Modal>
-
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -341,8 +516,20 @@ const styles = StyleSheet.create({
   createButtonDisabled: { opacity: 0.6 },
   createButtonText: { color: '#fff', fontWeight: '700' },
   footer: { marginTop: 18, color: '#9ca3af', fontSize: 12 },
-  modalBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  modalCard: { backgroundColor: '#fff', borderRadius: 12, padding: 16, width: '100%', maxWidth: 720 },
+  modalBg: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    width: '100%',
+    maxWidth: 720,
+  },
   modalTitle: { fontSize: 18, fontWeight: '700', marginBottom: 8 },
   modalText: { color: '#374151', marginBottom: 8, lineHeight: 20 },
 });

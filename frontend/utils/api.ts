@@ -1,6 +1,10 @@
 type LoginResponse = { access_token: string; token_type: string };
 
-const BASE_URL = (typeof process !== 'undefined' && (process as any).env && (process as any).env.EXPO_PUBLIC_API_URL) || 'http://localhost:5050';
+const BASE_URL =
+  (typeof process !== 'undefined' &&
+    (process as any).env &&
+    (process as any).env.EXPO_PUBLIC_API_URL) ||
+  'http://localhost:5050';
 
 let memoryToken: string | null = null;
 
@@ -50,7 +54,12 @@ export async function login(email: string, password: string) {
   return data;
 }
 
-export async function signup(payload: { first_name: string; last_name: string; email: string; password: string; }) {
+export async function signup(payload: {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+}) {
   const data: LoginResponse = await request('/auth/signup', {
     method: 'POST',
     body: JSON.stringify(payload),
@@ -59,7 +68,13 @@ export async function signup(payload: { first_name: string; last_name: string; e
   return data;
 }
 
-export type ApiPost = { id: number; content: string; media_url?: string | null; created_at: string; user_name: string };
+export type ApiPost = {
+  id: number;
+  content: string;
+  media_url?: string | null;
+  created_at: string;
+  user_name: string;
+};
 
 export async function getPosts(): Promise<ApiPost[]> {
   return request('/posts');
@@ -72,7 +87,12 @@ export async function createPost(content: string, file?: File | Blob) {
     form.append('file', file);
     return request('/posts/upload', { method: 'POST', body: form });
   }
-  return request('/posts', { method: 'POST', body: JSON.stringify({ content }) });
+  return request('/posts', {
+    method: 'POST',
+    body: JSON.stringify({ content }),
+  });
 }
 
-export function logout() { setToken(null); }
+export function logout() {
+  setToken(null);
+}
