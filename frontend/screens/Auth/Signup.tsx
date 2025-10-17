@@ -78,14 +78,18 @@ export default function SignupScreen() {
 
   const back = () => setStep(s => Math.max(0, s - 1));
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!validateStep2()) return;
-    setLoading(true);
-    // mock finalize
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      setLoading(true);
+      const { signup } = await import('../../utils/api');
+      await signup({ first_name: firstName.trim(), last_name: lastName.trim(), email: email.trim(), password });
       router.push('/feed');
-    }, 700);
+    } catch (e: any) {
+      setLoading(false);
+      alert(e?.message || 'Falha ao criar conta');
+      return;
+    }
   };
 
   const progressPct = Math.round(((step + 1) / totalSteps) * 100);
