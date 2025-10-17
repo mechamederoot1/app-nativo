@@ -417,15 +417,22 @@ export default function ProfileScreen() {
                         const { type, name } = guessMime(coverPhoto);
                         const response = await uploadCoverPhoto({ uri: coverPhoto, type, name });
 
-                        setCoverPhoto(response.cover_photo);
+                        const coverPhotoUrl = response.cover_photo;
+                        setCoverPhoto(coverPhotoUrl);
+                        setUserData((prev) => ({
+                          ...prev,
+                          cover: coverPhotoUrl,
+                        }));
                         setCoverEditorVisible(false);
 
                         try {
                           await postImageToFeed(
-                            response.cover_photo,
+                            coverPhotoUrl,
                             'Atualizou a foto de capa',
                           );
                         } catch {}
+
+                        Alert.alert('Sucesso', 'Foto de capa atualizada!');
                       } catch (error: any) {
                         Alert.alert('Erro', error?.message || 'Falha ao salvar foto de capa');
                       }
