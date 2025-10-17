@@ -34,8 +34,10 @@ export default function FeedScreen() {
           const avatar = abs(p.user_profile_photo);
           const cover = abs(p.user_cover_photo);
           let statusLabel: string | undefined;
-          if (media && avatar && media === avatar) statusLabel = 'atualizou a foto de perfil';
-          else if (media && cover && media === cover) statusLabel = 'atualizou a foto de capa';
+          if (media && avatar && media === avatar)
+            statusLabel = 'atualizou a foto de perfil';
+          else if (media && cover && media === cover)
+            statusLabel = 'atualizou a foto de capa';
           return {
             id: String(p.id),
             user: p.user_name,
@@ -79,8 +81,10 @@ export default function FeedScreen() {
           const avatar = abs(p.user_profile_photo);
           const cover = abs(p.user_cover_photo);
           let statusLabel: string | undefined;
-          if (media && avatar && media === avatar) statusLabel = 'atualizou a foto de perfil';
-          else if (media && cover && media === cover) statusLabel = 'atualizou a foto de capa';
+          if (media && avatar && media === avatar)
+            statusLabel = 'atualizou a foto de perfil';
+          else if (media && cover && media === cover)
+            statusLabel = 'atualizou a foto de capa';
           return {
             id: String(p.id),
             user: p.user_name,

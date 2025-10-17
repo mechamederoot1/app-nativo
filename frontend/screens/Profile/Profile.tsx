@@ -240,8 +240,10 @@ export default function ProfileScreen() {
           const avatar = abs(p.user_profile_photo);
           const cover = abs(p.user_cover_photo);
           let statusLabel: string | undefined;
-          if (media && avatar && media === avatar) statusLabel = 'atualizou a foto de perfil';
-          else if (media && cover && media === cover) statusLabel = 'atualizou a foto de capa';
+          if (media && avatar && media === avatar)
+            statusLabel = 'atualizou a foto de perfil';
+          else if (media && cover && media === cover)
+            statusLabel = 'atualizou a foto de capa';
           return {
             id: String(p.id),
             user: p.user_name,
@@ -347,8 +349,10 @@ export default function ProfileScreen() {
             const avatar = abs(p.user_profile_photo);
             const cover = abs(p.user_cover_photo);
             let statusLabel: string | undefined;
-            if (media && avatar && media === avatar) statusLabel = 'atualizou a foto de perfil';
-            else if (media && cover && media === cover) statusLabel = 'atualizou a foto de capa';
+            if (media && avatar && media === avatar)
+              statusLabel = 'atualizou a foto de perfil';
+            else if (media && cover && media === cover)
+              statusLabel = 'atualizou a foto de capa';
             return {
               id: String(p.id),
               user: p.user_name,
@@ -409,7 +413,9 @@ export default function ProfileScreen() {
           ? {
               ...p,
               liked: !p.liked,
-              likes: p.liked ? Math.max((p.likes || 0) - 1, 0) : (p.likes || 0) + 1,
+              likes: p.liked
+                ? Math.max((p.likes || 0) - 1, 0)
+                : (p.likes || 0) + 1,
             }
           : p,
       ),
@@ -494,7 +500,13 @@ export default function ProfileScreen() {
                       borderColor: '#e2e8f0',
                     }}
                   >
-                    <Text style={{ fontSize: 13, fontWeight: '700', color: '#64748b' }}>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontWeight: '700',
+                        color: '#64748b',
+                      }}
+                    >
                       Cancelar
                     </Text>
                   </TouchableOpacity>
@@ -546,14 +558,20 @@ export default function ProfileScreen() {
                               (process as any).env.EXPO_PUBLIC_API_URL) ||
                             'http://localhost:5050';
                           const abs = (u?: string | null) =>
-                            u ? (u.startsWith('http') ? u : `${BASE_URL}${u}`) : undefined;
+                            u
+                              ? u.startsWith('http')
+                                ? u
+                                : `${BASE_URL}${u}`
+                              : undefined;
                           const mapped = data.map((p) => {
                             const media = abs(p.media_url);
                             const avatar = abs(p.user_profile_photo);
                             const cover = abs(p.user_cover_photo);
                             let statusLabel: string | undefined;
-                            if (media && avatar && media === avatar) statusLabel = 'atualizou a foto de perfil';
-                            else if (media && cover && media === cover) statusLabel = 'atualizou a foto de capa';
+                            if (media && avatar && media === avatar)
+                              statusLabel = 'atualizou a foto de perfil';
+                            else if (media && cover && media === cover)
+                              statusLabel = 'atualizou a foto de capa';
                             return {
                               id: String(p.id),
                               user: p.user_name,
@@ -586,7 +604,13 @@ export default function ProfileScreen() {
                       alignItems: 'center',
                     }}
                   >
-                    <Text style={{ fontSize: 13, fontWeight: '700', color: '#ffffff' }}>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontWeight: '700',
+                        color: '#ffffff',
+                      }}
+                    >
                       Salvar
                     </Text>
                   </TouchableOpacity>
@@ -995,11 +1019,7 @@ export default function ProfileScreen() {
               </View>
             ) : (
               myPosts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  onLike={handleLike}
-                />
+                <PostCard key={post.id} post={post} onLike={handleLike} />
               ))
             ))}
 
@@ -1084,7 +1104,10 @@ export default function ProfileScreen() {
               }}
               onPress={() => {
                 setShowCoverMenu(false);
-                router.push({ pathname: `/cover/${p.username}` as any, params: { src: coverPhoto } });
+                router.push({
+                  pathname: `/cover/${p.username}` as any,
+                  params: { src: coverPhoto },
+                });
               }}
             >
               <Text
@@ -1139,7 +1162,10 @@ export default function ProfileScreen() {
               }}
               onPress={() => {
                 setShowAvatarMenu(false);
-                router.push({ pathname: `/photo/${p.username}` as any, params: { src: profilePhoto } });
+                router.push({
+                  pathname: `/photo/${p.username}` as any,
+                  params: { src: profilePhoto },
+                });
               }}
             >
               <Text

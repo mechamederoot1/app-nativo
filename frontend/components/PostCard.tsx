@@ -58,7 +58,13 @@ export default function PostCard({
           </View>
         )}
         <View style={{ marginLeft: 12, flex: 1 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
             <Text style={styles.user}>{post.user}</Text>
             {!!post.statusLabel && (
               <Text style={styles.statusLabel}> ({post.statusLabel})</Text>

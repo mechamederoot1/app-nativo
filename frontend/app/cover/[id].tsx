@@ -12,7 +12,10 @@ export default function CoverView() {
       <View style={styles.container}>
         <Text style={styles.title}>Foto de capa</Text>
         <Text style={styles.sub}>@{id}</Text>
-        <Image source={{ uri: src || 'https://picsum.photos/1200/400' }} style={styles.image} />
+        <Image
+          source={{ uri: src || 'https://picsum.photos/1200/400' }}
+          style={styles.image}
+        />
       </View>
     </SafeAreaView>
   );
