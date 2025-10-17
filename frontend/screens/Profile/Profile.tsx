@@ -178,8 +178,9 @@ export default function ProfileScreen() {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const { getToken } = await import('../../utils/api');
-        if (!getToken()) return;
+        const api = await import('../../utils/api');
+        const token = api.getToken();
+        if (!token) return;
 
         const BASE_URL =
           (typeof process !== 'undefined' &&
@@ -189,20 +190,33 @@ export default function ProfileScreen() {
 
         const response = await fetch(`${BASE_URL}/users/me`, {
           headers: {
-            'Authorization': `Bearer ${getToken()}`,
+            'Authorization': `Bearer ${token}`,
           },
         });
 
         if (response.ok) {
           const user = await response.json();
+
+          const profilePhotoUrl = user.profile_photo
+            ? user.profile_photo.startsWith('http')
+              ? user.profile_photo
+              : `${BASE_URL}${user.profile_photo}`
+            : prev.avatar;
+
+          const coverPhotoUrl = user.cover_photo
+            ? user.cover_photo.startsWith('http')
+              ? user.cover_photo
+              : `${BASE_URL}${user.cover_photo}`
+            : prev.cover;
+
           setUserData((prev) => ({
             ...prev,
-            avatar: user.profile_photo || prev.avatar,
-            cover: user.cover_photo || prev.cover,
+            avatar: profilePhotoUrl,
+            cover: coverPhotoUrl,
             name: `${user.first_name} ${user.last_name}`,
           }));
-          setProfilePhoto(user.profile_photo || p.avatar);
-          setCoverPhoto(user.cover_photo || p.cover);
+          setProfilePhoto(profilePhotoUrl);
+          setCoverPhoto(coverPhotoUrl);
         }
       } catch (error) {
         console.error('Erro ao carregar dados do usuário:', error);
