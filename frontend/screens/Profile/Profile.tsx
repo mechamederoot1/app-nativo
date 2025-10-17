@@ -537,6 +537,7 @@ export default function ProfileScreen() {
             <LinearGradient
               colors={['transparent', 'rgba(0,0,0,0.4)']}
               style={styles.coverGradient}
+              pointerEvents="none"
             />
             <TouchableOpacity
               style={styles.coverEditBtn}
