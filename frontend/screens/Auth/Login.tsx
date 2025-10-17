@@ -11,8 +11,16 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = () => {
-    router.push('/feed');
+  const handleLogin = async () => {
+    try {
+      const emailTrim = email.trim();
+      if (!emailTrim || !password) return;
+      const { login } = await import('../../utils/api');
+      await login(emailTrim, password);
+      router.push('/feed');
+    } catch (e: any) {
+      alert(e?.message || 'Falha ao entrar');
+    }
   };
 
   const handleSignup = () => {
