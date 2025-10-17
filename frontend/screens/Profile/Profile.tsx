@@ -355,6 +355,20 @@ export default function ProfileScreen() {
     sexy: false,
   });
 
+  const handleLike = (id: string) => {
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              liked: !p.liked,
+              likes: p.liked ? Math.max((p.likes || 0) - 1, 0) : (p.likes || 0) + 1,
+            }
+          : p,
+      ),
+    );
+  };
+
   const handleRating = (type: 'confiavel' | 'legal' | 'sexy') => {
     if (userVotes[type]) {
       return;
