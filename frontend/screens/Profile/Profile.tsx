@@ -373,12 +373,22 @@ export default function ProfileScreen() {
                   <TouchableOpacity
                     onPress={async () => {
                       try {
-                        await postImageToFeed(
-                          coverPhoto,
-                          'Atualizou a foto de capa',
-                        );
-                      } catch {}
-                      setCoverEditorVisible(false);
+                        const { uploadCoverPhoto } = await import('../../utils/api');
+                        const { type, name } = guessMime(coverPhoto);
+                        const response = await uploadCoverPhoto({ uri: coverPhoto, type, name });
+
+                        setCoverPhoto(response.cover_photo);
+                        setCoverEditorVisible(false);
+
+                        try {
+                          await postImageToFeed(
+                            response.cover_photo,
+                            'Atualizou a foto de capa',
+                          );
+                        } catch {}
+                      } catch (error: any) {
+                        Alert.alert('Erro', error?.message || 'Falha ao salvar foto de capa');
+                      }
                     }}
                     style={{
                       flex: 1,
