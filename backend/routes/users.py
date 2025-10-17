@@ -47,7 +47,6 @@ async def update_profile_photo(
         db.rollback()
         import traceback
         traceback.print_exc()
-        from fastapi import HTTPException
         raise HTTPException(status_code=500, detail=f"Error uploading profile photo: {str(e)}")
 
 @router.post("/cover-photo")
