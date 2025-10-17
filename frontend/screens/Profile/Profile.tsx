@@ -939,7 +939,7 @@ export default function ProfileScreen() {
                 <PostCard
                   key={post.id}
                   post={post}
-                  onLike={() => toggleLike(post.id)}
+                  onLike={handleLike}
                 />
               ))
             ))}
