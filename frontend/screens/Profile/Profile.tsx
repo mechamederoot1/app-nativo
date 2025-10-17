@@ -467,24 +467,6 @@ export default function ProfileScreen() {
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={() =>
-                      setCoverTransform({ scale: 1, offsetX: 0, offsetY: 0 })
-                    }
-                    style={{
-                      paddingVertical: 8,
-                      paddingHorizontal: 12,
-                      borderRadius: 10,
-                      backgroundColor: '#f8fafc',
-                      alignItems: 'center',
-                      borderWidth: 1,
-                      borderColor: '#e2e8f0',
-                    }}
-                  >
-                    <Text style={{ fontSize: 13, fontWeight: '700', color: '#64748b' }}>
-                      Resetar
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
                     onPress={async () => {
                       try {
                         const { uploadCoverPhoto } = await import(
