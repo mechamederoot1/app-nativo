@@ -190,7 +190,7 @@ export default function ProfileScreen() {
 
         const response = await fetch(`${BASE_URL}/users/me`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -439,9 +439,15 @@ export default function ProfileScreen() {
                   <TouchableOpacity
                     onPress={async () => {
                       try {
-                        const { uploadCoverPhoto } = await import('../../utils/api');
+                        const { uploadCoverPhoto } = await import(
+                          '../../utils/api'
+                        );
                         const { type, name } = guessMime(coverPhoto);
-                        const response = await uploadCoverPhoto({ uri: coverPhoto, type, name });
+                        const response = await uploadCoverPhoto({
+                          uri: coverPhoto,
+                          type,
+                          name,
+                        });
 
                         const BASE_URL =
                           (typeof process !== 'undefined' &&
@@ -472,7 +478,10 @@ export default function ProfileScreen() {
                         Alert.alert('Sucesso', 'Foto de capa atualizada!');
                       } catch (error: any) {
                         console.error('Erro ao salvar foto de capa:', error);
-                        Alert.alert('Erro', error?.message || 'Falha ao salvar foto de capa');
+                        Alert.alert(
+                          'Erro',
+                          error?.message || 'Falha ao salvar foto de capa',
+                        );
                       }
                     }}
                     style={{
