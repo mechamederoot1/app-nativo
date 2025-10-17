@@ -13,7 +13,7 @@ type Post = StorePost;
 
 export default function FeedScreen() {
   const router = useRouter();
-  const [posts, setPosts] = useState<Post[]>(getPosts());
+  const [posts, setPosts] = useState<Post[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
