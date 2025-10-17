@@ -11,6 +11,8 @@ class User(Base):
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
     last_name: Mapped[str] = mapped_column(String(100), nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    profile_photo: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    cover_photo: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     posts: Mapped[list["Post"]] = relationship("Post", back_populates="author", cascade="all,delete-orphan")
