@@ -176,6 +176,40 @@ export default function ProfileScreen() {
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
 
   useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const { getToken } = await import('../../utils/api');
+        if (!getToken()) return;
+
+        const BASE_URL =
+          (typeof process !== 'undefined' &&
+            (process as any).env &&
+            (process as any).env.EXPO_PUBLIC_API_URL) ||
+          'http://localhost:5050';
+
+        const response = await fetch(`${BASE_URL}/users/me`, {
+          headers: {
+            'Authorization': `Bearer ${getToken()}`,
+          },
+        });
+
+        if (response.ok) {
+          const user = await response.json();
+          setUserData((prev) => ({
+            ...prev,
+            avatar: user.profile_photo || prev.avatar,
+            cover: user.cover_photo || prev.cover,
+            name: `${user.first_name} ${user.last_name}`,
+          }));
+          setProfilePhoto(user.profile_photo || p.avatar);
+          setCoverPhoto(user.cover_photo || p.cover);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+      }
+    };
+
+    loadUserData();
     const unsub = subscribe(() => setPosts(getPosts()));
     return unsub;
   }, []);
