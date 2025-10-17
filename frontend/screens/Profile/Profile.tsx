@@ -335,16 +335,32 @@ export default function ProfileScreen() {
         try {
           const api = await import('../../utils/api');
           const data = await api.getPosts();
-          const mapped = data.map((p) => ({
-            id: String(p.id),
-            user: p.user_name,
-            content: p.content,
-            time: 'agora',
-            image: p.media_url || undefined,
-            likes: 0,
-            liked: false,
-            comments: [],
-          }));
+          const BASE_URL =
+            (typeof process !== 'undefined' &&
+              (process as any).env &&
+              (process as any).env.EXPO_PUBLIC_API_URL) ||
+            'http://localhost:5050';
+          const abs = (u?: string | null) =>
+            u ? (u.startsWith('http') ? u : `${BASE_URL}${u}`) : undefined;
+          const mapped = data.map((p) => {
+            const media = abs(p.media_url);
+            const avatar = abs(p.user_profile_photo);
+            const cover = abs(p.user_cover_photo);
+            let statusLabel: string | undefined;
+            if (media && avatar && media === avatar) statusLabel = 'atualizou a foto de perfil';
+            else if (media && cover && media === cover) statusLabel = 'atualizou a foto de capa';
+            return {
+              id: String(p.id),
+              user: p.user_name,
+              content: p.content,
+              time: 'agora',
+              image: media,
+              likes: 0,
+              liked: false,
+              comments: [],
+              statusLabel,
+            };
+          });
           setPosts(mapped);
         } catch {}
       } catch {}
