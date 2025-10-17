@@ -74,6 +74,8 @@ export type ApiPost = {
   media_url?: string | null;
   created_at: string;
   user_name: string;
+  user_profile_photo?: string | null;
+  user_cover_photo?: string | null;
 };
 
 export async function getPosts(): Promise<ApiPost[]> {
@@ -110,6 +112,34 @@ export async function createPostWithImage(
     name: file.name || 'upload.jpg',
   } as any);
   return request('/posts/upload', { method: 'POST', body: form });
+}
+
+export async function uploadProfilePhoto(file: {
+  uri: string;
+  type: string;
+  name?: string;
+}) {
+  const form = new FormData();
+  form.append('file', {
+    uri: file.uri,
+    type: file.type,
+    name: file.name || 'profile.jpg',
+  } as any);
+  return request('/users/profile-photo', { method: 'POST', body: form });
+}
+
+export async function uploadCoverPhoto(file: {
+  uri: string;
+  type: string;
+  name?: string;
+}) {
+  const form = new FormData();
+  form.append('file', {
+    uri: file.uri,
+    type: file.type,
+    name: file.name || 'cover.jpg',
+  } as any);
+  return request('/users/cover-photo', { method: 'POST', body: form });
 }
 
 export function logout() {

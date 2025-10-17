@@ -42,11 +42,15 @@ export default function PostCard({
         activeOpacity={0.85}
         onPress={() => onOpen && onOpen(post.id)}
       >
-        <View style={styles.avatarPlaceholder}>
-          <Text style={styles.avatarText}>
-            {post.user.charAt(0).toUpperCase()}
-          </Text>
-        </View>
+        {post.avatar ? (
+          <Image source={{ uri: post.avatar }} style={styles.avatarImage} />
+        ) : (
+          <View style={styles.avatarPlaceholder}>
+            <Text style={styles.avatarText}>
+              {post.user.charAt(0).toUpperCase()}
+            </Text>
+          </View>
+        )}
         <View style={{ marginLeft: 12, flex: 1 }}>
           <Text style={styles.user}>{post.user}</Text>
           <Text style={styles.time}>{`${username} · ${post.time}`}</Text>
@@ -133,6 +137,12 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  avatarImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#e2e8f0',
   },
   avatarPlaceholder: {
     width: 40,

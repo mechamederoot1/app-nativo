@@ -23,6 +23,8 @@ def list_posts(db: Session = Depends(get_db)):
             media_url=p.media_url,
             created_at=p.created_at,
             user_name=f"{p.author.first_name} {p.author.last_name}" if p.author else "Anônimo",
+            user_profile_photo=p.author.profile_photo if p.author else None,
+            user_cover_photo=p.author.cover_photo if p.author else None,
         ) for p in posts
     ]
 
@@ -37,6 +39,8 @@ def get_post(post_id: int, db: Session = Depends(get_db)):
         media_url=p.media_url,
         created_at=p.created_at,
         user_name=f"{p.author.first_name} {p.author.last_name}" if p.author else "Anônimo",
+        user_profile_photo=p.author.profile_photo if p.author else None,
+        user_cover_photo=p.author.cover_photo if p.author else None,
     )
 
 @router.post("/", response_model=PostOut)
@@ -51,6 +55,8 @@ def create_post(payload: PostCreate, db: Session = Depends(get_db), current=Depe
         media_url=post.media_url,
         created_at=post.created_at,
         user_name=f"{current.first_name} {current.last_name}",
+        user_profile_photo=current.profile_photo,
+        user_cover_photo=current.cover_photo,
     )
 
 @router.post("/upload", response_model=PostOut)
@@ -82,4 +88,6 @@ def create_post_with_upload(
         media_url=post.media_url,
         created_at=post.created_at,
         user_name=f"{current.first_name} {current.last_name}",
+        user_profile_photo=current.profile_photo,
+        user_cover_photo=current.cover_photo,
     )

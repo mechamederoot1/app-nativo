@@ -56,7 +56,8 @@ type CoverTransform = { scale: number; offsetX: number; offsetY: number };
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const p = profileData;
+  const [userData, setUserData] = useState(profileData);
+  const p = userData;
   const [tab, setTab] = useState<'posts' | 'about' | 'photos'>('posts');
   const [posts, setPosts] = useState(getPosts());
   const [editorVisible, setEditorVisible] = useState(false);
@@ -175,6 +176,54 @@ export default function ProfileScreen() {
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
 
   useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const api = await import('../../utils/api');
+        const token = api.getToken();
+        if (!token) return;
+
+        const BASE_URL =
+          (typeof process !== 'undefined' &&
+            (process as any).env &&
+            (process as any).env.EXPO_PUBLIC_API_URL) ||
+          'http://localhost:5050';
+
+        const response = await fetch(`${BASE_URL}/users/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const user = await response.json();
+
+          const profilePhotoUrl = user.profile_photo
+            ? user.profile_photo.startsWith('http')
+              ? user.profile_photo
+              : `${BASE_URL}${user.profile_photo}`
+            : p.avatar;
+
+          const coverPhotoUrl = user.cover_photo
+            ? user.cover_photo.startsWith('http')
+              ? user.cover_photo
+              : `${BASE_URL}${user.cover_photo}`
+            : p.cover;
+
+          setUserData((prev) => ({
+            ...prev,
+            avatar: profilePhotoUrl,
+            cover: coverPhotoUrl,
+            name: `${user.first_name} ${user.last_name}`,
+          }));
+          setProfilePhoto(profilePhotoUrl);
+          setCoverPhoto(coverPhotoUrl);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+      }
+    };
+
+    loadUserData();
     const unsub = subscribe(() => setPosts(getPosts()));
     return unsub;
   }, []);
@@ -222,16 +271,43 @@ export default function ProfileScreen() {
   };
 
   const handlePhotoSave = async (imageUri: string, caption: string) => {
-    setProfilePhoto(imageUri);
-    setEditorVisible(false);
-    setSelectedImageUri(null);
     try {
-      await postImageToFeed(imageUri, 'Atualizou a foto de perfil');
-    } catch {}
-    Alert.alert(
-      'Sucesso',
-      `Foto atualizada${caption ? ` com legenda: "${caption}"` : ''}!`,
-    );
+      const { uploadProfilePhoto } = await import('../../utils/api');
+      const { type, name } = guessMime(imageUri);
+      const response = await uploadProfilePhoto({ uri: imageUri, type, name });
+
+      const BASE_URL =
+        (typeof process !== 'undefined' &&
+          (process as any).env &&
+          (process as any).env.EXPO_PUBLIC_API_URL) ||
+        'http://localhost:5050';
+
+      const profilePhotoUrl = response.profile_photo
+        ? response.profile_photo.startsWith('http')
+          ? response.profile_photo
+          : `${BASE_URL}${response.profile_photo}`
+        : profilePhoto;
+
+      setProfilePhoto(profilePhotoUrl);
+      setUserData((prev) => ({
+        ...prev,
+        avatar: profilePhotoUrl,
+      }));
+      setEditorVisible(false);
+      setSelectedImageUri(null);
+
+      try {
+        await postImageToFeed(profilePhotoUrl, 'Atualizou a foto de perfil');
+      } catch {}
+
+      Alert.alert(
+        'Sucesso',
+        `Foto de perfil atualizada${caption ? ` com legenda: "${caption}"` : ''}!`,
+      );
+    } catch (error: any) {
+      console.error('Erro ao salvar foto de perfil:', error);
+      Alert.alert('Erro', error?.message || 'Falha ao salvar foto de perfil');
+    }
   };
 
   const myPosts = useMemo(
@@ -363,12 +439,50 @@ export default function ProfileScreen() {
                   <TouchableOpacity
                     onPress={async () => {
                       try {
-                        await postImageToFeed(
-                          coverPhoto,
-                          'Atualizou a foto de capa',
+                        const { uploadCoverPhoto } = await import(
+                          '../../utils/api'
                         );
-                      } catch {}
-                      setCoverEditorVisible(false);
+                        const { type, name } = guessMime(coverPhoto);
+                        const response = await uploadCoverPhoto({
+                          uri: coverPhoto,
+                          type,
+                          name,
+                        });
+
+                        const BASE_URL =
+                          (typeof process !== 'undefined' &&
+                            (process as any).env &&
+                            (process as any).env.EXPO_PUBLIC_API_URL) ||
+                          'http://localhost:5050';
+
+                        const coverPhotoUrl = response.cover_photo
+                          ? response.cover_photo.startsWith('http')
+                            ? response.cover_photo
+                            : `${BASE_URL}${response.cover_photo}`
+                          : coverPhoto;
+
+                        setCoverPhoto(coverPhotoUrl);
+                        setUserData((prev) => ({
+                          ...prev,
+                          cover: coverPhotoUrl,
+                        }));
+                        setCoverEditorVisible(false);
+
+                        try {
+                          await postImageToFeed(
+                            coverPhotoUrl,
+                            'Atualizou a foto de capa',
+                          );
+                        } catch {}
+
+                        Alert.alert('Sucesso', 'Foto de capa atualizada!');
+                      } catch (error: any) {
+                        console.error('Erro ao salvar foto de capa:', error);
+                        Alert.alert(
+                          'Erro',
+                          error?.message || 'Falha ao salvar foto de capa',
+                        );
+                      }
                     }}
                     style={{
                       flex: 1,
