@@ -7,13 +7,7 @@ import BottomNav from '../../components/BottomNav';
 import CreatePost from '../../components/CreatePost';
 import TopBar from '../../components/TopBar';
 import { useRouter } from 'expo-router';
-import {
-  getPosts,
-  subscribe,
-  toggleLike,
-  addPost,
-  Post as StorePost,
-} from '../../store/posts';
+import { subscribe, toggleLike, Post as StorePost } from '../../store/posts';
 
 type Post = StorePost;
 
