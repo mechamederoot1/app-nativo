@@ -100,7 +100,7 @@ export async function createPost(content: string, file?: File | Blob) {
 // React Native helper: upload image from local URI
 export async function createPostWithImage(
   content: string,
-  file: { uri: string; type: string; name?: string }
+  file: { uri: string; type: string; name?: string },
 ) {
   const form = new FormData();
   form.append('content', content);

@@ -205,7 +205,8 @@ export default function ProfileScreen() {
   const guessMime = (uri: string) => {
     const u = uri.toLowerCase();
     if (u.endsWith('.png')) return { type: 'image/png', name: 'image.png' };
-    if (u.endsWith('.jpg') || u.endsWith('.jpeg')) return { type: 'image/jpeg', name: 'image.jpg' };
+    if (u.endsWith('.jpg') || u.endsWith('.jpeg'))
+      return { type: 'image/jpeg', name: 'image.jpg' };
     if (u.endsWith('.webp')) return { type: 'image/webp', name: 'image.webp' };
     return { type: 'image/jpeg', name: 'image.jpg' };
   };
@@ -362,7 +363,10 @@ export default function ProfileScreen() {
                   <TouchableOpacity
                     onPress={async () => {
                       try {
-                        await postImageToFeed(coverPhoto, 'Atualizou a foto de capa');
+                        await postImageToFeed(
+                          coverPhoto,
+                          'Atualizou a foto de capa',
+                        );
                       } catch {}
                       setCoverEditorVisible(false);
                     }}
