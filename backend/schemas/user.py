@@ -6,6 +6,8 @@ class UserBase(BaseModel):
     email: EmailStr
     first_name: str
     last_name: str
+    profile_photo: str | None = None
+    cover_photo: str | None = None
     created_at: datetime
 
     class Config:
