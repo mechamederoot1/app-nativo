@@ -19,6 +19,18 @@ os.makedirs(MEDIA_DIR, exist_ok=True)
 async def me(current: User = Depends(get_current_user)):
     return current
 
+@router.get("", response_model=List[UserBase])
+async def search_users(q: str = None, db: Session = Depends(get_db)):
+    query = db.query(User)
+    if q:
+        q = q.lower().strip()
+        query = query.filter(
+            (User.first_name.ilike(f"%{q}%")) |
+            (User.last_name.ilike(f"%{q}%")) |
+            (User.email.ilike(f"%{q}%"))
+        )
+    return query.limit(50).all()
+
 @router.get("/{user_id}", response_model=UserBase)
 async def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
