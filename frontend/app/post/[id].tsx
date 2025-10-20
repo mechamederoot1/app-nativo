@@ -50,8 +50,14 @@ export default function PostDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const mediaUrl = React.useMemo(() => absoluteUrl(post?.media_url), [post?.media_url]);
-  const avatarUrl = React.useMemo(() => absoluteUrl(post?.user_profile_photo), [post?.user_profile_photo]);
+  const mediaUrl = React.useMemo(
+    () => absoluteUrl(post?.media_url),
+    [post?.media_url],
+  );
+  const avatarUrl = React.useMemo(
+    () => absoluteUrl(post?.user_profile_photo),
+    [post?.user_profile_photo],
+  );
   const { dimensions: imageDimensions } = useImageDimensions(mediaUrl);
 
   const [comment, setComment] = useState('');
@@ -245,7 +251,13 @@ export default function PostDetail() {
         >
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => router.push(`/profile/${String(item.user || '').replace(/\s+/g, '').toLowerCase()}`)}
+            onPress={() =>
+              router.push(
+                `/profile/${String(item.user || '')
+                  .replace(/\s+/g, '')
+                  .toLowerCase()}`,
+              )
+            }
           >
             <View style={styles.commentAvatarPlaceholder}>
               <Text style={styles.commentAvatarText}>
@@ -258,14 +270,26 @@ export default function PostDetail() {
               <View>
                 <TouchableOpacity
                   activeOpacity={0.7}
-                  onPress={() => router.push(`/profile/${String(item.user || '').replace(/\s+/g, '').toLowerCase()}`)}
+                  onPress={() =>
+                    router.push(
+                      `/profile/${String(item.user || '')
+                        .replace(/\s+/g, '')
+                        .toLowerCase()}`,
+                    )
+                  }
                 >
                   <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => router.push(`/profile/${String(item.user || '').replace(/\s+/g, '').toLowerCase()}`)}
-                >
-                  <Text style={styles.commentAuthor}>{item.user}</Text>
-                </TouchableOpacity>
+                    activeOpacity={0.7}
+                    onPress={() =>
+                      router.push(
+                        `/profile/${String(item.user || '')
+                          .replace(/\s+/g, '')
+                          .toLowerCase()}`,
+                      )
+                    }
+                  >
+                    <Text style={styles.commentAuthor}>{item.user}</Text>
+                  </TouchableOpacity>
                 </TouchableOpacity>
                 <Text style={styles.commentMeta}>
                   {item.timestamp || 'agora'}
@@ -335,10 +359,19 @@ export default function PostDetail() {
                 <View style={styles.authorRow}>
                   <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={() => router.push(`/profile/${String(post.user_name || '').replace(/\s+/g, '').toLowerCase()}`)}
+                    onPress={() =>
+                      router.push(
+                        `/profile/${String(post.user_name || '')
+                          .replace(/\s+/g, '')
+                          .toLowerCase()}`,
+                      )
+                    }
                   >
                     {avatarUrl ? (
-                      <Image source={{ uri: avatarUrl }} style={styles.authorAvatarPlaceholder} />
+                      <Image
+                        source={{ uri: avatarUrl }}
+                        style={styles.authorAvatarPlaceholder}
+                      />
                     ) : (
                       <View style={styles.authorAvatarPlaceholder}>
                         <Text style={styles.authorAvatarText}>
@@ -351,7 +384,13 @@ export default function PostDetail() {
                     <View style={styles.authorNameRow}>
                       <TouchableOpacity
                         activeOpacity={0.7}
-                        onPress={() => router.push(`/profile/${String(post.user_name || '').replace(/\s+/g, '').toLowerCase()}`)}
+                        onPress={() =>
+                          router.push(
+                            `/profile/${String(post.user_name || '')
+                              .replace(/\s+/g, '')
+                              .toLowerCase()}`,
+                          )
+                        }
                       >
                         <Text style={styles.authorName}>
                           {post.user_name || 'Anônimo'}

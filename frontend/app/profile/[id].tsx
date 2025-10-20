@@ -5,7 +5,9 @@ import { profileData as seed } from '../../screens/Profile/Data';
 
 export default function ProfileIdView() {
   const { id } = useLocalSearchParams();
-  const idStr = String(id ?? '').trim().toLowerCase();
+  const idStr = String(id ?? '')
+    .trim()
+    .toLowerCase();
   const displayName = idStr ? idStr.replace(/[._-]+/g, ' ') : seed.name;
   const [profile, setProfile] = React.useState({
     ...seed,
@@ -19,7 +21,10 @@ export default function ProfileIdView() {
       try {
         const api = await import('../../utils/api');
         const posts = await api.getPosts();
-        const toSlug = (s: string) => String(s || '').replace(/\s+/g, '').toLowerCase();
+        const toSlug = (s: string) =>
+          String(s || '')
+            .replace(/\s+/g, '')
+            .toLowerCase();
         const match = posts.find((p) => toSlug(p.user_name) === idStr);
         if (!mounted) return;
         if (match) {

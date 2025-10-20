@@ -122,10 +122,17 @@ export default function UserProfileView({ profile, editable }: Props) {
             }
             const currentDistance = getDistance(touches);
             const scaleFactor = currentDistance / gestureState.initialDistance;
-            const newScale = Math.max(1, Math.min(3, gestureState.initialScale * scaleFactor));
+            const newScale = Math.max(
+              1,
+              Math.min(3, gestureState.initialScale * scaleFactor),
+            );
             setCoverTransform((prev) => ({ ...prev, scale: newScale }));
             if (newScale <= 1) {
-              setCoverTransform((prev) => ({ ...prev, offsetX: 0, offsetY: 0 }));
+              setCoverTransform((prev) => ({
+                ...prev,
+                offsetX: 0,
+                offsetY: 0,
+              }));
             }
           } else if (touches.length === 1 && !gestureState.isPinching) {
             if (coverTransform.scale > 1) {
@@ -134,10 +141,21 @@ export default function UserProfileView({ profile, editable }: Props) {
               const deltaX = currentX - gestureState.lastTouchX;
               const deltaY = currentY - gestureState.lastTouchY;
               const maxOffsetX = (width * (coverTransform.scale - 1)) / 2;
-              const maxOffsetY = (COVER_HEIGHT * (coverTransform.scale - 1)) / 2;
-              const newOffsetX = Math.max(-maxOffsetX, Math.min(maxOffsetX, gestureState.initialOffsetX + deltaX));
-              const newOffsetY = Math.max(-maxOffsetY, Math.min(maxOffsetY, gestureState.initialOffsetY + deltaY));
-              setCoverTransform((prev) => ({ ...prev, offsetX: newOffsetX, offsetY: newOffsetY }));
+              const maxOffsetY =
+                (COVER_HEIGHT * (coverTransform.scale - 1)) / 2;
+              const newOffsetX = Math.max(
+                -maxOffsetX,
+                Math.min(maxOffsetX, gestureState.initialOffsetX + deltaX),
+              );
+              const newOffsetY = Math.max(
+                -maxOffsetY,
+                Math.min(maxOffsetY, gestureState.initialOffsetY + deltaY),
+              );
+              setCoverTransform((prev) => ({
+                ...prev,
+                offsetX: newOffsetX,
+                offsetY: newOffsetY,
+              }));
             }
           }
         },
@@ -146,7 +164,12 @@ export default function UserProfileView({ profile, editable }: Props) {
           gestureState.initialDistance = 0;
         },
       }),
-    [coverEditorVisible, coverTransform.scale, coverTransform.offsetX, coverTransform.offsetY],
+    [
+      coverEditorVisible,
+      coverTransform.scale,
+      coverTransform.offsetX,
+      coverTransform.offsetY,
+    ],
   );
 
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
@@ -159,7 +182,9 @@ export default function UserProfileView({ profile, editable }: Props) {
         const token = api.getToken();
         if (!token) return;
         const BASE_URL =
-          (typeof process !== 'undefined' && (process as any).env && (process as any).env.EXPO_PUBLIC_API_URL) ||
+          (typeof process !== 'undefined' &&
+            (process as any).env &&
+            (process as any).env.EXPO_PUBLIC_API_URL) ||
           'http://localhost:5050';
         const response = await fetch(`${BASE_URL}/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -198,7 +223,10 @@ export default function UserProfileView({ profile, editable }: Props) {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permissão necessária', 'Permitir acesso à galeria de fotos para mudar sua foto de perfil.');
+      Alert.alert(
+        'Permissão necessária',
+        'Permitir acesso à galeria de fotos para mudar sua foto de perfil.',
+      );
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -216,7 +244,8 @@ export default function UserProfileView({ profile, editable }: Props) {
   const guessMime = (uri: string) => {
     const u = uri.toLowerCase();
     if (u.endsWith('.png')) return { type: 'image/png', name: 'image.png' };
-    if (u.endsWith('.jpg') || u.endsWith('.jpeg')) return { type: 'image/jpeg', name: 'image.jpg' };
+    if (u.endsWith('.jpg') || u.endsWith('.jpeg'))
+      return { type: 'image/jpeg', name: 'image.jpg' };
     if (u.endsWith('.webp')) return { type: 'image/webp', name: 'image.webp' };
     return { type: 'image/jpeg', name: 'image.jpg' };
   };
@@ -235,7 +264,9 @@ export default function UserProfileView({ profile, editable }: Props) {
       const { type, name } = guessMime(imageUri);
       const response = await uploadProfilePhoto({ uri: imageUri, type, name });
       const BASE_URL =
-        (typeof process !== 'undefined' && (process as any).env && (process as any).env.EXPO_PUBLIC_API_URL) ||
+        (typeof process !== 'undefined' &&
+          (process as any).env &&
+          (process as any).env.EXPO_PUBLIC_API_URL) ||
         'http://localhost:5050';
       const profilePhotoUrl = response.profile_photo
         ? response.profile_photo.startsWith('http')
@@ -249,7 +280,10 @@ export default function UserProfileView({ profile, editable }: Props) {
       try {
         await postImageToFeed(profilePhotoUrl, 'Atualizou a foto de perfil');
       } catch {}
-      Alert.alert('Sucesso', `Foto de perfil atualizada${caption ? ` com legenda: "${caption}"` : ''}!`);
+      Alert.alert(
+        'Sucesso',
+        `Foto de perfil atualizada${caption ? ` com legenda: "${caption}"` : ''}!`,
+      );
     } catch (error: any) {
       console.error('Erro ao salvar foto de perfil:', error);
       Alert.alert('Erro', error?.message || 'Falha ao salvar foto de perfil');
@@ -258,7 +292,10 @@ export default function UserProfileView({ profile, editable }: Props) {
 
   const myPosts = useMemo(() => {
     if (editable) return posts.filter((x) => x.user === 'Você');
-    const toSlug = (s: string) => String(s || '').replace(/\s+/g, '').toLowerCase();
+    const toSlug = (s: string) =>
+      String(s || '')
+        .replace(/\s+/g, '')
+        .toLowerCase();
     const target = String(p.username || '').toLowerCase();
     return posts.filter((x) => toSlug(x.user) === target);
   }, [posts, editable, p.username]);
@@ -271,8 +308,16 @@ export default function UserProfileView({ profile, editable }: Props) {
     { id: 5, name: 'Hobbies', image: p.highlights[4], icon: '🎮' },
   ];
 
-  const [ratings, setRatings] = useState({ confiavel: 142, legal: 256, sexy: 89 });
-  const [userVotes, setUserVotes] = useState({ confiavel: false, legal: false, sexy: false });
+  const [ratings, setRatings] = useState({
+    confiavel: 142,
+    legal: 256,
+    sexy: 89,
+  });
+  const [userVotes, setUserVotes] = useState({
+    confiavel: false,
+    legal: false,
+    sexy: false,
+  });
   const handleRating = (type: 'confiavel' | 'legal' | 'sexy') => {
     if (userVotes[type]) return;
     setRatings((prev) => ({ ...prev, [type]: prev[type] + 1 }));
@@ -282,45 +327,102 @@ export default function UserProfileView({ profile, editable }: Props) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }}>
       <TopBar />
-      <ScrollView contentContainerStyle={{ paddingBottom: 120 }} showsVerticalScrollIndicator={false} bounces>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 120 }}
+        showsVerticalScrollIndicator={false}
+        bounces
+      >
         <View style={styles.headerSection}>
           <View style={styles.coverContainer}>
             <Image
               source={{ uri: coverPhoto }}
               style={[
                 styles.coverImage,
-                { transform: [{ scale: coverTransform.scale }, { translateX: coverTransform.offsetX }, { translateY: coverTransform.offsetY }] },
+                {
+                  transform: [
+                    { scale: coverTransform.scale },
+                    { translateX: coverTransform.offsetX },
+                    { translateY: coverTransform.offsetY },
+                  ],
+                },
               ]}
               resizeMode="cover"
             />
-            {!coverEditorVisible && <Pressable style={StyleSheet.absoluteFill} onPress={() => setShowCoverMenu(true)} />}
+            {!coverEditorVisible && (
+              <Pressable
+                style={StyleSheet.absoluteFill}
+                onPress={() => setShowCoverMenu(true)}
+              />
+            )}
             {editable && coverEditorVisible && (
-              <View style={StyleSheet.absoluteFill} {...panResponder.panHandlers}>
-                <View style={{ position: 'absolute', bottom: 12, left: 12, right: 12, flexDirection: 'row', gap: 8 }}>
+              <View
+                style={StyleSheet.absoluteFill}
+                {...panResponder.panHandlers}
+              >
+                <View
+                  style={{
+                    position: 'absolute',
+                    bottom: 12,
+                    left: 12,
+                    right: 12,
+                    flexDirection: 'row',
+                    gap: 8,
+                  }}
+                >
                   <TouchableOpacity
                     onPress={() => {
                       setCoverEditorVisible(false);
                       setCoverPhoto(prevCoverPhotoRef.current);
                       setCoverTransform(prevCoverTransformRef.current);
                     }}
-                    style={{ flex: 1, paddingVertical: 10, borderRadius: 12, backgroundColor: '#ffffff', alignItems: 'center', borderWidth: 1, borderColor: '#e2e8f0' }}
+                    style={{
+                      flex: 1,
+                      paddingVertical: 10,
+                      borderRadius: 12,
+                      backgroundColor: '#ffffff',
+                      alignItems: 'center',
+                      borderWidth: 1,
+                      borderColor: '#e2e8f0',
+                    }}
                   >
-                    <Text style={{ fontWeight: '700', color: '#64748b' }}>Cancelar</Text>
+                    <Text style={{ fontWeight: '700', color: '#64748b' }}>
+                      Cancelar
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={() => setCoverTransform({ scale: 1, offsetX: 0, offsetY: 0 })}
-                    style={{ paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12, backgroundColor: '#f8fafc', alignItems: 'center', borderWidth: 1, borderColor: '#e2e8f0' }}
+                    onPress={() =>
+                      setCoverTransform({ scale: 1, offsetX: 0, offsetY: 0 })
+                    }
+                    style={{
+                      paddingVertical: 10,
+                      paddingHorizontal: 16,
+                      borderRadius: 12,
+                      backgroundColor: '#f8fafc',
+                      alignItems: 'center',
+                      borderWidth: 1,
+                      borderColor: '#e2e8f0',
+                    }}
                   >
-                    <Text style={{ fontWeight: '700', color: '#64748b' }}>Resetar</Text>
+                    <Text style={{ fontWeight: '700', color: '#64748b' }}>
+                      Resetar
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={async () => {
                       try {
-                        const { uploadCoverPhoto } = await import('../utils/api');
+                        const { uploadCoverPhoto } = await import(
+                          '../utils/api'
+                        );
                         const { type, name } = guessMime(coverPhoto);
-                        const response = await uploadCoverPhoto({ uri: coverPhoto, type, name });
+                        const response = await uploadCoverPhoto({
+                          uri: coverPhoto,
+                          type,
+                          name,
+                        });
                         const BASE_URL =
-                          (typeof process !== 'undefined' && (process as any).env && (process as any).env.EXPO_PUBLIC_API_URL) ||
+                          (typeof process !== 'undefined' &&
+                            (process as any).env &&
+                            (process as any).env.EXPO_PUBLIC_API_URL) ||
                           'http://localhost:5050';
                         const coverPhotoUrl = response.cover_photo
                           ? response.cover_photo.startsWith('http')
@@ -328,36 +430,64 @@ export default function UserProfileView({ profile, editable }: Props) {
                             : `${BASE_URL}${response.cover_photo}`
                           : coverPhoto;
                         setCoverPhoto(coverPhotoUrl);
-                        setUserData((prev) => ({ ...prev, cover: coverPhotoUrl }));
+                        setUserData((prev) => ({
+                          ...prev,
+                          cover: coverPhotoUrl,
+                        }));
                         setCoverEditorVisible(false);
                         try {
-                          await postImageToFeed(coverPhotoUrl, 'Atualizou a foto de capa');
+                          await postImageToFeed(
+                            coverPhotoUrl,
+                            'Atualizou a foto de capa',
+                          );
                         } catch {}
                         Alert.alert('Sucesso', 'Foto de capa atualizada!');
                       } catch (error: any) {
                         console.error('Erro ao salvar foto de capa:', error);
-                        Alert.alert('Erro', error?.message || 'Falha ao salvar foto de capa');
+                        Alert.alert(
+                          'Erro',
+                          error?.message || 'Falha ao salvar foto de capa',
+                        );
                       }
                     }}
-                    style={{ flex: 1, paddingVertical: 10, borderRadius: 12, backgroundColor: '#3b82f6', alignItems: 'center' }}
+                    style={{
+                      flex: 1,
+                      paddingVertical: 10,
+                      borderRadius: 12,
+                      backgroundColor: '#3b82f6',
+                      alignItems: 'center',
+                    }}
                   >
-                    <Text style={{ fontWeight: '700', color: '#ffffff' }}>Salvar</Text>
+                    <Text style={{ fontWeight: '700', color: '#ffffff' }}>
+                      Salvar
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
             )}
-            <LinearGradient colors={[ 'transparent', 'rgba(0,0,0,0.4)' ]} style={styles.coverGradient} />
+            <LinearGradient
+              colors={['transparent', 'rgba(0,0,0,0.4)']}
+              style={styles.coverGradient}
+            />
             {editable && (
               <TouchableOpacity
                 style={styles.coverEditBtn}
                 activeOpacity={0.8}
                 onPress={async () => {
-                  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                  const { status } =
+                    await ImagePicker.requestMediaLibraryPermissionsAsync();
                   if (status !== 'granted') {
-                    Alert.alert('Permissão necessária', 'Permitir acesso à galeria para alterar sua capa.');
+                    Alert.alert(
+                      'Permissão necessária',
+                      'Permitir acesso à galeria para alterar sua capa.',
+                    );
                     return;
                   }
-                  const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: false, quality: 1 });
+                  const result = await ImagePicker.launchImageLibraryAsync({
+                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                    allowsEditing: false,
+                    quality: 1,
+                  });
                   if (!result.canceled) {
                     prevCoverPhotoRef.current = coverPhoto;
                     prevCoverTransformRef.current = coverTransform;
@@ -379,7 +509,11 @@ export default function UserProfileView({ profile, editable }: Props) {
               </Pressable>
               <View style={styles.onlineDot} />
               {editable && (
-                <TouchableOpacity style={styles.avatarEditBtn} activeOpacity={0.8} onPress={pickImage}>
+                <TouchableOpacity
+                  style={styles.avatarEditBtn}
+                  activeOpacity={0.8}
+                  onPress={pickImage}
+                >
                   <Camera size={14} color="#ffffff" strokeWidth={2.5} />
                 </TouchableOpacity>
               )}
@@ -394,11 +528,32 @@ export default function UserProfileView({ profile, editable }: Props) {
             <Text style={styles.bio}>{p.bio}</Text>
 
             <View style={styles.ratingsContainer}>
-              <TouchableOpacity style={[styles.ratingItem, userVotes.confiavel && styles.ratingItemVoted]} activeOpacity={userVotes.confiavel ? 1 : 0.7} onPress={() => handleRating('confiavel')}>
+              <TouchableOpacity
+                style={[
+                  styles.ratingItem,
+                  userVotes.confiavel && styles.ratingItemVoted,
+                ]}
+                activeOpacity={userVotes.confiavel ? 1 : 0.7}
+                onPress={() => handleRating('confiavel')}
+              >
                 <Text style={styles.ratingEmoji}>😊</Text>
                 <View style={styles.ratingInfo}>
-                  <Text style={[styles.ratingLabel, userVotes.confiavel && styles.ratingLabelVoted]}>Confiável</Text>
-                  <Text style={[styles.ratingCount, userVotes.confiavel && styles.ratingCountVoted]}>{ratings.confiavel}</Text>
+                  <Text
+                    style={[
+                      styles.ratingLabel,
+                      userVotes.confiavel && styles.ratingLabelVoted,
+                    ]}
+                  >
+                    Confiável
+                  </Text>
+                  <Text
+                    style={[
+                      styles.ratingCount,
+                      userVotes.confiavel && styles.ratingCountVoted,
+                    ]}
+                  >
+                    {ratings.confiavel}
+                  </Text>
                 </View>
                 {userVotes.confiavel && (
                   <View style={styles.votedIndicator}>
@@ -409,11 +564,32 @@ export default function UserProfileView({ profile, editable }: Props) {
 
               <View style={styles.ratingDivider} />
 
-              <TouchableOpacity style={[styles.ratingItem, userVotes.legal && styles.ratingItemVoted]} activeOpacity={userVotes.legal ? 1 : 0.7} onPress={() => handleRating('legal')}>
+              <TouchableOpacity
+                style={[
+                  styles.ratingItem,
+                  userVotes.legal && styles.ratingItemVoted,
+                ]}
+                activeOpacity={userVotes.legal ? 1 : 0.7}
+                onPress={() => handleRating('legal')}
+              >
                 <Text style={styles.ratingEmoji}>😎</Text>
                 <View style={styles.ratingInfo}>
-                  <Text style={[styles.ratingLabel, userVotes.legal && styles.ratingLabelVoted]}>Legal</Text>
-                  <Text style={[styles.ratingCount, userVotes.legal && styles.ratingCountVoted]}>{ratings.legal}</Text>
+                  <Text
+                    style={[
+                      styles.ratingLabel,
+                      userVotes.legal && styles.ratingLabelVoted,
+                    ]}
+                  >
+                    Legal
+                  </Text>
+                  <Text
+                    style={[
+                      styles.ratingCount,
+                      userVotes.legal && styles.ratingCountVoted,
+                    ]}
+                  >
+                    {ratings.legal}
+                  </Text>
                 </View>
                 {userVotes.legal && (
                   <View style={styles.votedIndicator}>
@@ -424,11 +600,32 @@ export default function UserProfileView({ profile, editable }: Props) {
 
               <View style={styles.ratingDivider} />
 
-              <TouchableOpacity style={[styles.ratingItem, userVotes.sexy && styles.ratingItemVoted]} activeOpacity={userVotes.sexy ? 1 : 0.7} onPress={() => handleRating('sexy')}>
+              <TouchableOpacity
+                style={[
+                  styles.ratingItem,
+                  userVotes.sexy && styles.ratingItemVoted,
+                ]}
+                activeOpacity={userVotes.sexy ? 1 : 0.7}
+                onPress={() => handleRating('sexy')}
+              >
                 <Text style={styles.ratingEmoji}>💖</Text>
                 <View style={styles.ratingInfo}>
-                  <Text style={[styles.ratingLabel, userVotes.sexy && styles.ratingLabelVoted]}>Sexy</Text>
-                  <Text style={[styles.ratingCount, userVotes.sexy && styles.ratingCountVoted]}>{ratings.sexy}</Text>
+                  <Text
+                    style={[
+                      styles.ratingLabel,
+                      userVotes.sexy && styles.ratingLabelVoted,
+                    ]}
+                  >
+                    Sexy
+                  </Text>
+                  <Text
+                    style={[
+                      styles.ratingCount,
+                      userVotes.sexy && styles.ratingCountVoted,
+                    ]}
+                  >
+                    {ratings.sexy}
+                  </Text>
                 </View>
                 {userVotes.sexy && (
                   <View style={styles.votedIndicator}>
@@ -441,27 +638,50 @@ export default function UserProfileView({ profile, editable }: Props) {
             <View style={styles.actionButtons}>
               {editable ? (
                 <>
-                  <TouchableOpacity style={styles.primaryBtn} activeOpacity={0.85}>
+                  <TouchableOpacity
+                    style={styles.primaryBtn}
+                    activeOpacity={0.85}
+                  >
                     <Edit3 size={16} color="#ffffff" strokeWidth={2.5} />
                     <Text style={styles.primaryBtnText}>Editar perfil</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.85}>
+                  <TouchableOpacity
+                    style={styles.secondaryBtn}
+                    activeOpacity={0.85}
+                  >
                     <Plus size={18} color="#3b82f6" strokeWidth={2.5} />
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.85}>
+                  <TouchableOpacity
+                    style={styles.secondaryBtn}
+                    activeOpacity={0.85}
+                  >
                     <MoreVertical size={18} color="#3b82f6" strokeWidth={2.5} />
                   </TouchableOpacity>
                 </>
               ) : (
                 <>
-                  <TouchableOpacity style={styles.primaryBtn} activeOpacity={0.85}>
+                  <TouchableOpacity
+                    style={styles.primaryBtn}
+                    activeOpacity={0.85}
+                  >
                     <UserPlus size={16} color="#ffffff" strokeWidth={2.5} />
                     <Text style={styles.primaryBtnText}>Adicionar</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.85} onPress={() => router.push('/messages')}>
-                    <MessageCircle size={18} color="#3b82f6" strokeWidth={2.5} />
+                  <TouchableOpacity
+                    style={styles.secondaryBtn}
+                    activeOpacity={0.85}
+                    onPress={() => router.push('/messages')}
+                  >
+                    <MessageCircle
+                      size={18}
+                      color="#3b82f6"
+                      strokeWidth={2.5}
+                    />
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.85}>
+                  <TouchableOpacity
+                    style={styles.secondaryBtn}
+                    activeOpacity={0.85}
+                  >
                     <MoreVertical size={18} color="#3b82f6" strokeWidth={2.5} />
                   </TouchableOpacity>
                 </>
@@ -478,12 +698,26 @@ export default function UserProfileView({ profile, editable }: Props) {
                 )}
               </View>
 
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.highlightsContainer}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.highlightsContainer}
+              >
                 {highlightsData.map((highlight) => (
-                  <TouchableOpacity key={highlight.id} style={styles.highlightItem} activeOpacity={0.9}>
+                  <TouchableOpacity
+                    key={highlight.id}
+                    style={styles.highlightItem}
+                    activeOpacity={0.9}
+                  >
                     <View style={styles.highlightImageWrapper}>
-                      <Image source={{ uri: highlight.image }} style={styles.highlightImage} />
-                      <LinearGradient colors={[ 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.7)' ]} style={styles.highlightOverlay} />
+                      <Image
+                        source={{ uri: highlight.image }}
+                        style={styles.highlightImage}
+                      />
+                      <LinearGradient
+                        colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.7)']}
+                        style={styles.highlightOverlay}
+                      />
                       <Text style={styles.highlightIcon}>{highlight.icon}</Text>
                     </View>
                     <Text style={styles.highlightName}>{highlight.name}</Text>
@@ -491,7 +725,10 @@ export default function UserProfileView({ profile, editable }: Props) {
                 ))}
 
                 {editable && (
-                  <TouchableOpacity style={styles.addHighlightItem} activeOpacity={0.8}>
+                  <TouchableOpacity
+                    style={styles.addHighlightItem}
+                    activeOpacity={0.8}
+                  >
                     <View style={styles.addHighlightCircle}>
                       <Plus size={18} color="#64748b" strokeWidth={2.5} />
                     </View>
@@ -506,7 +743,13 @@ export default function UserProfileView({ profile, editable }: Props) {
         <View style={styles.infoCard}>
           <View style={styles.infoHeader}>
             <Text style={styles.infoTitle}>Informações Pessoais</Text>
-            <Pressable onPress={() => router.push(`/profile/about?user=${encodeURIComponent(p.username)}`)}>
+            <Pressable
+              onPress={() =>
+                router.push(
+                  `/profile/about?user=${encodeURIComponent(p.username)}`,
+                )
+              }
+            >
               <ChevronRight size={20} color="#64748b" strokeWidth={2} />
             </Pressable>
           </View>
@@ -534,7 +777,9 @@ export default function UserProfileView({ profile, editable }: Props) {
             </View>
             <View style={styles.infoItem}>
               <Mail size={18} color="#64748b" strokeWidth={2} />
-              <Text style={[styles.infoText, styles.linkText]}>contato@email.com</Text>
+              <Text style={[styles.infoText, styles.linkText]}>
+                contato@email.com
+              </Text>
             </View>
           </View>
         </View>
@@ -546,7 +791,8 @@ export default function UserProfileView({ profile, editable }: Props) {
               <View>
                 <Text style={styles.sectionTitle}>Conexões</Text>
                 <Text style={styles.connectionsSubtitle}>
-                  {p.connectionsCount} conexões · {p.recentFriends.length} em comum
+                  {p.connectionsCount} conexões · {p.recentFriends.length} em
+                  comum
                 </Text>
               </View>
             </View>
@@ -557,8 +803,15 @@ export default function UserProfileView({ profile, editable }: Props) {
 
           <View style={styles.connectionsGrid}>
             {p.recentFriends.slice(0, 9).map((friend) => (
-              <TouchableOpacity key={friend.id} style={styles.connectionCard} activeOpacity={0.85}>
-                <Image source={{ uri: friend.avatar }} style={styles.connectionAvatar} />
+              <TouchableOpacity
+                key={friend.id}
+                style={styles.connectionCard}
+                activeOpacity={0.85}
+              >
+                <Image
+                  source={{ uri: friend.avatar }}
+                  style={styles.connectionAvatar}
+                />
                 <Text style={styles.connectionName} numberOfLines={1}>
                   {friend.name.split(' ')[0]}
                 </Text>
@@ -570,19 +823,61 @@ export default function UserProfileView({ profile, editable }: Props) {
 
         <View style={styles.tabsContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <Pressable onPress={() => setTab('posts')} style={[styles.tabBtn, tab === 'posts' && styles.tabActive]}>
-              <FileText size={18} color={tab === 'posts' ? '#3b82f6' : '#64748b'} strokeWidth={2} />
-              <Text style={[styles.tabText, tab === 'posts' && styles.tabTextActive]}>Posts</Text>
+            <Pressable
+              onPress={() => setTab('posts')}
+              style={[styles.tabBtn, tab === 'posts' && styles.tabActive]}
+            >
+              <FileText
+                size={18}
+                color={tab === 'posts' ? '#3b82f6' : '#64748b'}
+                strokeWidth={2}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  tab === 'posts' && styles.tabTextActive,
+                ]}
+              >
+                Posts
+              </Text>
             </Pressable>
 
-            <Pressable onPress={() => setTab('photos')} style={[styles.tabBtn, tab === 'photos' && styles.tabActive]}>
-              <Camera size={18} color={tab === 'photos' ? '#3b82f6' : '#64748b'} strokeWidth={2} />
-              <Text style={[styles.tabText, tab === 'photos' && styles.tabTextActive]}>Fotos</Text>
+            <Pressable
+              onPress={() => setTab('photos')}
+              style={[styles.tabBtn, tab === 'photos' && styles.tabActive]}
+            >
+              <Camera
+                size={18}
+                color={tab === 'photos' ? '#3b82f6' : '#64748b'}
+                strokeWidth={2}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  tab === 'photos' && styles.tabTextActive,
+                ]}
+              >
+                Fotos
+              </Text>
             </Pressable>
 
-            <Pressable onPress={() => setTab('about')} style={[styles.tabBtn, tab === 'about' && styles.tabActive]}>
-              <Users size={18} color={tab === 'about' ? '#3b82f6' : '#64748b'} strokeWidth={2} />
-              <Text style={[styles.tabText, tab === 'about' && styles.tabTextActive]}>Sobre</Text>
+            <Pressable
+              onPress={() => setTab('about')}
+              style={[styles.tabBtn, tab === 'about' && styles.tabActive]}
+            >
+              <Users
+                size={18}
+                color={tab === 'about' ? '#3b82f6' : '#64748b'}
+                strokeWidth={2}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  tab === 'about' && styles.tabTextActive,
+                ]}
+              >
+                Sobre
+              </Text>
             </Pressable>
           </ScrollView>
         </View>
@@ -595,22 +890,39 @@ export default function UserProfileView({ profile, editable }: Props) {
                   <FileText size={48} color="#cbd5e1" strokeWidth={1.5} />
                 </View>
                 <Text style={styles.emptyTitle}>Nenhuma publicação ainda</Text>
-                <Text style={styles.emptyDesc}>Compartilhe seus momentos e pensamentos com seus amigos</Text>
+                <Text style={styles.emptyDesc}>
+                  Compartilhe seus momentos e pensamentos com seus amigos
+                </Text>
                 {editable && (
-                  <TouchableOpacity style={styles.emptyBtn} activeOpacity={0.85}>
+                  <TouchableOpacity
+                    style={styles.emptyBtn}
+                    activeOpacity={0.85}
+                  >
                     <Plus size={18} color="#ffffff" strokeWidth={2.5} />
-                    <Text style={styles.emptyBtnText}>Criar primeira publicação</Text>
+                    <Text style={styles.emptyBtnText}>
+                      Criar primeira publicação
+                    </Text>
                   </TouchableOpacity>
                 )}
               </View>
             ) : (
-              myPosts.map((post) => <PostCard key={post.id} post={post as any} onLike={() => toggleLike(post.id)} />)
+              myPosts.map((post) => (
+                <PostCard
+                  key={post.id}
+                  post={post as any}
+                  onLike={() => toggleLike(post.id)}
+                />
+              ))
             ))}
 
           {tab === 'photos' && (
             <View style={styles.photosGrid}>
               {p.highlights.map((photo, i) => (
-                <TouchableOpacity key={i} style={styles.photoItem} activeOpacity={0.9}>
+                <TouchableOpacity
+                  key={i}
+                  style={styles.photoItem}
+                  activeOpacity={0.9}
+                >
                   <Image source={{ uri: photo }} style={styles.photoImage} />
                 </TouchableOpacity>
               ))}
@@ -623,7 +935,10 @@ export default function UserProfileView({ profile, editable }: Props) {
                 <Text style={styles.aboutTitle}>Biografia</Text>
                 <Text style={styles.aboutText}>
                   {p.bio}
-                  {'\n\n'}Apaixonado por tecnologia e inovação, sempre buscando novos desafios e oportunidades de crescimento. Acredito no poder da colaboração e no impacto positivo que podemos criar juntos.
+                  {'\n\n'}Apaixonado por tecnologia e inovação, sempre buscando
+                  novos desafios e oportunidades de crescimento. Acredito no
+                  poder da colaboração e no impacto positivo que podemos criar
+                  juntos.
                 </Text>
               </View>
 
@@ -632,12 +947,12 @@ export default function UserProfileView({ profile, editable }: Props) {
                   <Text style={styles.aboutTitle}>Depoimentos</Text>
                   {p.testimonials.map((t) => (
                     <View key={t.id} style={styles.testimonialCard}>
-                      <Text style={styles.testimonialText}>
-                        "{t.text}"
-                      </Text>
+                      <Text style={styles.testimonialText}>"{t.text}"</Text>
                       <View style={styles.testimonialAuthor}>
                         <View style={styles.testimonialAvatar}>
-                          <Text style={styles.testimonialAvatarText}>{t.author.charAt(0)}</Text>
+                          <Text style={styles.testimonialAvatarText}>
+                            {t.author.charAt(0)}
+                          </Text>
                         </View>
                         <Text style={styles.testimonialName}>— {t.author}</Text>
                       </View>
@@ -653,18 +968,42 @@ export default function UserProfileView({ profile, editable }: Props) {
 
       <Modal visible={showCoverMenu} transparent animationType="fade">
         <Pressable
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.35)',
+            justifyContent: 'flex-end',
+          }}
           onPress={() => setShowCoverMenu(false)}
         >
-          <View style={{ backgroundColor: '#ffffff', borderTopLeftRadius: 16, borderTopRightRadius: 16, paddingBottom: 20 }}>
+          <View
+            style={{
+              backgroundColor: '#ffffff',
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+              paddingBottom: 20,
+            }}
+          >
             <TouchableOpacity
-              style={{ paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' }}
+              style={{
+                paddingVertical: 16,
+                paddingHorizontal: 20,
+                borderBottomWidth: 1,
+                borderBottomColor: '#f1f5f9',
+              }}
               onPress={() => {
                 setShowCoverMenu(false);
                 router.push(`/cover/${p.username}`);
               }}
             >
-              <Text style={{ fontSize: 16, color: '#0f172a', fontWeight: '600' }}>Ver foto da capa</Text>
+              <Text
+                style={{ fontSize: 16, color: '#0f172a', fontWeight: '600' }}
+              >
+                Ver foto da capa
+              </Text>
             </TouchableOpacity>
           </View>
         </Pressable>
@@ -684,28 +1023,61 @@ export default function UserProfileView({ profile, editable }: Props) {
 
       <Modal visible={showAvatarMenu} transparent animationType="fade">
         <Pressable
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.35)',
+            justifyContent: 'flex-end',
+          }}
           onPress={() => setShowAvatarMenu(false)}
         >
-          <View style={{ backgroundColor: '#ffffff', borderTopLeftRadius: 16, borderTopRightRadius: 16, paddingBottom: 20 }}>
+          <View
+            style={{
+              backgroundColor: '#ffffff',
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+              paddingBottom: 20,
+            }}
+          >
             <TouchableOpacity
-              style={{ paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' }}
+              style={{
+                paddingVertical: 16,
+                paddingHorizontal: 20,
+                borderBottomWidth: 1,
+                borderBottomColor: '#f1f5f9',
+              }}
               onPress={() => {
                 setShowAvatarMenu(false);
                 router.push(`/photo/${p.username}`);
               }}
             >
-              <Text style={{ fontSize: 16, color: '#0f172a', fontWeight: '600' }}>Ver foto de perfil</Text>
+              <Text
+                style={{ fontSize: 16, color: '#0f172a', fontWeight: '600' }}
+              >
+                Ver foto de perfil
+              </Text>
             </TouchableOpacity>
             {hasStory && (
               <TouchableOpacity
-                style={{ paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' }}
+                style={{
+                  paddingVertical: 16,
+                  paddingHorizontal: 20,
+                  borderBottomWidth: 1,
+                  borderBottomColor: '#f1f5f9',
+                }}
                 onPress={() => {
                   setShowAvatarMenu(false);
                   router.push(`/story/${p.username}`);
                 }}
               >
-                <Text style={{ fontSize: 16, color: '#0f172a', fontWeight: '600' }}>Ver story</Text>
+                <Text
+                  style={{ fontSize: 16, color: '#0f172a', fontWeight: '600' }}
+                >
+                  Ver story
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -716,51 +1088,211 @@ export default function UserProfileView({ profile, editable }: Props) {
 }
 
 const styles = StyleSheet.create({
-  headerSection: { backgroundColor: '#ffffff', borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
+  headerSection: {
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
   coverContainer: { position: 'relative' },
   coverImage: { width: '100%', height: 200, backgroundColor: '#e2e8f0' },
-  coverGradient: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 80 },
-  coverEditBtn: { position: 'absolute', bottom: 12, right: 12, backgroundColor: 'rgba(0,0,0,0.5)', padding: 8, borderRadius: 20 },
-  mainContainer: { alignItems: 'center', paddingBottom: 20, paddingHorizontal: 20 },
+  coverGradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+  },
+  coverEditBtn: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 8,
+    borderRadius: 20,
+  },
+  mainContainer: {
+    alignItems: 'center',
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+  },
   avatarWrapper: { marginTop: -65, position: 'relative' },
-  avatar: { width: 130, height: 130, borderRadius: 65, borderWidth: 5, borderColor: '#ffffff', backgroundColor: '#e2e8f0' },
-  onlineDot: { position: 'absolute', bottom: 8, right: 8, width: 24, height: 24, borderRadius: 12, backgroundColor: '#10b981', borderWidth: 4, borderColor: '#ffffff' },
-  avatarEditBtn: { position: 'absolute', bottom: 0, right: 0, backgroundColor: '#3b82f6', padding: 8, borderRadius: 16 },
-  nameContainer: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12 },
-  name: { fontSize: 26, fontWeight: '900', color: '#0f172a', letterSpacing: -0.5 },
+  avatar: {
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    borderWidth: 5,
+    borderColor: '#ffffff',
+    backgroundColor: '#e2e8f0',
+  },
+  onlineDot: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#10b981',
+    borderWidth: 4,
+    borderColor: '#ffffff',
+  },
+  avatarEditBtn: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#3b82f6',
+    padding: 8,
+    borderRadius: 16,
+  },
+  nameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 12,
+  },
+  name: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#0f172a',
+    letterSpacing: -0.5,
+  },
   username: { fontSize: 15, color: '#64748b', marginTop: 2, fontWeight: '600' },
-  bio: { fontSize: 15, color: '#475569', textAlign: 'center', marginTop: 12, lineHeight: 22, paddingHorizontal: 20 },
-  ratingsContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fafbfc', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12, marginTop: 14, borderWidth: 1, borderColor: '#f1f5f9', gap: 8 },
-  ratingItem: { flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, position: 'relative' },
+  bio: {
+    fontSize: 15,
+    color: '#475569',
+    textAlign: 'center',
+    marginTop: 12,
+    lineHeight: 22,
+    paddingHorizontal: 20,
+  },
+  ratingsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fafbfc',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+    gap: 8,
+  },
+  ratingItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+    position: 'relative',
+  },
   ratingItemVoted: { opacity: 0.9 },
   ratingEmoji: { fontSize: 20 },
   ratingInfo: { flex: 1 },
   ratingLabel: { fontSize: 10, fontWeight: '600', color: '#94a3b8' },
   ratingLabelVoted: { color: '#10b981' },
-  ratingCount: { fontSize: 15, fontWeight: '800', color: '#334155', marginTop: 1 },
+  ratingCount: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#334155',
+    marginTop: 1,
+  },
   ratingCountVoted: { color: '#10b981' },
   ratingDivider: { width: 1, height: 30, backgroundColor: '#e2e8f0' },
-  votedIndicator: { position: 'absolute', top: -2, right: -2, backgroundColor: '#ffffff', borderRadius: 10, padding: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
+  votedIndicator: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    padding: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
   actionButtons: { flexDirection: 'row', gap: 8, marginTop: 16 },
-  primaryBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#3b82f6', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 24 },
+  primaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 24,
+  },
   primaryBtnText: { color: '#ffffff', fontSize: 14, fontWeight: '700' },
   secondaryBtn: { backgroundColor: '#eff6ff', padding: 10, borderRadius: 24 },
   highlightsWrapper: { width: '100%', marginTop: 24 },
-  highlightsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, paddingHorizontal: 0 },
+  highlightsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingHorizontal: 0,
+  },
   highlightsTitle: { fontSize: 15, fontWeight: '700', color: '#0f172a' },
   highlightsEdit: { fontSize: 13, color: '#3b82f6', fontWeight: '600' },
   highlightsContainer: { flexDirection: 'row', gap: 16 },
   highlightItem: { alignItems: 'center' },
-  highlightImageWrapper: { width: 64, height: 64, borderRadius: 32, overflow: 'hidden', borderWidth: 2, borderColor: '#e2e8f0', position: 'relative' },
+  highlightImageWrapper: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    position: 'relative',
+  },
   highlightImage: { width: '100%', height: '100%' },
-  highlightOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '100%' },
-  highlightIcon: { position: 'absolute', bottom: 8, alignSelf: 'center', fontSize: 16 },
-  highlightName: { fontSize: 11, fontWeight: '600', color: '#0f172a', marginTop: 6 },
+  highlightOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '100%',
+  },
+  highlightIcon: {
+    position: 'absolute',
+    bottom: 8,
+    alignSelf: 'center',
+    fontSize: 16,
+  },
+  highlightName: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#0f172a',
+    marginTop: 6,
+  },
   addHighlightItem: { alignItems: 'center' },
-  addHighlightCircle: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#f8fafc', borderWidth: 2, borderColor: '#e2e8f0', borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
-  addHighlightText: { fontSize: 11, fontWeight: '600', color: '#64748b', marginTop: 6 },
-  infoCard: { backgroundColor: '#ffffff', marginHorizontal: 16, marginTop: 8, borderRadius: 12, padding: 16 },
-  infoHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  addHighlightCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#f8fafc',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addHighlightText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748b',
+    marginTop: 6,
+  },
+  infoCard: {
+    backgroundColor: '#ffffff',
+    marginHorizontal: 16,
+    marginTop: 8,
+    borderRadius: 12,
+    padding: 16,
+  },
+  infoHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   infoTitle: { fontSize: 16, fontWeight: '800', color: '#0f172a' },
   infoGrid: { gap: 14 },
   infoItem: { flexDirection: 'row', alignItems: 'center', gap: 12 },
@@ -777,37 +1309,122 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  sectionTitleContainer: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  sectionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
   sectionTitle: { fontSize: 18, fontWeight: '900', color: '#0f172a' },
   seeAll: { fontSize: 14, color: '#3b82f6', fontWeight: '700' },
   connectionsSubtitle: { fontSize: 13, color: '#64748b', marginTop: 2 },
   connectionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   connectionCard: { width: (width - 64) / 3, alignItems: 'center' },
-  connectionAvatar: { width: '100%', aspectRatio: 1, borderRadius: 12, backgroundColor: '#e2e8f0' },
-  connectionName: { fontSize: 13, color: '#0f172a', fontWeight: '700', marginTop: 6 },
+  connectionAvatar: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: 12,
+    backgroundColor: '#e2e8f0',
+  },
+  connectionName: {
+    fontSize: 13,
+    color: '#0f172a',
+    fontWeight: '700',
+    marginTop: 6,
+  },
   connectionMutual: { fontSize: 11, color: '#64748b', marginTop: 2 },
-  tabsContainer: { backgroundColor: '#ffffff', marginTop: 8, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
-  tabBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: 'transparent' },
+  tabsContainer: {
+    backgroundColor: '#ffffff',
+    marginTop: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  tabBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
   tabActive: { borderBottomColor: '#3b82f6' },
   tabText: { fontSize: 14, fontWeight: '700', color: '#64748b' },
   tabTextActive: { color: '#3b82f6' },
   tabContent: { paddingHorizontal: 20, paddingTop: 16 },
-  emptyState: { backgroundColor: '#ffffff', borderRadius: 16, padding: 40, alignItems: 'center' },
-  emptyIcon: { backgroundColor: '#f8fafc', padding: 24, borderRadius: 50, marginBottom: 16 },
-  emptyTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
-  emptyDesc: { fontSize: 14, color: '#64748b', textAlign: 'center', lineHeight: 20, marginBottom: 20 },
-  emptyBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#3b82f6', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 24 },
+  emptyState: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 40,
+    alignItems: 'center',
+  },
+  emptyIcon: {
+    backgroundColor: '#f8fafc',
+    padding: 24,
+    borderRadius: 50,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 8,
+  },
+  emptyDesc: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  emptyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+  },
   emptyBtnText: { color: '#ffffff', fontSize: 14, fontWeight: '700' },
   photosGrid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -4 },
   photoItem: { width: '33.333%', padding: 4 },
   photoImage: { width: '100%', aspectRatio: 1, borderRadius: 8 },
-  aboutSection: { backgroundColor: '#ffffff', borderRadius: 12, padding: 16, marginBottom: 12 },
-  aboutTitle: { fontSize: 16, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
+  aboutSection: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  aboutTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 8,
+  },
   aboutText: { fontSize: 14, color: '#334155', lineHeight: 20 },
-  testimonialCard: { backgroundColor: '#fafbfc', borderRadius: 12, padding: 12, marginTop: 8, borderWidth: 1, borderColor: '#e2e8f0' },
+  testimonialCard: {
+    backgroundColor: '#fafbfc',
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
   testimonialText: { fontStyle: 'italic', color: '#334155' },
-  testimonialAuthor: { flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 8 },
-  testimonialAvatar: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#e2e8f0', alignItems: 'center', justifyContent: 'center' },
+  testimonialAuthor: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 8,
+  },
+  testimonialAvatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#e2e8f0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   testimonialAvatarText: { fontWeight: '800', color: '#475569' },
   testimonialName: { color: '#475569' },
 });
