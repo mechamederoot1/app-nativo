@@ -113,7 +113,7 @@ export default function FeedScreen() {
     toggleLike(id);
   }, []);
 
-  const handleOpenProfile = useCallback((userId: string) => {
+  const handleOpenProfile = useCallback((userId: string | number) => {
     router.push(`/profile/${userId}`);
   }, [router]);
 
