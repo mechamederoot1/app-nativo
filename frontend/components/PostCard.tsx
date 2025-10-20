@@ -33,7 +33,7 @@ export default function PostCard({
 }: {
   post: Post;
   onLike?: (id: string) => void;
-  onOpen?: (id: string) => void;
+  onOpen?: (id: string | number) => void;
 }) {
   const { dimensions } = useImageDimensions(post.image);
   const username = '@' + post.user.replace(/\s+/g, '').toLowerCase();
