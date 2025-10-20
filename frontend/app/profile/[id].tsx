@@ -143,6 +143,7 @@ export default function ProfileIdView() {
                 key={post.id}
                 post={post}
                 onOpen={(id) => router.push(`/post/${id}`)}
+                onOpenProfile={(userId) => router.push(`/profile/${userId}`)}
               />
             ))
           )}
