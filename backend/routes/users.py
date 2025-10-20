@@ -19,6 +19,18 @@ os.makedirs(MEDIA_DIR, exist_ok=True)
 async def me(current: User = Depends(get_current_user)):
     return current
 
+@router.get("", response_model=List[UserBase])
+async def search_users(q: str = None, db: Session = Depends(get_db)):
+    query = db.query(User)
+    if q:
+        q = q.lower().strip()
+        query = query.filter(
+            (User.first_name.ilike(f"%{q}%")) |
+            (User.last_name.ilike(f"%{q}%")) |
+            (User.email.ilike(f"%{q}%"))
+        )
+    return query.limit(50).all()
+
 @router.get("/{user_id}", response_model=UserBase)
 async def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
@@ -36,6 +48,7 @@ async def get_user_posts(user_id: int, db: Session = Depends(get_db)):
             content=p.content,
             media_url=p.media_url,
             created_at=p.created_at,
+            user_id=p.user_id,
             user_name=f"{p.author.first_name} {p.author.last_name}" if p.author else "Anônimo",
             user_profile_photo=p.author.profile_photo if p.author else None,
             user_cover_photo=p.author.cover_photo if p.author else None,

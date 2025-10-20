@@ -73,6 +73,7 @@ export type ApiPost = {
   content: string;
   media_url?: string | null;
   created_at: string;
+  user_id: number;
   user_name: string;
   user_profile_photo?: string | null;
   user_cover_photo?: string | null;
@@ -158,6 +159,14 @@ export async function getUserById(id: number | string): Promise<ApiUser> {
 
 export async function getUserPosts(id: number | string): Promise<ApiPost[]> {
   return request(`/users/${id}/posts`);
+}
+
+export async function searchUsers(query: string): Promise<ApiUser[]> {
+  const params = new URLSearchParams();
+  if (query && query.trim()) {
+    params.append('q', query.trim());
+  }
+  return request(`/users?${params.toString()}`);
 }
 
 export function logout() {

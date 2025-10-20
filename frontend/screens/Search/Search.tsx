@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,83 +6,31 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import type { ListRenderItem } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Search as SearchIcon } from 'lucide-react-native';
 
-const PEOPLE = [
-  {
-    id: 'p1',
-    name: 'Alice Martins',
-    location: 'São Paulo, SP',
-    interests: ['Design', 'React Native', 'Eventos'],
-    mutualCount: 6,
-  },
-  {
-    id: 'p2',
-    name: 'Bruno Lima',
-    location: 'Florianópolis, SC',
-    interests: ['Startups', 'Investimentos', 'Comunidade'],
-    mutualCount: 3,
-  },
-  {
-    id: 'p3',
-    name: 'Carla Sousa',
-    location: 'Recife, PE',
-    interests: ['UX', 'Mentorias', 'Workshops'],
-    mutualCount: 8,
-  },
-  {
-    id: 'p4',
-    name: 'Diego Andrade',
-    location: 'Curitiba, PR',
-    interests: ['Inteligência Artificial', 'Podcasts', 'Eventos'],
-    mutualCount: 4,
-  },
-  {
-    id: 'p5',
-    name: 'Eduarda Campos',
-    location: 'Rio de Janeiro, RJ',
-    interests: ['Comunidade', 'Networking', 'Design'],
-    mutualCount: 5,
-  },
-];
-
-const ALL_TAGS = Array.from(
-  new Set(PEOPLE.flatMap((person) => person.interests)),
-).sort();
-
-type Person = (typeof PEOPLE)[number];
-
-type TagButtonProps = {
-  tag: string;
-  selected: boolean;
-  onSelect: (tag: string) => void;
+type User = {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  profile_photo?: string | null;
+  cover_photo?: string | null;
 };
 
-function TagButton({ tag, selected, onSelect }: TagButtonProps) {
-  return (
-    <TouchableOpacity
-      style={[styles.tag, selected && styles.tagSelected]}
-      onPress={() => onSelect(tag)}
-      activeOpacity={0.8}
-    >
-      <Text style={[styles.tagText, selected && styles.tagTextSelected]}>
-        #{tag}
-      </Text>
-    </TouchableOpacity>
-  );
-}
-
-function PersonRow({
-  person,
-  onPress,
-}: {
-  person: Person;
+type UserRowProps = {
+  user: User;
   onPress: () => void;
-}) {
+};
+
+function UserRow({ user, onPress }: UserRowProps) {
+  const fullName = `${user.first_name} ${user.last_name}`;
+  const initial = user.first_name.charAt(0).toUpperCase();
+
   return (
     <TouchableOpacity
       style={styles.personRow}
@@ -90,20 +38,12 @@ function PersonRow({
       activeOpacity={0.9}
     >
       <View style={styles.personAvatar}>
-        <Text style={styles.personInitial}>{person.name[0]}</Text>
+        <Text style={styles.personInitial}>{initial}</Text>
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={styles.personName}>{person.name}</Text>
-        <Text style={styles.personLocation}>{person.location}</Text>
-        <View style={styles.personTagsRow}>
-          {person.interests.slice(0, 3).map((interest) => (
-            <View key={interest} style={styles.personTag}>
-              <Text style={styles.personTagText}>{interest}</Text>
-            </View>
-          ))}
-        </View>
+        <Text style={styles.personName}>{fullName}</Text>
+        <Text style={styles.personLocation}>{user.email}</Text>
       </View>
-      <Text style={styles.mutualCount}>{person.mutualCount} em comum</Text>
     </TouchableOpacity>
   );
 }
@@ -111,35 +51,57 @@ function PersonRow({
 export default function SearchScreen() {
   const router = useRouter();
   const [query, setQuery] = useState('');
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(
+    null,
+  );
 
-  const filteredPeople = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-
-    return PEOPLE.filter((person) => {
-      const matchesQuery =
-        normalizedQuery.length === 0 ||
-        person.name.toLowerCase().includes(normalizedQuery) ||
-        person.location.toLowerCase().includes(normalizedQuery) ||
-        person.interests.some((interest) =>
-          interest.toLowerCase().includes(normalizedQuery),
-        );
-
-      const matchesTag = selectedTag
-        ? person.interests.includes(selectedTag)
-        : true;
-
-      return matchesQuery && matchesTag;
-    });
-  }, [query, selectedTag]);
-
-  const handleSelectTag = useCallback((tag: string) => {
-    setSelectedTag((current) => (current === tag ? null : tag));
+  const handleSearch = useCallback(async (searchQuery: string) => {
+    setLoading(true);
+    try {
+      const api = await import('../../utils/api');
+      const results = await api.searchUsers(searchQuery);
+      setUsers(results);
+    } catch (e) {
+      console.error('Search error:', e);
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const renderPerson = useCallback<ListRenderItem<Person>>(
+  const handleChangeText = useCallback(
+    (text: string) => {
+      setQuery(text);
+
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+
+      if (text.trim()) {
+        const timeout = setTimeout(() => {
+          handleSearch(text);
+        }, 300);
+        setSearchTimeout(timeout);
+      } else {
+        setUsers([]);
+      }
+    },
+    [searchTimeout, handleSearch],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTimeout]);
+
+  const renderUser = useCallback<ListRenderItem<User>>(
     ({ item }) => (
-      <PersonRow person={item} onPress={() => router.push('/profile')} />
+      <UserRow user={item} onPress={() => router.push(`/profile/${item.id}`)} />
     ),
     [router],
   );
@@ -150,62 +112,61 @@ export default function SearchScreen() {
         <View style={styles.searchInputWrapper}>
           <SearchIcon size={18} color="#6b7280" />
           <TextInput
-            placeholder="Buscar pessoas, eventos ou interesses"
+            placeholder="Buscar pessoas por nome ou email"
             placeholderTextColor="#9ca3af"
             value={query}
-            onChangeText={setQuery}
+            onChangeText={handleChangeText}
             style={styles.searchInput}
             accessibilityLabel="Campo de busca"
             returnKeyType="search"
           />
         </View>
 
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Tendências para você</Text>
-        </View>
+        {query && (
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Resultados</Text>
+            <Text style={styles.resultCount}>
+              {loading
+                ? '...'
+                : `${users.length} ${users.length === 1 ? 'resultado' : 'resultados'}`}
+            </Text>
+          </View>
+        )}
 
-        <FlatList<string>
-          data={ALL_TAGS}
-          horizontal
-          keyExtractor={(tag) => tag}
-          contentContainerStyle={{ paddingHorizontal: 4 }}
-          showsHorizontalScrollIndicator={false}
-          style={{ marginBottom: 16 }}
-          renderItem={({ item }) => (
-            <TagButton
-              tag={item}
-              selected={item === selectedTag}
-              onSelect={handleSelectTag}
-            />
-          )}
-        />
+        {loading && query && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#0ea5e9" />
+          </View>
+        )}
 
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Resultados</Text>
-          <Text style={styles.resultCount}>
-            {filteredPeople.length}{' '}
-            {filteredPeople.length === 1 ? 'resultado' : 'resultados'}
-          </Text>
-        </View>
+        {!loading && query && (
+          <FlatList<User>
+            data={users}
+            keyExtractor={(user) => user.id.toString()}
+            renderItem={renderUser}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            ListEmptyComponent={
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateTitle}>
+                  Nenhum perfil encontrado
+                </Text>
+                <Text style={styles.emptyStateSubtitle}>
+                  Tente um termo diferente para encontrar novas conexões.
+                </Text>
+              </View>
+            }
+            contentContainerStyle={{ paddingBottom: 32 }}
+          />
+        )}
 
-        <FlatList<Person>
-          data={filteredPeople}
-          keyExtractor={(person) => person.id}
-          renderItem={renderPerson}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateTitle}>
-                Nenhum perfil encontrado
-              </Text>
-              <Text style={styles.emptyStateSubtitle}>
-                Ajuste os filtros ou tente um termo diferente para encontrar
-                novas conexões.
-              </Text>
-            </View>
-          }
-          contentContainerStyle={{ paddingBottom: 32 }}
-        />
+        {!query && (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateTitle}>Digite para buscar</Text>
+            <Text style={styles.emptyStateSubtitle}>
+              Procure por nomes de usuários ou emails para encontrar pessoas.
+            </Text>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -253,22 +214,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#64748b',
   },
-  tag: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 18,
-    backgroundColor: '#e2e8f0',
-    marginRight: 10,
-  },
-  tagSelected: {
-    backgroundColor: '#0856d6',
-  },
-  tagText: {
-    color: '#334155',
-    fontWeight: '600',
-  },
-  tagTextSelected: {
-    color: '#ffffff',
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
   },
   personRow: {
     flexDirection: 'row',
@@ -298,28 +248,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#64748b',
     marginTop: 2,
-  },
-  personTagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginTop: 6,
-  },
-  personTag: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    backgroundColor: '#f1f5f9',
-  },
-  personTagText: {
-    fontSize: 12,
-    color: '#475569',
-  },
-  mutualCount: {
-    fontSize: 12,
-    color: '#0f172a',
-    fontWeight: '600',
-    marginLeft: 12,
   },
   separator: {
     height: 1,

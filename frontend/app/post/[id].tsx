@@ -48,8 +48,9 @@ export default function PostDetail() {
   const [post, setPost] = useState<ApiPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [postMediaUrl, setPostMediaUrl] = useState<string | null>(null);
 
-  const { dimensions: imageDimensions } = useImageDimensions(post?.media_url);
+  const { dimensions: imageDimensions } = useImageDimensions(postMediaUrl);
 
   const [comment, setComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -82,7 +83,17 @@ export default function PostDetail() {
         const api = await import('../../utils/api');
         const data = await api.getPostById(id);
         if (!mounted) return;
+
+        const BASE_URL =
+          (typeof process !== 'undefined' &&
+            (process as any).env &&
+            (process as any).env.EXPO_PUBLIC_API_URL) ||
+          'http://localhost:5050';
+        const abs = (u?: string | null) =>
+          u ? (u.startsWith('http') ? u : `${BASE_URL}${u}`) : undefined;
+
         setPost(data);
+        setPostMediaUrl(abs(data.media_url) || null);
       } catch (e: any) {
         if (!mounted) return;
         setError(e?.message || 'Falha ao carregar publicação');
@@ -323,7 +334,7 @@ export default function PostDetail() {
                   <View style={styles.authorInfo}>
                     <View style={styles.authorNameRow}>
                       <Text style={styles.authorName}>
-                        {post.user_name || 'Anônimo'}
+                        {post.user_name || 'An��nimo'}
                       </Text>
                     </View>
                     <Text style={styles.authorUsername}>
@@ -337,14 +348,14 @@ export default function PostDetail() {
 
                 <Text style={styles.postContent}>{post.content}</Text>
 
-                {post.media_url && imageDimensions && (
+                {postMediaUrl && imageDimensions && (
                   <View style={styles.postImageContainer}>
                     <TouchableOpacity
                       activeOpacity={0.9}
                       onPress={() => setShowMedia(true)}
                     >
                       <Image
-                        source={{ uri: post.media_url }}
+                        source={{ uri: postMediaUrl }}
                         style={[
                           styles.postImage,
                           { aspectRatio: imageDimensions.aspectRatio },
@@ -558,11 +569,11 @@ export default function PostDetail() {
         </View>
       </KeyboardAvoidingView>
 
-      {post.media_url && (
+      {postMediaUrl && (
         <MediaViewer
           visible={showMedia}
           type="image"
-          uri={post.media_url}
+          uri={postMediaUrl}
           onClose={() => setShowMedia(false)}
         />
       )}
