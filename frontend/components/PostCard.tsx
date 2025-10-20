@@ -123,7 +123,12 @@ export default function PostCard({
 
       {(post.comments || []).slice(0, 2).map((c) => (
         <View key={c.id} style={styles.commentRow}>
-          <Text style={styles.commentUser}>{c.user}</Text>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => router.push(`/profile/${c.user.replace(/\s+/g, '').toLowerCase()}`)}
+          >
+            <Text style={styles.commentUser}>{c.user}</Text>
+          </TouchableOpacity>
           <Text style={styles.commentText}> {c.text}</Text>
         </View>
       ))}
