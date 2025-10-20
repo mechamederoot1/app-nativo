@@ -40,6 +40,7 @@ export default function FeedScreen() {
             statusLabel = 'atualizou a foto de capa';
           return {
             id: String(p.id),
+            userId: p.user_id,
             user: p.user_name,
             avatar,
             cover,
@@ -87,6 +88,7 @@ export default function FeedScreen() {
             statusLabel = 'atualizou a foto de capa';
           return {
             id: String(p.id),
+            userId: p.user_id,
             user: p.user_name,
             avatar,
             cover,
