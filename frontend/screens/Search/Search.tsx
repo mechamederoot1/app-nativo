@@ -53,7 +53,9 @@ export default function SearchScreen() {
   const [query, setQuery] = useState('');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(
+    null,
+  );
 
   const handleSearch = useCallback(async (searchQuery: string) => {
     setLoading(true);
@@ -69,22 +71,25 @@ export default function SearchScreen() {
     }
   }, []);
 
-  const handleChangeText = useCallback((text: string) => {
-    setQuery(text);
+  const handleChangeText = useCallback(
+    (text: string) => {
+      setQuery(text);
 
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
 
-    if (text.trim()) {
-      const timeout = setTimeout(() => {
-        handleSearch(text);
-      }, 300);
-      setSearchTimeout(timeout);
-    } else {
-      setUsers([]);
-    }
-  }, [searchTimeout, handleSearch]);
+      if (text.trim()) {
+        const timeout = setTimeout(() => {
+          handleSearch(text);
+        }, 300);
+        setSearchTimeout(timeout);
+      } else {
+        setUsers([]);
+      }
+    },
+    [searchTimeout, handleSearch],
+  );
 
   useEffect(() => {
     return () => {
@@ -96,10 +101,7 @@ export default function SearchScreen() {
 
   const renderUser = useCallback<ListRenderItem<User>>(
     ({ item }) => (
-      <UserRow
-        user={item}
-        onPress={() => router.push(`/profile/${item.id}`)}
-      />
+      <UserRow user={item} onPress={() => router.push(`/profile/${item.id}`)} />
     ),
     [router],
   );
@@ -124,7 +126,9 @@ export default function SearchScreen() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Resultados</Text>
             <Text style={styles.resultCount}>
-              {loading ? '...' : `${users.length} ${users.length === 1 ? 'resultado' : 'resultados'}`}
+              {loading
+                ? '...'
+                : `${users.length} ${users.length === 1 ? 'resultado' : 'resultados'}`}
             </Text>
           </View>
         )}
@@ -157,9 +161,7 @@ export default function SearchScreen() {
 
         {!query && (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyStateTitle}>
-              Digite para buscar
-            </Text>
+            <Text style={styles.emptyStateTitle}>Digite para buscar</Text>
             <Text style={styles.emptyStateSubtitle}>
               Procure por nomes de usuários ou emails para encontrar pessoas.
             </Text>

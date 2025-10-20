@@ -113,9 +113,12 @@ export default function FeedScreen() {
     toggleLike(id);
   }, []);
 
-  const handleOpenProfile = useCallback((userId: string | number) => {
-    router.push(`/profile/${userId}`);
-  }, [router]);
+  const handleOpenProfile = useCallback(
+    (userId: string | number) => {
+      router.push(`/profile/${userId}`);
+    },
+    [router],
+  );
 
   const handleCreate = useCallback((content: string) => {
     (async () => {

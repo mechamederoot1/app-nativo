@@ -312,10 +312,7 @@ export default function UserProfileView() {
               strokeWidth={2}
             />
             <Text
-              style={[
-                styles.tabText,
-                tab === 'posts' && styles.tabTextActive,
-              ]}
+              style={[styles.tabText, tab === 'posts' && styles.tabTextActive]}
             >
               Posts
             </Text>
@@ -327,10 +324,7 @@ export default function UserProfileView() {
           >
             <Text style={styles.tabIcon}>ℹ️</Text>
             <Text
-              style={[
-                styles.tabText,
-                tab === 'about' && styles.tabTextActive,
-              ]}
+              style={[styles.tabText, tab === 'about' && styles.tabTextActive]}
             >
               Sobre
             </Text>
@@ -342,9 +336,7 @@ export default function UserProfileView() {
           <View style={styles.postsContainer}>
             {posts.length === 0 ? (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyStateTitle}>
-                  Nenhuma publicação
-                </Text>
+                <Text style={styles.emptyStateTitle}>Nenhuma publicação</Text>
               </View>
             ) : (
               posts.map((post) => (
@@ -352,9 +344,7 @@ export default function UserProfileView() {
                   key={post.id}
                   post={post}
                   onOpen={(id) => router.push(`/post/${id}`)}
-                  onOpenProfile={(userId) =>
-                    router.push(`/profile/${userId}`)
-                  }
+                  onOpenProfile={(userId) => router.push(`/profile/${userId}`)}
                 />
               ))
             )}
