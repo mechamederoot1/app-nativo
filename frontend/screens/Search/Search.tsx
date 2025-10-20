@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,83 +6,31 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import type { ListRenderItem } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Search as SearchIcon } from 'lucide-react-native';
 
-const PEOPLE = [
-  {
-    id: 'p1',
-    name: 'Alice Martins',
-    location: 'São Paulo, SP',
-    interests: ['Design', 'React Native', 'Eventos'],
-    mutualCount: 6,
-  },
-  {
-    id: 'p2',
-    name: 'Bruno Lima',
-    location: 'Florianópolis, SC',
-    interests: ['Startups', 'Investimentos', 'Comunidade'],
-    mutualCount: 3,
-  },
-  {
-    id: 'p3',
-    name: 'Carla Sousa',
-    location: 'Recife, PE',
-    interests: ['UX', 'Mentorias', 'Workshops'],
-    mutualCount: 8,
-  },
-  {
-    id: 'p4',
-    name: 'Diego Andrade',
-    location: 'Curitiba, PR',
-    interests: ['Inteligência Artificial', 'Podcasts', 'Eventos'],
-    mutualCount: 4,
-  },
-  {
-    id: 'p5',
-    name: 'Eduarda Campos',
-    location: 'Rio de Janeiro, RJ',
-    interests: ['Comunidade', 'Networking', 'Design'],
-    mutualCount: 5,
-  },
-];
-
-const ALL_TAGS = Array.from(
-  new Set(PEOPLE.flatMap((person) => person.interests)),
-).sort();
-
-type Person = (typeof PEOPLE)[number];
-
-type TagButtonProps = {
-  tag: string;
-  selected: boolean;
-  onSelect: (tag: string) => void;
+type User = {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  profile_photo?: string | null;
+  cover_photo?: string | null;
 };
 
-function TagButton({ tag, selected, onSelect }: TagButtonProps) {
-  return (
-    <TouchableOpacity
-      style={[styles.tag, selected && styles.tagSelected]}
-      onPress={() => onSelect(tag)}
-      activeOpacity={0.8}
-    >
-      <Text style={[styles.tagText, selected && styles.tagTextSelected]}>
-        #{tag}
-      </Text>
-    </TouchableOpacity>
-  );
-}
-
-function PersonRow({
-  person,
-  onPress,
-}: {
-  person: Person;
+type UserRowProps = {
+  user: User;
   onPress: () => void;
-}) {
+};
+
+function UserRow({ user, onPress }: UserRowProps) {
+  const fullName = `${user.first_name} ${user.last_name}`;
+  const initial = user.first_name.charAt(0).toUpperCase();
+
   return (
     <TouchableOpacity
       style={styles.personRow}
@@ -90,20 +38,12 @@ function PersonRow({
       activeOpacity={0.9}
     >
       <View style={styles.personAvatar}>
-        <Text style={styles.personInitial}>{person.name[0]}</Text>
+        <Text style={styles.personInitial}>{initial}</Text>
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={styles.personName}>{person.name}</Text>
-        <Text style={styles.personLocation}>{person.location}</Text>
-        <View style={styles.personTagsRow}>
-          {person.interests.slice(0, 3).map((interest) => (
-            <View key={interest} style={styles.personTag}>
-              <Text style={styles.personTagText}>{interest}</Text>
-            </View>
-          ))}
-        </View>
+        <Text style={styles.personName}>{fullName}</Text>
+        <Text style={styles.personLocation}>{user.email}</Text>
       </View>
-      <Text style={styles.mutualCount}>{person.mutualCount} em comum</Text>
     </TouchableOpacity>
   );
 }
