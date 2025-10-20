@@ -9,11 +9,42 @@ import {
 } from 'react-native';
 import TopBar from '../../components/TopBar';
 import BottomNav from '../../components/BottomNav';
-import { profileData } from './Data';
+import { profileData as seed } from './Data';
 import { Home, MapPin, Heart, Briefcase } from 'lucide-react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { absoluteUrl } from '../../utils/api';
 
 export default function AboutScreen() {
-  const p = profileData;
+  const { user } = useLocalSearchParams();
+  const slug = String(user ?? '').toLowerCase();
+  const [p, setP] = React.useState({ ...seed });
+
+  React.useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        if (!slug) return;
+        const api = await import('../../utils/api');
+        const posts = await api.getPosts();
+        const toSlug = (s: string) => String(s || '').replace(/\s+/g, '').toLowerCase();
+        const match = posts.find((x) => toSlug(x.user_name) === slug);
+        if (!mounted) return;
+        if (match) {
+          setP((prev) => ({
+            ...prev,
+            name: match.user_name,
+            username: slug,
+            avatar: absoluteUrl(match.user_profile_photo) || prev.avatar,
+            cover: absoluteUrl(match.user_cover_photo) || prev.cover,
+          }));
+        }
+      } catch {}
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [slug]);
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f1f5f9' }}>
       <TopBar />
@@ -36,17 +67,9 @@ export default function AboutScreen() {
           <Text style={styles.cardTitle}>Informações pessoais</Text>
           <InfoRow icon={Home} label="Cidade natal" value={p.hometown} />
           <InfoRow icon={MapPin} label="Cidade atual" value={p.currentCity} />
-          <InfoRow
-            icon={Heart}
-            label="Relacionamento"
-            value={p.relationshipStatus}
-          />
+          <InfoRow icon={Heart} label="Relacionamento" value={p.relationshipStatus} />
           <InfoRow icon={Briefcase} label="Trabalho" value={p.workplace} />
-          <InfoRow
-            icon={Heart}
-            label="Conexões"
-            value={`${p.connectionsCount}`}
-          />
+          <InfoRow icon={Heart} label="Conexões" value={`${p.connectionsCount}`} />
         </View>
 
         <View style={styles.card}>
