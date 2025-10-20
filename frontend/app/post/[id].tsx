@@ -260,7 +260,12 @@ export default function PostDetail() {
                   activeOpacity={0.7}
                   onPress={() => router.push(`/profile/${String(item.user || '').replace(/\s+/g, '').toLowerCase()}`)}
                 >
+                  <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => router.push(`/profile/${String(item.user || '').replace(/\s+/g, '').toLowerCase()}`)}
+                >
                   <Text style={styles.commentAuthor}>{item.user}</Text>
+                </TouchableOpacity>
                 </TouchableOpacity>
                 <Text style={styles.commentMeta}>
                   {item.timestamp || 'agora'}
