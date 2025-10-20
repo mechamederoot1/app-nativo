@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Heart, MessageCircle, Share2 } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { useImageDimensions } from '../hooks/useImageDimensions';
 
 type Comment = { id: string; user: string; text: string };
@@ -35,27 +36,35 @@ export default function PostCard({
 }) {
   const { dimensions } = useImageDimensions(post.image);
   const username = '@' + post.user.replace(/\s+/g, '').toLowerCase();
+  const router = useRouter();
+  const slug = post.user.replace(/\s+/g, '').toLowerCase();
   return (
     <View style={styles.card}>
-      <TouchableOpacity
-        style={styles.header}
-        activeOpacity={0.85}
-        onPress={() => onOpen && onOpen(post.id)}
-      >
-        {post.avatar ? (
-          <Image source={{ uri: post.avatar }} style={styles.avatarImage} />
-        ) : (
-          <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarText}>
-              {post.user.charAt(0).toUpperCase()}
-            </Text>
-          </View>
-        )}
+      <View style={styles.header}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => router.push(`/profile/${slug}`)}
+        >
+          {post.avatar ? (
+            <Image source={{ uri: post.avatar }} style={styles.avatarImage} />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarText}>
+                {post.user.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
         <View style={{ marginLeft: 12, flex: 1 }}>
-          <Text style={styles.user}>{post.user}</Text>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => router.push(`/profile/${slug}`)}
+          >
+            <Text style={styles.user}>{post.user}</Text>
+          </TouchableOpacity>
           <Text style={styles.time}>{`${username} · ${post.time}`}</Text>
         </View>
-      </TouchableOpacity>
+      </View>
 
       <TouchableOpacity
         activeOpacity={0.85}
