@@ -348,14 +348,14 @@ export default function PostDetail() {
 
                 <Text style={styles.postContent}>{post.content}</Text>
 
-                {post.media_url && imageDimensions && (
+                {postMediaUrl && imageDimensions && (
                   <View style={styles.postImageContainer}>
                     <TouchableOpacity
                       activeOpacity={0.9}
                       onPress={() => setShowMedia(true)}
                     >
                       <Image
-                        source={{ uri: post.media_url }}
+                        source={{ uri: postMediaUrl }}
                         style={[
                           styles.postImage,
                           { aspectRatio: imageDimensions.aspectRatio },
