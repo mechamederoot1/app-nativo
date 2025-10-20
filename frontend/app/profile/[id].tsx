@@ -1,26 +1,16 @@
 import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, Text, StyleSheet } from 'react-native';
-import TopBar from '../../components/TopBar';
-import BottomNav from '../../components/BottomNav';
 import { useLocalSearchParams } from 'expo-router';
+import UserProfileView from '../../components/UserProfileView';
+import { profileData } from '../../screens/Profile/Data';
 
 export default function ProfileIdView() {
   const { id } = useLocalSearchParams();
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <TopBar />
-      <View style={styles.container}>
-        <Text style={styles.title}>Perfil</Text>
-        <Text style={styles.sub}>ID: {String(id ?? '')}</Text>
-      </View>
-      <BottomNav active="profile" />
-    </SafeAreaView>
-  );
+  const idStr = String(id ?? '').trim();
+  const displayName = idStr ? idStr.replace(/[._-]+/g, ' ') : profileData.name;
+  const derived = {
+    ...profileData,
+    name: displayName,
+    username: idStr || profileData.username,
+  };
+  return <UserProfileView profile={derived} editable={false} />;
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  title: { fontSize: 22, fontWeight: '700' },
-  sub: { marginTop: 6, color: '#64748b' },
-});
