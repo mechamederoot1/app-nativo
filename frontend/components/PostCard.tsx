@@ -47,7 +47,7 @@ export default function PostCard({
       <TouchableOpacity
         style={styles.header}
         activeOpacity={0.85}
-        onPress={() => onOpen && onOpen(post.id)}
+        onPress={() => onOpen && onOpen(post.userId || post.id)}
       >
         {post.avatar ? (
           <Image source={{ uri: post.avatar }} style={styles.avatarImage} />
