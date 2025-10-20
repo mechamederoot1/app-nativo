@@ -1,13 +1,26 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function MessageItem({ item, onPress }: { item: any; onPress?: () => void }) {
+  const router = useRouter();
+  const slug = String(item.name || '').replace(/\s+/g, '').toLowerCase();
   return (
     <TouchableOpacity onPress={onPress} style={styles.row}>
-      <Image source={{ uri: item.avatar }} style={styles.avatar} />
+      <TouchableOpacity
+        onPress={() => router.push(`/profile/${slug}`)}
+        activeOpacity={0.8}
+      >
+        <Image source={{ uri: item.avatar }} style={styles.avatar} />
+      </TouchableOpacity>
       <View style={{ flex: 1 }}>
         <View style={styles.header}>
-          <Text style={styles.name}>{item.name}</Text>
+          <TouchableOpacity
+            onPress={() => router.push(`/profile/${slug}`)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.name}>{item.name}</Text>
+          </TouchableOpacity>
           <Text style={styles.time}>{item.time}</Text>
         </View>
         <Text numberOfLines={1} style={styles.snippet}>{item.snippet}</Text>
