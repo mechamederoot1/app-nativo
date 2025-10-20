@@ -257,8 +257,10 @@ export default function UserProfileView({ profile, editable }: Props) {
 
   const myPosts = useMemo(() => {
     if (editable) return posts.filter((x) => x.user === 'Você');
-    return posts.filter((x) => x.user === p.name);
-  }, [posts, editable, p.name]);
+    const toSlug = (s: string) => String(s || '').replace(/\s+/g, '').toLowerCase();
+    const target = String(p.username || '').toLowerCase();
+    return posts.filter((x) => toSlug(x.user) === target);
+  }, [posts, editable, p.username]);
 
   const highlightsData = [
     { id: 1, name: 'Viagens', image: p.highlights[0], icon: '✈️' },
