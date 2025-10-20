@@ -26,6 +26,7 @@ import {
   Eye,
 } from 'lucide-react-native';
 import type { ApiPost } from '../../utils/api';
+import { absoluteUrl } from '../../utils/api';
 import MediaViewer from '../../components/MediaViewer';
 import { useImageDimensions } from '../../hooks/useImageDimensions';
 
@@ -50,7 +51,15 @@ export default function PostDetail() {
   const [error, setError] = useState<string | null>(null);
   const [postMediaUrl, setPostMediaUrl] = useState<string | null>(null);
 
-  const { dimensions: imageDimensions } = useImageDimensions(postMediaUrl);
+  const mediaUrl = React.useMemo(
+    () => absoluteUrl(post?.media_url),
+    [post?.media_url],
+  );
+  const avatarUrl = React.useMemo(
+    () => absoluteUrl(post?.user_profile_photo),
+    [post?.user_profile_photo],
+  );
+  const { dimensions: imageDimensions } = useImageDimensions(mediaUrl);
 
   const [comment, setComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -251,15 +260,48 @@ export default function PostDetail() {
         <View
           style={[styles.commentContainer, isReply && styles.replyContainer]}
         >
-          <View style={styles.commentAvatarPlaceholder}>
-            <Text style={styles.commentAvatarText}>
-              {String(item.user || 'V')[0]}
-            </Text>
-          </View>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() =>
+              router.push(
+                `/profile/${String(item.user || '')
+                  .replace(/\s+/g, '')
+                  .toLowerCase()}`,
+              )
+            }
+          >
+            <View style={styles.commentAvatarPlaceholder}>
+              <Text style={styles.commentAvatarText}>
+                {String(item.user || 'V')[0]}
+              </Text>
+            </View>
+          </TouchableOpacity>
           <View style={styles.commentContent}>
             <View style={styles.commentHeader}>
               <View>
-                <Text style={styles.commentAuthor}>{item.user}</Text>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    router.push(
+                      `/profile/${String(item.user || '')
+                        .replace(/\s+/g, '')
+                        .toLowerCase()}`,
+                    )
+                  }
+                >
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() =>
+                      router.push(
+                        `/profile/${String(item.user || '')
+                          .replace(/\s+/g, '')
+                          .toLowerCase()}`,
+                      )
+                    }
+                  >
+                    <Text style={styles.commentAuthor}>{item.user}</Text>
+                  </TouchableOpacity>
+                </TouchableOpacity>
                 <Text style={styles.commentMeta}>
                   {item.timestamp || 'agora'}
                 </Text>
@@ -326,16 +368,45 @@ export default function PostDetail() {
               {/* Post Preview */}
               <View style={styles.postPreview}>
                 <View style={styles.authorRow}>
-                  <View style={styles.authorAvatarPlaceholder}>
-                    <Text style={styles.authorAvatarText}>
-                      {post.user_name?.charAt(0) || 'U'}
-                    </Text>
-                  </View>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() =>
+                      router.push(
+                        `/profile/${String(post.user_name || '')
+                          .replace(/\s+/g, '')
+                          .toLowerCase()}`,
+                      )
+                    }
+                  >
+                    {avatarUrl ? (
+                      <Image
+                        source={{ uri: avatarUrl }}
+                        style={styles.authorAvatarPlaceholder}
+                      />
+                    ) : (
+                      <View style={styles.authorAvatarPlaceholder}>
+                        <Text style={styles.authorAvatarText}>
+                          {post.user_name?.charAt(0) || 'U'}
+                        </Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
                   <View style={styles.authorInfo}>
                     <View style={styles.authorNameRow}>
-                      <Text style={styles.authorName}>
-                        {post.user_name || 'An��nimo'}
-                      </Text>
+                      <TouchableOpacity
+                        activeOpacity={0.7}
+                        onPress={() =>
+                          router.push(
+                            `/profile/${String(post.user_name || '')
+                              .replace(/\s+/g, '')
+                              .toLowerCase()}`,
+                          )
+                        }
+                      >
+                        <Text style={styles.authorName}>
+                          {post.user_name || 'Anônimo'}
+                        </Text>
+                      </TouchableOpacity>
                     </View>
                     <Text style={styles.authorUsername}>
                       @
@@ -348,14 +419,14 @@ export default function PostDetail() {
 
                 <Text style={styles.postContent}>{post.content}</Text>
 
-                {postMediaUrl && imageDimensions && (
+                {mediaUrl && imageDimensions && (
                   <View style={styles.postImageContainer}>
                     <TouchableOpacity
                       activeOpacity={0.9}
                       onPress={() => setShowMedia(true)}
                     >
                       <Image
-                        source={{ uri: postMediaUrl }}
+                        source={{ uri: mediaUrl }}
                         style={[
                           styles.postImage,
                           { aspectRatio: imageDimensions.aspectRatio },
@@ -569,11 +640,11 @@ export default function PostDetail() {
         </View>
       </KeyboardAvoidingView>
 
-      {postMediaUrl && (
+      {mediaUrl && (
         <MediaViewer
           visible={showMedia}
           type="image"
-          uri={postMediaUrl}
+          uri={mediaUrl}
           onClose={() => setShowMedia(false)}
         />
       )}

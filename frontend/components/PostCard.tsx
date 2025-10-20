@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Heart, MessageCircle, Share2 } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { useImageDimensions } from '../hooks/useImageDimensions';
 
 type Comment = { id: string; user: string; text: string };
@@ -39,45 +40,35 @@ export default function PostCard({
 }) {
   const { dimensions } = useImageDimensions(post.image);
   const username = '@' + post.user.replace(/\s+/g, '').toLowerCase();
-  const isUpdateContent =
-    post.content &&
-    ['Atualizou a foto de perfil', 'Atualizou a foto de capa'].includes(
-      post.content.trim(),
-    );
+  const router = useRouter();
+  const slug = post.user.replace(/\s+/g, '').toLowerCase();
   return (
     <View style={styles.card}>
-      <TouchableOpacity
-        style={styles.header}
-        activeOpacity={0.85}
-        onPress={() =>
-          onOpenProfile && post.userId && onOpenProfile(post.userId)
-        }
-      >
-        {post.avatar ? (
-          <Image source={{ uri: post.avatar }} style={styles.avatarImage} />
-        ) : (
-          <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarText}>
-              {post.user.charAt(0).toUpperCase()}
-            </Text>
-          </View>
-        )}
+      <View style={styles.header}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => router.push(`/profile/${slug}`)}
+        >
+          {post.avatar ? (
+            <Image source={{ uri: post.avatar }} style={styles.avatarImage} />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarText}>
+                {post.user.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
         <View style={{ marginLeft: 12, flex: 1 }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-            }}
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => router.push(`/profile/${slug}`)}
           >
             <Text style={styles.user}>{post.user}</Text>
-            {!!post.statusLabel && (
-              <Text style={styles.statusLabel}> ({post.statusLabel})</Text>
-            )}
-          </View>
+          </TouchableOpacity>
           <Text style={styles.time}>{`${username} · ${post.time}`}</Text>
         </View>
-      </TouchableOpacity>
+      </View>
 
       {!!post.content && !isUpdateContent && (
         <TouchableOpacity
@@ -138,7 +129,16 @@ export default function PostCard({
 
       {(post.comments || []).slice(0, 2).map((c) => (
         <View key={c.id} style={styles.commentRow}>
-          <Text style={styles.commentUser}>{c.user}</Text>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() =>
+              router.push(
+                `/profile/${c.user.replace(/\s+/g, '').toLowerCase()}`,
+              )
+            }
+          >
+            <Text style={styles.commentUser}>{c.user}</Text>
+          </TouchableOpacity>
           <Text style={styles.commentText}> {c.text}</Text>
         </View>
       ))}

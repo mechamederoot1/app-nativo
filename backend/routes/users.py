@@ -1,5 +1,4 @@
-from typing import List
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Form
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Query
 from sqlalchemy.orm import Session
 from database.session import get_db
 from schemas.user import UserBase
@@ -19,41 +18,26 @@ os.makedirs(MEDIA_DIR, exist_ok=True)
 async def me(current: User = Depends(get_current_user)):
     return current
 
-@router.get("", response_model=List[UserBase])
-async def search_users(q: str = None, db: Session = Depends(get_db)):
-    query = db.query(User)
-    if q:
-        q = q.lower().strip()
-        query = query.filter(
-            (User.first_name.ilike(f"%{q}%")) |
-            (User.last_name.ilike(f"%{q}%")) |
-            (User.email.ilike(f"%{q}%"))
-        )
-    return query.limit(50).all()
-
-@router.get("/{user_id}", response_model=UserBase)
-async def get_user(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    return user
-
-@router.get("/{user_id}/posts", response_model=List[PostOut])
-async def get_user_posts(user_id: int, db: Session = Depends(get_db)):
-    posts = db.query(Post).filter(Post.user_id == user_id).order_by(Post.created_at.desc()).all()
-    out: List[PostOut] = []
-    for p in posts:
-        out.append(PostOut(
-            id=p.id,
-            content=p.content,
-            media_url=p.media_url,
-            created_at=p.created_at,
-            user_id=p.user_id,
-            user_name=f"{p.author.first_name} {p.author.last_name}" if p.author else "Anônimo",
-            user_profile_photo=p.author.profile_photo if p.author else None,
-            user_cover_photo=p.author.cover_photo if p.author else None,
-        ))
-    return out
+@router.get("/search")
+async def search_users(q: str = Query(""), db: Session = Depends(get_db)):
+    term = (q or "").strip()
+    qs = db.query(User)
+    if term:
+        like = f"%{term.lower()}%"
+        qs = qs.filter((User.first_name.ilike(like)) | (User.last_name.ilike(like)) | (User.email.ilike(like)))
+    users = qs.order_by(User.first_name.asc()).limit(20).all()
+    def to_username(u: User):
+        return f"{u.first_name}{u.last_name}".replace(" ", "").lower()
+    return [
+        {
+            "id": u.id,
+            "name": f"{u.first_name} {u.last_name}",
+            "username": to_username(u),
+            "profile_photo": u.profile_photo,
+            "cover_photo": u.cover_photo,
+        }
+        for u in users
+    ]
 
 @router.post("/profile-photo")
 async def update_profile_photo(
