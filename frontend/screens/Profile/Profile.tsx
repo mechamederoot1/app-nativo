@@ -1006,6 +1006,7 @@ export default function ProfileScreen() {
                   post={post}
                   onLike={handleLike}
                   onOpen={(id) => router.push(`/post/${id}`)}
+                  onOpenProfile={(userId) => router.push(`/profile/${userId}`)}
                 />
               ))
             ))}
