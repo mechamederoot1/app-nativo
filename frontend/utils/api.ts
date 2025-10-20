@@ -1,6 +1,6 @@
 type LoginResponse = { access_token: string; token_type: string };
 
-const BASE_URL =
+export const API_BASE_URL =
   (typeof process !== 'undefined' &&
     (process as any).env &&
     (process as any).env.EXPO_PUBLIC_API_URL) ||
@@ -31,7 +31,7 @@ async function request(path: string, init: RequestInit = {}) {
   if (!headers.has('Content-Type') && !(init.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
   }
-  const res = await fetch(`${BASE_URL}${path}`, { ...init, headers });
+  const res = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
   if (!res.ok) {
     let msg = 'Request failed';
     try {
@@ -84,6 +84,13 @@ export async function getPosts(): Promise<ApiPost[]> {
 
 export async function getPostById(id: number | string): Promise<ApiPost> {
   return request(`/posts/${id}`);
+}
+
+export function absoluteUrl(input?: string | null): string | undefined {
+  if (!input) return undefined;
+  const s = String(input);
+  if (/^https?:\/\//i.test(s)) return s;
+  return `${API_BASE_URL}${s.startsWith('/') ? s : '/' + s}`;
 }
 
 export async function createPost(content: string, file?: File | Blob) {
