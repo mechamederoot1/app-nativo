@@ -131,6 +131,7 @@ export default function FeedScreen() {
           u ? (u.startsWith('http') ? u : `${BASE_URL}${u}`) : undefined;
         const newPost: Post = {
           id: String(created.id),
+          userId: created.user_id,
           user: created.user_name,
           content: created.content,
           time: new Date(created.created_at).toLocaleTimeString(),
