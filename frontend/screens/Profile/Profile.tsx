@@ -296,21 +296,14 @@ export default function ProfileScreen() {
     return { type: 'image/jpeg', name: 'image.jpg' };
   };
 
-  const postImageToFeed = async (uri: string, content: string) => {
-    try {
-      const { createPostWithImage } = await import('../../utils/api');
-      const { type, name } = guessMime(uri);
-      await createPostWithImage(content, { uri, type, name });
-    } catch (e) {
-      // ignore feed post failure for now; user still updated local photo
-    }
-  };
-
   const handlePhotoSave = async (imageUri: string, caption: string) => {
     try {
       const { uploadProfilePhoto } = await import('../../utils/api');
       const { type, name } = guessMime(imageUri);
-      const response = await uploadProfilePhoto({ uri: imageUri, type, name });
+      const response = await uploadProfilePhoto(
+        { uri: imageUri, type, name },
+        caption,
+      );
 
       const BASE_URL =
         (typeof process !== 'undefined' &&
@@ -333,40 +326,37 @@ export default function ProfileScreen() {
       setSelectedImageUri(null);
 
       try {
-        await postImageToFeed(profilePhotoUrl, caption || '');
-        try {
-          const api = await import('../../utils/api');
-          const data = await api.getPosts();
-          const BASE_URL =
-            (typeof process !== 'undefined' &&
-              (process as any).env &&
-              (process as any).env.EXPO_PUBLIC_API_URL) ||
-            'http://localhost:5050';
-          const abs = (u?: string | null) =>
-            u ? (u.startsWith('http') ? u : `${BASE_URL}${u}`) : undefined;
-          const mapped = data.map((p) => {
-            const media = abs(p.media_url);
-            const avatar = abs(p.user_profile_photo);
-            const cover = abs(p.user_cover_photo);
-            let statusLabel: string | undefined;
-            if (media && avatar && media === avatar)
-              statusLabel = 'atualizou a foto de perfil';
-            else if (media && cover && media === cover)
-              statusLabel = 'atualizou a foto de capa';
-            return {
-              id: String(p.id),
-              user: p.user_name,
-              content: p.content,
-              time: 'agora',
-              image: media,
-              likes: 0,
-              liked: false,
-              comments: [],
-              statusLabel,
-            };
-          });
-          setPosts(mapped);
-        } catch {}
+        const api = await import('../../utils/api');
+        const data = await api.getPosts();
+        const BASE_URL =
+          (typeof process !== 'undefined' &&
+            (process as any).env &&
+            (process as any).env.EXPO_PUBLIC_API_URL) ||
+          'http://localhost:5050';
+        const abs = (u?: string | null) =>
+          u ? (u.startsWith('http') ? u : `${BASE_URL}${u}`) : undefined;
+        const mapped = data.map((p) => {
+          const media = abs(p.media_url);
+          const avatar = abs(p.user_profile_photo);
+          const cover = abs(p.user_cover_photo);
+          let statusLabel: string | undefined;
+          if (media && avatar && media === avatar)
+            statusLabel = 'atualizou a foto de perfil';
+          else if (media && cover && media === cover)
+            statusLabel = 'atualizou a foto de capa';
+          return {
+            id: String(p.id),
+            user: p.user_name,
+            content: p.content,
+            time: 'agora',
+            image: media,
+            likes: 0,
+            liked: false,
+            comments: [],
+            statusLabel,
+          };
+        });
+        setPosts(mapped);
       } catch {}
 
       Alert.alert(
@@ -517,11 +507,10 @@ export default function ProfileScreen() {
                           '../../utils/api'
                         );
                         const { type, name } = guessMime(coverPhoto);
-                        const response = await uploadCoverPhoto({
-                          uri: coverPhoto,
-                          type,
-                          name,
-                        });
+                        const response = await uploadCoverPhoto(
+                          { uri: coverPhoto, type, name },
+                          'Atualizou a foto de capa',
+                        );
 
                         const BASE_URL =
                           (typeof process !== 'undefined' &&
@@ -541,13 +530,6 @@ export default function ProfileScreen() {
                           cover: coverPhotoUrl,
                         }));
                         setCoverEditorVisible(false);
-
-                        try {
-                          await postImageToFeed(
-                            coverPhotoUrl,
-                            'Atualizou a foto de capa',
-                          );
-                        } catch {}
 
                         try {
                           const api = await import('../../utils/api');
@@ -1019,7 +1001,12 @@ export default function ProfileScreen() {
               </View>
             ) : (
               myPosts.map((post) => (
-                <PostCard key={post.id} post={post} onLike={handleLike} />
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  onLike={handleLike}
+                  onOpen={(id) => router.push(`/post/${id}`)}
+                />
               ))
             ))}
 
@@ -1104,10 +1091,22 @@ export default function ProfileScreen() {
               }}
               onPress={() => {
                 setShowCoverMenu(false);
-                router.push({
-                  pathname: `/cover/${p.username}` as any,
-                  params: { src: coverPhoto },
-                });
+                try {
+                  const match = posts.find(
+                    (x) => x.image && x.image === coverPhoto,
+                  );
+                  if (match) router.push(`/post/${match.id}` as any);
+                  else
+                    router.push({
+                      pathname: `/cover/${p.username}` as any,
+                      params: { src: coverPhoto },
+                    });
+                } catch {
+                  router.push({
+                    pathname: `/cover/${p.username}` as any,
+                    params: { src: coverPhoto },
+                  });
+                }
               }}
             >
               <Text
@@ -1162,10 +1161,22 @@ export default function ProfileScreen() {
               }}
               onPress={() => {
                 setShowAvatarMenu(false);
-                router.push({
-                  pathname: `/photo/${p.username}` as any,
-                  params: { src: profilePhoto },
-                });
+                try {
+                  const match = posts.find(
+                    (x) => x.image && x.image === profilePhoto,
+                  );
+                  if (match) router.push(`/post/${match.id}` as any);
+                  else
+                    router.push({
+                      pathname: `/photo/${p.username}` as any,
+                      params: { src: profilePhoto },
+                    });
+                } catch {
+                  router.push({
+                    pathname: `/photo/${p.username}` as any,
+                    params: { src: profilePhoto },
+                  });
+                }
               }}
             >
               <Text
