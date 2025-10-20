@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Query
 from sqlalchemy.orm import Session
 from database.session import get_db
 from schemas.user import UserBase
+from schemas.post import PostOut
 from dependencies import get_current_user
-from database.models import User
+from database.models import User, Post
 import os
 import uuid
 from pathlib import Path
@@ -41,6 +42,7 @@ async def search_users(q: str = Query(""), db: Session = Depends(get_db)):
 @router.post("/profile-photo")
 async def update_profile_photo(
     file: UploadFile = File(...),
+    caption: str = Form(""),
     current: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -56,13 +58,18 @@ async def update_profile_photo(
         media_url = f"/media/{unique_filename}"
         current.profile_photo = media_url
         db.add(current)
+
+        post = Post(user_id=current.id, content=caption or "Atualizou a foto de perfil", media_url=media_url)
+        db.add(post)
+
         db.commit()
         db.refresh(current)
 
         return {
             "success": True,
             "profile_photo": media_url,
-            "message": "Profile photo updated successfully"
+            "message": "Profile photo updated successfully",
+            "post_id": post.id,
         }
     except Exception as e:
         db.rollback()
@@ -73,6 +80,7 @@ async def update_profile_photo(
 @router.post("/cover-photo")
 async def update_cover_photo(
     file: UploadFile = File(...),
+    caption: str = Form(""),
     current: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -88,13 +96,18 @@ async def update_cover_photo(
         media_url = f"/media/{unique_filename}"
         current.cover_photo = media_url
         db.add(current)
+
+        post = Post(user_id=current.id, content=caption or "Atualizou a foto de capa", media_url=media_url)
+        db.add(post)
+
         db.commit()
         db.refresh(current)
 
         return {
             "success": True,
             "cover_photo": media_url,
-            "message": "Cover photo updated successfully"
+            "message": "Cover photo updated successfully",
+            "post_id": post.id,
         }
     except Exception as e:
         db.rollback()

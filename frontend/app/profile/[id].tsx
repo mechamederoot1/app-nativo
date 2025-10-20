@@ -3,7 +3,35 @@ import { useLocalSearchParams } from 'expo-router';
 import UserProfileView from '../../components/UserProfileView';
 import { profileData as seed } from '../../screens/Profile/Data';
 
-export default function ProfileIdView() {
+const { width } = Dimensions.get('window');
+const COVER_HEIGHT = 200;
+
+type UserProfile = {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  profile_photo?: string | null;
+  cover_photo?: string | null;
+  created_at: string;
+};
+
+type Post = {
+  id: string;
+  userId: number;
+  user: string;
+  avatar?: string;
+  cover?: string;
+  content: string;
+  time: string;
+  image?: string;
+  likes?: number;
+  liked?: boolean;
+  comments: any[];
+};
+
+export default function UserProfileView() {
+  const router = useRouter();
   const { id } = useLocalSearchParams();
   const idStr = String(id ?? '')
     .trim()
