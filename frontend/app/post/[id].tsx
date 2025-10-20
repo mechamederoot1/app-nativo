@@ -48,8 +48,9 @@ export default function PostDetail() {
   const [post, setPost] = useState<ApiPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [postMediaUrl, setPostMediaUrl] = useState<string | null>(null);
 
-  const { dimensions: imageDimensions } = useImageDimensions(post?.media_url);
+  const { dimensions: imageDimensions } = useImageDimensions(postMediaUrl);
 
   const [comment, setComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -82,7 +83,17 @@ export default function PostDetail() {
         const api = await import('../../utils/api');
         const data = await api.getPostById(id);
         if (!mounted) return;
+
+        const BASE_URL =
+          (typeof process !== 'undefined' &&
+            (process as any).env &&
+            (process as any).env.EXPO_PUBLIC_API_URL) ||
+          'http://localhost:5050';
+        const abs = (u?: string | null) =>
+          u ? (u.startsWith('http') ? u : `${BASE_URL}${u}`) : undefined;
+
         setPost(data);
+        setPostMediaUrl(abs(data.media_url) || null);
       } catch (e: any) {
         if (!mounted) return;
         setError(e?.message || 'Falha ao carregar publicação');
