@@ -160,6 +160,14 @@ export async function getUserPosts(id: number | string): Promise<ApiPost[]> {
   return request(`/users/${id}/posts`);
 }
 
+export async function searchUsers(query: string): Promise<ApiUser[]> {
+  const params = new URLSearchParams();
+  if (query && query.trim()) {
+    params.append('q', query.trim());
+  }
+  return request(`/users?${params.toString()}`);
+}
+
 export function logout() {
   setToken(null);
 }
