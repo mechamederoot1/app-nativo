@@ -1,4 +1,5 @@
 from .user import User
+from .user import User
 from .post import Post
 from .story import Story
 
