@@ -212,22 +212,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#64748b',
   },
-  tag: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 18,
-    backgroundColor: '#e2e8f0',
-    marginRight: 10,
-  },
-  tagSelected: {
-    backgroundColor: '#0856d6',
-  },
-  tagText: {
-    color: '#334155',
-    fontWeight: '600',
-  },
-  tagTextSelected: {
-    color: '#ffffff',
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
   },
   personRow: {
     flexDirection: 'row',
@@ -257,28 +246,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#64748b',
     marginTop: 2,
-  },
-  personTagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginTop: 6,
-  },
-  personTag: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    backgroundColor: '#f1f5f9',
-  },
-  personTagText: {
-    fontSize: 12,
-    color: '#475569',
-  },
-  mutualCount: {
-    fontSize: 12,
-    color: '#0f172a',
-    fontWeight: '600',
-    marginLeft: 12,
   },
   separator: {
     height: 1,
