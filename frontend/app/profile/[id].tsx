@@ -74,7 +74,7 @@ export default function ProfileIdView() {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <TopBar />
-        <View style={styles.center}> 
+        <View style={styles.center}>
           <Text style={styles.sub}>Carregando…</Text>
         </View>
         <BottomNav active="profile" />
@@ -101,14 +101,31 @@ export default function ProfileIdView() {
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         <View style={{ backgroundColor: '#fff', marginBottom: 12 }}>
           {!!user.cover && (
-            <Image source={{ uri: user.cover }} style={{ width: '100%', height: 200 }} />
+            <Image
+              source={{ uri: user.cover }}
+              style={{ width: '100%', height: 200 }}
+            />
           )}
           <View style={{ alignItems: 'center', marginTop: -65 }}>
             <Image
               source={{ uri: user.avatar }}
-              style={{ width: 130, height: 130, borderRadius: 65, borderWidth: 5, borderColor: '#fff', backgroundColor: '#e2e8f0' }}
+              style={{
+                width: 130,
+                height: 130,
+                borderRadius: 65,
+                borderWidth: 5,
+                borderColor: '#fff',
+                backgroundColor: '#e2e8f0',
+              }}
             />
-            <Text style={{ fontSize: 24, fontWeight: '900', color: '#0f172a', marginTop: 10 }}>
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: '900',
+                color: '#0f172a',
+                marginTop: 10,
+              }}
+            >
               {user.name}
             </Text>
           </View>
@@ -116,7 +133,7 @@ export default function ProfileIdView() {
 
         <View style={{ paddingHorizontal: 16 }}>
           {posts.length === 0 ? (
-            <View style={styles.center}> 
+            <View style={styles.center}>
               <Text style={styles.sub}>Nenhuma publicação</Text>
             </View>
           ) : (

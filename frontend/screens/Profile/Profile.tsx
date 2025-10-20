@@ -300,7 +300,10 @@ export default function ProfileScreen() {
     try {
       const { uploadProfilePhoto } = await import('../../utils/api');
       const { type, name } = guessMime(imageUri);
-      const response = await uploadProfilePhoto({ uri: imageUri, type, name }, caption);
+      const response = await uploadProfilePhoto(
+        { uri: imageUri, type, name },
+        caption,
+      );
 
       const BASE_URL =
         (typeof process !== 'undefined' &&
@@ -1093,9 +1096,16 @@ export default function ProfileScreen() {
                     (x) => x.image && x.image === coverPhoto,
                   );
                   if (match) router.push(`/post/${match.id}` as any);
-                  else router.push({ pathname: `/cover/${p.username}` as any, params: { src: coverPhoto } });
+                  else
+                    router.push({
+                      pathname: `/cover/${p.username}` as any,
+                      params: { src: coverPhoto },
+                    });
                 } catch {
-                  router.push({ pathname: `/cover/${p.username}` as any, params: { src: coverPhoto } });
+                  router.push({
+                    pathname: `/cover/${p.username}` as any,
+                    params: { src: coverPhoto },
+                  });
                 }
               }}
             >
@@ -1156,9 +1166,16 @@ export default function ProfileScreen() {
                     (x) => x.image && x.image === profilePhoto,
                   );
                   if (match) router.push(`/post/${match.id}` as any);
-                  else router.push({ pathname: `/photo/${p.username}` as any, params: { src: profilePhoto } });
+                  else
+                    router.push({
+                      pathname: `/photo/${p.username}` as any,
+                      params: { src: profilePhoto },
+                    });
                 } catch {
-                  router.push({ pathname: `/photo/${p.username}` as any, params: { src: profilePhoto } });
+                  router.push({
+                    pathname: `/photo/${p.username}` as any,
+                    params: { src: profilePhoto },
+                  });
                 }
               }}
             >

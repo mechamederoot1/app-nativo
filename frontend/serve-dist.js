@@ -23,7 +23,7 @@ const mime = {
   '.ttf': 'font/ttf',
   '.otf': 'font/otf',
   '.eot': 'application/vnd.ms-fontobject',
-  '.webp': 'image/webp'
+  '.webp': 'image/webp',
 };
 
 function send(res, status, headers, stream) {
