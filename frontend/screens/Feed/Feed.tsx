@@ -111,6 +111,10 @@ export default function FeedScreen() {
     toggleLike(id);
   }, []);
 
+  const handleOpenProfile = useCallback((userId: string) => {
+    router.push(`/profile/${userId}`);
+  }, [router]);
+
   const handleCreate = useCallback((content: string) => {
     (async () => {
       try {
@@ -151,7 +155,7 @@ export default function FeedScreen() {
             <PostCard
               post={item}
               onLike={handleLike}
-              onOpen={(id) => router.push(`/post/${id}`)}
+              onOpen={handleOpenProfile}
             />
           )}
           refreshControl={
