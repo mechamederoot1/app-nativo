@@ -73,6 +73,7 @@ export type ApiPost = {
   content: string;
   media_url?: string | null;
   created_at: string;
+  user_id: number;
   user_name: string;
   user_profile_photo?: string | null;
   user_cover_photo?: string | null;
@@ -121,32 +122,58 @@ export async function createPostWithImage(
   return request('/posts/upload', { method: 'POST', body: form });
 }
 
-export async function uploadProfilePhoto(file: {
-  uri: string;
-  type: string;
-  name?: string;
-}) {
+export async function uploadProfilePhoto(
+  file: { uri: string; type: string; name?: string },
+  caption?: string,
+) {
   const form = new FormData();
   form.append('file', {
     uri: file.uri,
     type: file.type,
     name: file.name || 'profile.jpg',
   } as any);
+  if (typeof caption === 'string') form.append('caption', caption);
   return request('/users/profile-photo', { method: 'POST', body: form });
 }
 
-export async function uploadCoverPhoto(file: {
-  uri: string;
-  type: string;
-  name?: string;
-}) {
+export async function uploadCoverPhoto(
+  file: { uri: string; type: string; name?: string },
+  caption?: string,
+) {
   const form = new FormData();
   form.append('file', {
     uri: file.uri,
     type: file.type,
     name: file.name || 'cover.jpg',
   } as any);
+  if (typeof caption === 'string') form.append('caption', caption);
   return request('/users/cover-photo', { method: 'POST', body: form });
+}
+
+export type ApiUser = {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  profile_photo?: string | null;
+  cover_photo?: string | null;
+  created_at: string;
+};
+
+export async function getUserById(id: number | string): Promise<ApiUser> {
+  return request(`/users/${id}`);
+}
+
+export async function getUserPosts(id: number | string): Promise<ApiPost[]> {
+  return request(`/users/${id}/posts`);
+}
+
+export async function searchUsers(query: string): Promise<ApiUser[]> {
+  const params = new URLSearchParams();
+  if (query && query.trim()) {
+    params.append('q', query.trim());
+  }
+  return request(`/users?${params.toString()}`);
 }
 
 export function logout() {

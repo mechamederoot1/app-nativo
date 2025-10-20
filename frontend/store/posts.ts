@@ -1,6 +1,7 @@
 export type Comment = { id: string; user: string; text: string };
 export type Post = {
   id: string;
+  userId: number;
   user: string;
   avatar?: string;
   cover?: string;
