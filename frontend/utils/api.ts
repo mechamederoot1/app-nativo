@@ -73,6 +73,7 @@ export type ApiPost = {
   content: string;
   media_url?: string | null;
   created_at: string;
+  user_id: number;
   user_name: string;
   user_profile_photo?: string | null;
   user_cover_photo?: string | null;
