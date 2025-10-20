@@ -334,7 +334,7 @@ export default function PostDetail() {
                   <View style={styles.authorInfo}>
                     <View style={styles.authorNameRow}>
                       <Text style={styles.authorName}>
-                        {post.user_name || 'Anônimo'}
+                        {post.user_name || 'An��nimo'}
                       </Text>
                     </View>
                     <Text style={styles.authorUsername}>
@@ -569,11 +569,11 @@ export default function PostDetail() {
         </View>
       </KeyboardAvoidingView>
 
-      {post.media_url && (
+      {postMediaUrl && (
         <MediaViewer
           visible={showMedia}
           type="image"
-          uri={post.media_url}
+          uri={postMediaUrl}
           onClose={() => setShowMedia(false)}
         />
       )}
