@@ -39,6 +39,7 @@ import {
   Check,
   MessageCircle,
   UserPlus,
+  UserCheck,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { getPosts, subscribe, toggleLike } from '../store/posts';
@@ -505,7 +506,7 @@ export default function UserProfileView({ profile, editable }: Props) {
         <View style={styles.infoCard}>
           <View style={styles.infoHeader}>
             <Text style={styles.infoTitle}>Informações Pessoais</Text>
-            <Pressable onPress={() => router.push('/profile/about')}>
+            <Pressable onPress={() => router.push(`/profile/about?user=${encodeURIComponent(p.username)}`)}>
               <ChevronRight size={20} color="#64748b" strokeWidth={2} />
             </Pressable>
           </View>
@@ -535,6 +536,35 @@ export default function UserProfileView({ profile, editable }: Props) {
               <Mail size={18} color="#64748b" strokeWidth={2} />
               <Text style={[styles.infoText, styles.linkText]}>contato@email.com</Text>
             </View>
+          </View>
+        </View>
+
+        <View style={styles.connectionsSection}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionTitleContainer}>
+              <UserCheck size={22} color="#3b82f6" strokeWidth={2.5} />
+              <View>
+                <Text style={styles.sectionTitle}>Conexões</Text>
+                <Text style={styles.connectionsSubtitle}>
+                  {p.connectionsCount} conexões · {p.recentFriends.length} em comum
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity>
+              <Text style={styles.seeAll}>Ver todas</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.connectionsGrid}>
+            {p.recentFriends.slice(0, 9).map((friend) => (
+              <TouchableOpacity key={friend.id} style={styles.connectionCard} activeOpacity={0.85}>
+                <Image source={{ uri: friend.avatar }} style={styles.connectionAvatar} />
+                <Text style={styles.connectionName} numberOfLines={1}>
+                  {friend.name.split(' ')[0]}
+                </Text>
+                <Text style={styles.connectionMutual}>2 em comum</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
@@ -736,6 +766,26 @@ const styles = StyleSheet.create({
   infoItem: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   infoText: { fontSize: 14, color: '#1e293b', fontWeight: '500', flex: 1 },
   linkText: { color: '#3b82f6' },
+  connectionsSection: {
+    backgroundColor: '#ffffff',
+    marginTop: 8,
+    padding: 20,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionTitleContainer: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  sectionTitle: { fontSize: 18, fontWeight: '900', color: '#0f172a' },
+  seeAll: { fontSize: 14, color: '#3b82f6', fontWeight: '700' },
+  connectionsSubtitle: { fontSize: 13, color: '#64748b', marginTop: 2 },
+  connectionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  connectionCard: { width: (width - 64) / 3, alignItems: 'center' },
+  connectionAvatar: { width: '100%', aspectRatio: 1, borderRadius: 12, backgroundColor: '#e2e8f0' },
+  connectionName: { fontSize: 13, color: '#0f172a', fontWeight: '700', marginTop: 6 },
+  connectionMutual: { fontSize: 11, color: '#64748b', marginTop: 2 },
   tabsContainer: { backgroundColor: '#ffffff', marginTop: 8, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
   tabBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: 'transparent' },
   tabActive: { borderBottomColor: '#3b82f6' },
