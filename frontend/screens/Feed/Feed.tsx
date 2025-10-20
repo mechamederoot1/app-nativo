@@ -75,17 +75,32 @@ export default function FeedScreen() {
     toggleLike(id);
   }, []);
 
+  const handleOpenProfile = useCallback(
+    (userId: string | number) => {
+      router.push(`/profile/${userId}`);
+    },
+    [router],
+  );
+
   const handleCreate = useCallback((content: string) => {
     (async () => {
       try {
         const api = await import('../../utils/api');
         const created = await api.createPost(content);
+        const BASE_URL =
+          (typeof process !== 'undefined' &&
+            (process as any).env &&
+            (process as any).env.EXPO_PUBLIC_API_URL) ||
+          'http://localhost:5050';
+        const abs = (u?: string | null) =>
+          u ? (u.startsWith('http') ? u : `${BASE_URL}${u}`) : undefined;
         const newPost: Post = {
           id: String(created.id),
+          userId: created.user_id,
           user: created.user_name,
           content: created.content,
           time: new Date(created.created_at).toLocaleTimeString(),
-          image: created.media_url || undefined,
+          image: abs(created.media_url),
           likes: 0,
           liked: false,
           comments: [],
@@ -109,6 +124,7 @@ export default function FeedScreen() {
               post={item}
               onLike={handleLike}
               onOpen={(id) => router.push(`/post/${id}`)}
+              onOpenProfile={handleOpenProfile}
             />
           )}
           refreshControl={

@@ -26,7 +26,10 @@ export default function AboutScreen() {
         if (!slug) return;
         const api = await import('../../utils/api');
         const posts = await api.getPosts();
-        const toSlug = (s: string) => String(s || '').replace(/\s+/g, '').toLowerCase();
+        const toSlug = (s: string) =>
+          String(s || '')
+            .replace(/\s+/g, '')
+            .toLowerCase();
         const match = posts.find((x) => toSlug(x.user_name) === slug);
         if (!mounted) return;
         if (match) {
@@ -67,9 +70,17 @@ export default function AboutScreen() {
           <Text style={styles.cardTitle}>Informações pessoais</Text>
           <InfoRow icon={Home} label="Cidade natal" value={p.hometown} />
           <InfoRow icon={MapPin} label="Cidade atual" value={p.currentCity} />
-          <InfoRow icon={Heart} label="Relacionamento" value={p.relationshipStatus} />
+          <InfoRow
+            icon={Heart}
+            label="Relacionamento"
+            value={p.relationshipStatus}
+          />
           <InfoRow icon={Briefcase} label="Trabalho" value={p.workplace} />
-          <InfoRow icon={Heart} label="Conexões" value={`${p.connectionsCount}`} />
+          <InfoRow
+            icon={Heart}
+            label="Conexões"
+            value={`${p.connectionsCount}`}
+          />
         </View>
 
         <View style={styles.card}>

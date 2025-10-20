@@ -15,6 +15,7 @@ type Comment = { id: string; user: string; text: string };
 
 type Post = {
   id: string;
+  userId?: number;
   user: string;
   avatar?: string;
   content: string;
@@ -23,16 +24,19 @@ type Post = {
   likes?: number;
   liked?: boolean;
   comments?: Comment[];
+  statusLabel?: string;
 };
 
 export default function PostCard({
   post,
   onLike,
   onOpen,
+  onOpenProfile,
 }: {
   post: Post;
   onLike?: (id: string) => void;
   onOpen?: (id: string) => void;
+  onOpenProfile?: (userId: number) => void;
 }) {
   const { dimensions } = useImageDimensions(post.image);
   const username = '@' + post.user.replace(/\s+/g, '').toLowerCase();
@@ -66,13 +70,15 @@ export default function PostCard({
         </View>
       </View>
 
-      <TouchableOpacity
-        activeOpacity={0.85}
-        onPress={() => onOpen && onOpen(post.id)}
-        style={{ marginTop: 10 }}
-      >
-        <Text style={styles.content}>{post.content}</Text>
-      </TouchableOpacity>
+      {!!post.content && !isUpdateContent && (
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => onOpen && onOpen(post.id)}
+          style={{ marginTop: 10 }}
+        >
+          <Text style={styles.content}>{post.content}</Text>
+        </TouchableOpacity>
+      )}
 
       {post.image && dimensions ? (
         <TouchableOpacity
@@ -125,7 +131,11 @@ export default function PostCard({
         <View key={c.id} style={styles.commentRow}>
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => router.push(`/profile/${c.user.replace(/\s+/g, '').toLowerCase()}`)}
+            onPress={() =>
+              router.push(
+                `/profile/${c.user.replace(/\s+/g, '').toLowerCase()}`,
+              )
+            }
           >
             <Text style={styles.commentUser}>{c.user}</Text>
           </TouchableOpacity>
@@ -178,6 +188,12 @@ const styles = StyleSheet.create({
   time: {
     fontSize: 12,
     color: '#6b7280',
+  },
+  statusLabel: {
+    marginLeft: 6,
+    color: '#6b7280',
+    fontSize: 12,
+    fontWeight: '600',
   },
   content: {
     fontSize: 13,
