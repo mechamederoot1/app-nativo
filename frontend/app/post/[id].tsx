@@ -26,6 +26,7 @@ import {
   Eye,
 } from 'lucide-react-native';
 import type { ApiPost } from '../../utils/api';
+import { absoluteUrl } from '../../utils/api';
 import MediaViewer from '../../components/MediaViewer';
 import { useImageDimensions } from '../../hooks/useImageDimensions';
 
@@ -49,7 +50,9 @@ export default function PostDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { dimensions: imageDimensions } = useImageDimensions(post?.media_url);
+  const mediaUrl = React.useMemo(() => absoluteUrl(post?.media_url), [post?.media_url]);
+  const avatarUrl = React.useMemo(() => absoluteUrl(post?.user_profile_photo), [post?.user_profile_photo]);
+  const { dimensions: imageDimensions } = useImageDimensions(mediaUrl);
 
   const [comment, setComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -315,11 +318,15 @@ export default function PostDetail() {
               {/* Post Preview */}
               <View style={styles.postPreview}>
                 <View style={styles.authorRow}>
-                  <View style={styles.authorAvatarPlaceholder}>
-                    <Text style={styles.authorAvatarText}>
-                      {post.user_name?.charAt(0) || 'U'}
-                    </Text>
-                  </View>
+                  {avatarUrl ? (
+                    <Image source={{ uri: avatarUrl }} style={styles.authorAvatarPlaceholder} />
+                  ) : (
+                    <View style={styles.authorAvatarPlaceholder}>
+                      <Text style={styles.authorAvatarText}>
+                        {post.user_name?.charAt(0) || 'U'}
+                      </Text>
+                    </View>
+                  )}
                   <View style={styles.authorInfo}>
                     <View style={styles.authorNameRow}>
                       <Text style={styles.authorName}>
@@ -337,14 +344,14 @@ export default function PostDetail() {
 
                 <Text style={styles.postContent}>{post.content}</Text>
 
-                {post.media_url && imageDimensions && (
+                {mediaUrl && imageDimensions && (
                   <View style={styles.postImageContainer}>
                     <TouchableOpacity
                       activeOpacity={0.9}
                       onPress={() => setShowMedia(true)}
                     >
                       <Image
-                        source={{ uri: post.media_url }}
+                        source={{ uri: mediaUrl }}
                         style={[
                           styles.postImage,
                           { aspectRatio: imageDimensions.aspectRatio },
@@ -558,11 +565,11 @@ export default function PostDetail() {
         </View>
       </KeyboardAvoidingView>
 
-      {post.media_url && (
+      {mediaUrl && (
         <MediaViewer
           visible={showMedia}
           type="image"
-          uri={post.media_url}
+          uri={mediaUrl}
           onClose={() => setShowMedia(false)}
         />
       )}
