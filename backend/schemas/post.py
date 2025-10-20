@@ -10,6 +10,7 @@ class PostOut(BaseModel):
     content: str
     media_url: str | None
     created_at: datetime
+    user_id: int
     user_name: str
     user_profile_photo: str | None = None
     user_cover_photo: str | None = None
