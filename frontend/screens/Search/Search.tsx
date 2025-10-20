@@ -110,62 +110,61 @@ export default function SearchScreen() {
         <View style={styles.searchInputWrapper}>
           <SearchIcon size={18} color="#6b7280" />
           <TextInput
-            placeholder="Buscar pessoas, eventos ou interesses"
+            placeholder="Buscar pessoas por nome ou email"
             placeholderTextColor="#9ca3af"
             value={query}
-            onChangeText={setQuery}
+            onChangeText={handleChangeText}
             style={styles.searchInput}
             accessibilityLabel="Campo de busca"
             returnKeyType="search"
           />
         </View>
 
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Tendências para você</Text>
-        </View>
+        {query && (
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Resultados</Text>
+            <Text style={styles.resultCount}>
+              {loading ? '...' : `${users.length} ${users.length === 1 ? 'resultado' : 'resultados'}`}
+            </Text>
+          </View>
+        )}
 
-        <FlatList<string>
-          data={ALL_TAGS}
-          horizontal
-          keyExtractor={(tag) => tag}
-          contentContainerStyle={{ paddingHorizontal: 4 }}
-          showsHorizontalScrollIndicator={false}
-          style={{ marginBottom: 16 }}
-          renderItem={({ item }) => (
-            <TagButton
-              tag={item}
-              selected={item === selectedTag}
-              onSelect={handleSelectTag}
-            />
-          )}
-        />
+        {loading && query && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#0ea5e9" />
+          </View>
+        )}
 
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Resultados</Text>
-          <Text style={styles.resultCount}>
-            {filteredPeople.length}{' '}
-            {filteredPeople.length === 1 ? 'resultado' : 'resultados'}
-          </Text>
-        </View>
+        {!loading && query && (
+          <FlatList<User>
+            data={users}
+            keyExtractor={(user) => user.id.toString()}
+            renderItem={renderUser}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            ListEmptyComponent={
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateTitle}>
+                  Nenhum perfil encontrado
+                </Text>
+                <Text style={styles.emptyStateSubtitle}>
+                  Tente um termo diferente para encontrar novas conexões.
+                </Text>
+              </View>
+            }
+            contentContainerStyle={{ paddingBottom: 32 }}
+          />
+        )}
 
-        <FlatList<Person>
-          data={filteredPeople}
-          keyExtractor={(person) => person.id}
-          renderItem={renderPerson}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateTitle}>
-                Nenhum perfil encontrado
-              </Text>
-              <Text style={styles.emptyStateSubtitle}>
-                Ajuste os filtros ou tente um termo diferente para encontrar
-                novas conexões.
-              </Text>
-            </View>
-          }
-          contentContainerStyle={{ paddingBottom: 32 }}
-        />
+        {!query && (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateTitle}>
+              Digite para buscar
+            </Text>
+            <Text style={styles.emptyStateSubtitle}>
+              Procure por nomes de usuários ou emails para encontrar pessoas.
+            </Text>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
