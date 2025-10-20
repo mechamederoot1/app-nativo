@@ -158,7 +158,8 @@ export default function FeedScreen() {
             <PostCard
               post={item}
               onLike={handleLike}
-              onOpen={handleOpenProfile}
+              onOpen={(id) => router.push(`/post/${id}`)}
+              onOpenProfile={handleOpenProfile}
             />
           )}
           refreshControl={
