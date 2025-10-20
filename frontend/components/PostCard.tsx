@@ -30,10 +30,12 @@ export default function PostCard({
   post,
   onLike,
   onOpen,
+  onOpenProfile,
 }: {
   post: Post;
   onLike?: (id: string) => void;
-  onOpen?: (id: string | number) => void;
+  onOpen?: (id: string) => void;
+  onOpenProfile?: (userId: number) => void;
 }) {
   const { dimensions } = useImageDimensions(post.image);
   const username = '@' + post.user.replace(/\s+/g, '').toLowerCase();
@@ -47,7 +49,7 @@ export default function PostCard({
       <TouchableOpacity
         style={styles.header}
         activeOpacity={0.85}
-        onPress={() => onOpen && onOpen(post.userId || post.id)}
+        onPress={() => onOpenProfile && post.userId && onOpenProfile(post.userId)}
       >
         {post.avatar ? (
           <Image source={{ uri: post.avatar }} style={styles.avatarImage} />
