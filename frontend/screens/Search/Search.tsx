@@ -51,35 +51,55 @@ function UserRow({ user, onPress }: UserRowProps) {
 export default function SearchScreen() {
   const router = useRouter();
   const [query, setQuery] = useState('');
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  const filteredPeople = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-
-    return PEOPLE.filter((person) => {
-      const matchesQuery =
-        normalizedQuery.length === 0 ||
-        person.name.toLowerCase().includes(normalizedQuery) ||
-        person.location.toLowerCase().includes(normalizedQuery) ||
-        person.interests.some((interest) =>
-          interest.toLowerCase().includes(normalizedQuery),
-        );
-
-      const matchesTag = selectedTag
-        ? person.interests.includes(selectedTag)
-        : true;
-
-      return matchesQuery && matchesTag;
-    });
-  }, [query, selectedTag]);
-
-  const handleSelectTag = useCallback((tag: string) => {
-    setSelectedTag((current) => (current === tag ? null : tag));
+  const handleSearch = useCallback(async (searchQuery: string) => {
+    setLoading(true);
+    try {
+      const api = await import('../../utils/api');
+      const results = await api.searchUsers(searchQuery);
+      setUsers(results);
+    } catch (e) {
+      console.error('Search error:', e);
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const renderPerson = useCallback<ListRenderItem<Person>>(
+  const handleChangeText = useCallback((text: string) => {
+    setQuery(text);
+
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    if (text.trim()) {
+      const timeout = setTimeout(() => {
+        handleSearch(text);
+      }, 300);
+      setSearchTimeout(timeout);
+    } else {
+      setUsers([]);
+    }
+  }, [searchTimeout, handleSearch]);
+
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTimeout]);
+
+  const renderUser = useCallback<ListRenderItem<User>>(
     ({ item }) => (
-      <PersonRow person={item} onPress={() => router.push('/profile')} />
+      <UserRow
+        user={item}
+        onPress={() => router.push(`/profile/${item.id}`)}
+      />
     ),
     [router],
   );
