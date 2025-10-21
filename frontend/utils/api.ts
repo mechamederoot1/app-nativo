@@ -173,7 +173,7 @@ export async function searchUsers(query: string): Promise<ApiUser[]> {
   if (query && query.trim()) {
     params.append('q', query.trim());
   }
-  return request(`/users?${params.toString()}`);
+  return request(`/users/search?${params.toString()}`);
 }
 
 export function logout() {
