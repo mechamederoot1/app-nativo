@@ -52,6 +52,7 @@ export default function StoryViewer({
   onClose,
   mode = 'modal',
 }: StoryViewerProps) {
+  const currentProgressRef = useRef(0);
   const { width, height } = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const videoRef = useRef<Video | null>(null);
@@ -119,7 +120,7 @@ export default function StoryViewer({
     } else if (current?.type === 'image') {
       // Retomar animação de progresso para imagem
       const dur = Math.max(1500, current.durationMs ?? 5000);
-      const currentProgress = (progress as any)._value || 0;
+      const currentProgress = currentProgressRef.current || 0;
       const remainingDuration = dur * (1 - currentProgress);
 
       if (remainingDuration > 0) {
@@ -198,7 +199,7 @@ export default function StoryViewer({
           <Video
             ref={(r) => (videoRef.current = r)}
             style={styles.media}
-            source={{ uri: current?.uri ?? '' }}
+            source={{ uri: current?.uri || '' }}
             useNativeControls={false}
             resizeMode={ResizeMode.COVER}
             isLooping={false}
