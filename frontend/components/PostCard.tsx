@@ -54,7 +54,7 @@ export default function PostCard({
           ) : (
             <View style={styles.avatarPlaceholder}>
               <Text style={styles.avatarText}>
-                {post.user.charAt(0).toUpperCase()}
+                {(post.user || '?').charAt(0).toUpperCase()}
               </Text>
             </View>
           )}
