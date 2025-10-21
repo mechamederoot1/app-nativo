@@ -9,6 +9,7 @@ import {
   Dimensions,
   Modal,
   PanResponder,
+  Platform,
 } from 'react-native';
 import { Download, X, RotateCcw } from 'lucide-react-native';
 
@@ -27,7 +28,13 @@ type Props = {
   onCancel: () => void;
 };
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const getDimensions = () => {
+  if (Platform.OS === 'web') {
+    return { width: typeof window !== 'undefined' ? window.innerWidth : 375 };
+  }
+  return Dimensions.get('window');
+};
+const { width: SCREEN_WIDTH } = getDimensions();
 const MIN_SCALE = 1;
 const MAX_SCALE = 3;
 

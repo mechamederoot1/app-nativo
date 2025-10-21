@@ -49,8 +49,13 @@ export default function MediaViewer({ visible, type, uri, onClose }: Props) {
       return styles.media;
     }
 
-    const screenWidth = Dimensions.get('window').width;
-    const screenHeight = Dimensions.get('window').height;
+    const getScreenDimensions = () => {
+      if (Platform.OS === 'web') {
+        return { width: typeof window !== 'undefined' ? window.innerWidth : 375, height: typeof window !== 'undefined' ? window.innerHeight : 812 };
+      }
+      return Dimensions.get('window');
+    };
+    const { width: screenWidth, height: screenHeight } = getScreenDimensions();
     const aspectRatio = imageDimensions.width / imageDimensions.height;
 
     // Limitar a no máximo 80% da largura e 70% da altura da tela
