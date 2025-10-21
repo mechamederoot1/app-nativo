@@ -213,6 +213,7 @@ export default function StoryViewer({
                   1,
                   st.positionMillis / Math.max(st.durationMillis, 1),
                 );
+                currentProgressRef.current = ratio;
                 progress.setValue(ratio);
               }
               if (st.didJustFinish) {
