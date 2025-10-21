@@ -12,6 +12,7 @@ import {
   Alert,
   PanResponder,
   Modal,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
@@ -45,7 +46,13 @@ import { useRouter } from 'expo-router';
 import { getPosts, subscribe, toggleLike } from '../store/posts';
 import type { UserProfile } from '../screens/Profile/Data';
 
-const { width } = Dimensions.get('window');
+const getDimensions = () => {
+  if (Platform.OS === 'web') {
+    return { width: typeof window !== 'undefined' ? window.innerWidth : 375 };
+  }
+  return Dimensions.get('window');
+};
+const { width } = getDimensions();
 
 export type Props = {
   profile: UserProfile;
