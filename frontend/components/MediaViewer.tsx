@@ -96,13 +96,13 @@ export default function MediaViewer({ visible, type, uri, onClose }: Props) {
         </TouchableOpacity>
 
         <View style={styles.mediaContainer}>
-          {type === 'image' ? (
+          {type === 'image' && uri ? (
             <Image
               source={{ uri }}
               style={getImageStyle()}
               resizeMode="contain"
             />
-          ) : (
+          ) : type === 'video' && uri ? (
             <Video
               source={{ uri }}
               style={getImageStyle()}
@@ -113,7 +113,7 @@ export default function MediaViewer({ visible, type, uri, onClose }: Props) {
               useNativeControls
               isLooping
             />
-          )}
+          ) : null}
         </View>
       </View>
     </Modal>
