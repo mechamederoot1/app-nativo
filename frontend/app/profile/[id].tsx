@@ -30,7 +30,7 @@ type Post = {
   comments: any[];
 };
 
-export default function UserProfileView() {
+export default function UserProfilePage() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const idStr = String(id ?? '')
