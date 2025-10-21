@@ -15,9 +15,8 @@ import { Search as SearchIcon } from 'lucide-react-native';
 
 type User = {
   id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
+  name: string;
+  username: string;
   profile_photo?: string | null;
   cover_photo?: string | null;
 };
@@ -28,8 +27,8 @@ type UserRowProps = {
 };
 
 function UserRow({ user, onPress }: UserRowProps) {
-  const fullName = `${user.first_name} ${user.last_name}`;
-  const initial = user.first_name.charAt(0).toUpperCase();
+  const fullName = user.name;
+  const initial = user.name?.charAt(0).toUpperCase() || '?';
 
   return (
     <TouchableOpacity
@@ -42,7 +41,7 @@ function UserRow({ user, onPress }: UserRowProps) {
       </View>
       <View style={{ flex: 1 }}>
         <Text style={styles.personName}>{fullName}</Text>
-        <Text style={styles.personLocation}>{user.email}</Text>
+        <Text style={styles.personLocation}>@{user.username}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -101,7 +100,7 @@ export default function SearchScreen() {
 
   const renderUser = useCallback<ListRenderItem<User>>(
     ({ item }) => (
-      <UserRow user={item} onPress={() => router.push(`/profile/${item.id}`)} />
+      <UserRow user={item} onPress={() => router.push(`/profile/${item.username}`)} />
     ),
     [router],
   );
