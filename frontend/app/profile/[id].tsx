@@ -1,6 +1,6 @@
 import React from 'react';
 import { Platform } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import UserProfileView from '../../components/UserProfileView';
 import { profileData as seed } from '../../screens/Profile/Data';
 
