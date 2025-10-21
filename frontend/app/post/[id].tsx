@@ -30,7 +30,13 @@ import { absoluteUrl } from '../../utils/api';
 import MediaViewer from '../../components/MediaViewer';
 import { useImageDimensions } from '../../hooks/useImageDimensions';
 
-const { width } = Dimensions.get('window');
+const getDimensions = () => {
+  if (Platform.OS === 'web') {
+    return { width: typeof window !== 'undefined' ? window.innerWidth : 375 };
+  }
+  return Dimensions.get('window');
+};
+const { width } = getDimensions();
 
 // Reações disponíveis
 const REACTIONS = [
