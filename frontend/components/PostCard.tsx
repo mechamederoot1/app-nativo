@@ -70,7 +70,7 @@ export default function PostCard({
         </View>
       </View>
 
-      {!!post.content && !isUpdateContent && (
+      {!!post.content && (
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={() => onOpen && onOpen(post.id)}
