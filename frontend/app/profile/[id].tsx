@@ -1,9 +1,18 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import UserProfileView from '../../components/UserProfileView';
 import { profileData as seed } from '../../screens/Profile/Data';
 
-const { width } = Dimensions.get('window');
+const getDimensions = () => {
+  if (Platform.OS === 'web') {
+    return { width: typeof window !== 'undefined' ? window.innerWidth : 375, height: typeof window !== 'undefined' ? window.innerHeight : 812 };
+  }
+  const { Dimensions } = require('react-native');
+  return Dimensions.get('window');
+};
+
+const { width } = getDimensions();
 const COVER_HEIGHT = 200;
 
 type UserProfile = {
