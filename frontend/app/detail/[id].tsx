@@ -327,7 +327,7 @@ export default function DetailView() {
   }
 
   const userName = post.user_name || 'Anônimo';
-  const userHandle = (userName).replace(/\s+/g, '').toLowerCase();
+  const userHandle = userName.replace(/\s+/g, '').toLowerCase();
   const formattedTime = formatPostTime(post.created_at);
 
   return (
@@ -650,9 +650,9 @@ const styles = StyleSheet.create({
   },
 
   // Author section - Melhorada
-  authorRow: { 
-    flexDirection: 'row', 
-    alignItems: 'flex-start', 
+  authorRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     marginBottom: 16,
     gap: 12,
   },
@@ -672,20 +672,20 @@ const styles = StyleSheet.create({
   },
   authorAvatarText: { color: '#0856d6', fontWeight: '800', fontSize: 20 },
   authorInfo: { flex: 1, justifyContent: 'center' },
-  authorName: { 
-    fontSize: 16, 
-    fontWeight: '700', 
+  authorName: {
+    fontSize: 16,
+    fontWeight: '700',
     color: '#0f172a',
     marginBottom: 2,
   },
-  authorHandle: { 
-    fontSize: 14, 
-    color: '#64748b', 
+  authorHandle: {
+    fontSize: 14,
+    color: '#64748b',
     marginBottom: 4,
   },
-  postTime: { 
-    fontSize: 13, 
-    color: '#94a3b8', 
+  postTime: {
+    fontSize: 13,
+    color: '#94a3b8',
     fontWeight: '500',
   },
 
