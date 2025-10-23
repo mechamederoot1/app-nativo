@@ -12,6 +12,7 @@ import {
   Modal,
   PanResponder,
   Animated,
+  Platform,
 } from 'react-native';
 import { Download, X, RotateCcw, Check } from 'lucide-react-native';
 
@@ -22,7 +23,13 @@ interface ProfilePhotoEditorProps {
   onCancel: () => void;
 }
 
-const { width } = Dimensions.get('window');
+const getDimensions = () => {
+  if (Platform.OS === 'web') {
+    return { width: typeof window !== 'undefined' ? window.innerWidth : 375 };
+  }
+  return Dimensions.get('window');
+};
+const { width } = getDimensions();
 const CIRCLE_SIZE = 280;
 const CIRCLE_RADIUS = CIRCLE_SIZE / 2;
 const MIN_SCALE = 1;

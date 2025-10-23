@@ -10,6 +10,7 @@ import {
   useWindowDimensions,
   StatusBar,
   Dimensions,
+  Platform,
 } from 'react-native';
 import {
   Plus,
@@ -22,7 +23,13 @@ import TopBar from '../components/TopBar';
 import BottomNav from '../components/BottomNav';
 import StoryViewer, { StorySegment, StoryUser } from '../components/StoryViewer';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const getDimensions = () => {
+  if (Platform.OS === 'web') {
+    return { width: typeof window !== 'undefined' ? window.innerWidth : 375, height: typeof window !== 'undefined' ? window.innerHeight : 812 };
+  }
+  return Dimensions.get('window');
+};
+const { width: screenWidth, height: screenHeight } = getDimensions();
 
 export type StoryItem = {
   id: string;

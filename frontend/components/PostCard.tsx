@@ -54,7 +54,7 @@ export default function PostCard({
           ) : (
             <View style={styles.avatarPlaceholder}>
               <Text style={styles.avatarText}>
-                {post.user.charAt(0).toUpperCase()}
+                {(post.user || '?').charAt(0).toUpperCase()}
               </Text>
             </View>
           )}
@@ -70,7 +70,7 @@ export default function PostCard({
         </View>
       </View>
 
-      {!!post.content && !isUpdateContent && (
+      {!!post.content && (
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={() => onOpen && onOpen(post.id)}

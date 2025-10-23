@@ -12,6 +12,7 @@ import {
   Alert,
   PanResponder,
   Modal,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
@@ -45,7 +46,13 @@ import { useRouter } from 'expo-router';
 import { getPosts, subscribe, toggleLike } from '../store/posts';
 import type { UserProfile } from '../screens/Profile/Data';
 
-const { width } = Dimensions.get('window');
+const getDimensions = () => {
+  if (Platform.OS === 'web') {
+    return { width: typeof window !== 'undefined' ? window.innerWidth : 375 };
+  }
+  return Dimensions.get('window');
+};
+const { width } = getDimensions();
 
 export type Props = {
   profile: UserProfile;
@@ -235,7 +242,7 @@ export default function UserProfileView({ profile, editable }: Props) {
       aspect: [1, 1],
       quality: 1,
     });
-    if (!result.canceled) {
+    if (!result.canceled && Array.isArray(result.assets) && result.assets.length > 0 && result.assets[0]?.uri) {
       setSelectedImageUri(result.assets[0].uri);
       setEditorVisible(true);
     }
@@ -255,7 +262,9 @@ export default function UserProfileView({ profile, editable }: Props) {
       const { createPostWithImage } = await import('../utils/api');
       const { type, name } = guessMime(uri);
       await createPostWithImage(content, { uri, type, name });
-    } catch (e) {}
+    } catch (e) {
+      console.error('Error posting image to feed:', e);
+    }
   };
 
   const handlePhotoSave = async (imageUri: string, caption: string) => {
@@ -301,11 +310,11 @@ export default function UserProfileView({ profile, editable }: Props) {
   }, [posts, editable, p.username]);
 
   const highlightsData = [
-    { id: 1, name: 'Viagens', image: p.highlights[0], icon: '✈️' },
-    { id: 2, name: 'Família', image: p.highlights[1], icon: '👨‍👩‍👧‍👦' },
-    { id: 3, name: 'Trabalho', image: p.highlights[2], icon: '💼' },
-    { id: 4, name: 'Amigos', image: p.highlights[3], icon: '🎉' },
-    { id: 5, name: 'Hobbies', image: p.highlights[4], icon: '🎮' },
+    { id: 1, name: 'Viagens', image: (Array.isArray(p.highlights) && p.highlights[0]) || undefined, icon: '✈️' },
+    { id: 2, name: 'Família', image: (Array.isArray(p.highlights) && p.highlights[1]) || undefined, icon: '👨‍👩‍👧‍👦' },
+    { id: 3, name: 'Trabalho', image: (Array.isArray(p.highlights) && p.highlights[2]) || undefined, icon: '💼' },
+    { id: 4, name: 'Amigos', image: (Array.isArray(p.highlights) && p.highlights[3]) || undefined, icon: '🎉' },
+    { id: 5, name: 'Hobbies', image: (Array.isArray(p.highlights) && p.highlights[4]) || undefined, icon: '🎮' },
   ];
 
   const [ratings, setRatings] = useState({
@@ -488,7 +497,7 @@ export default function UserProfileView({ profile, editable }: Props) {
                     allowsEditing: false,
                     quality: 1,
                   });
-                  if (!result.canceled) {
+                  if (!result.canceled && Array.isArray(result.assets) && result.assets.length > 0 && result.assets[0]?.uri) {
                     prevCoverPhotoRef.current = coverPhoto;
                     prevCoverTransformRef.current = coverTransform;
                     setCoverPhoto(result.assets[0].uri);
@@ -710,10 +719,14 @@ export default function UserProfileView({ profile, editable }: Props) {
                     activeOpacity={0.9}
                   >
                     <View style={styles.highlightImageWrapper}>
+                      {highlight.image ? (
                       <Image
                         source={{ uri: highlight.image }}
                         style={styles.highlightImage}
                       />
+                    ) : (
+                      <View style={[styles.highlightImage, { backgroundColor: '#e2e8f0' }]} />
+                    )}
                       <LinearGradient
                         colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.7)']}
                         style={styles.highlightOverlay}
@@ -802,16 +815,24 @@ export default function UserProfileView({ profile, editable }: Props) {
           </View>
 
           <View style={styles.connectionsGrid}>
-            {p.recentFriends.slice(0, 9).map((friend) => (
+            {(Array.isArray(p.recentFriends) ? p.recentFriends : []).slice(0, 9).map((friend) => (
               <TouchableOpacity
                 key={friend.id}
                 style={styles.connectionCard}
                 activeOpacity={0.85}
               >
-                <Image
-                  source={{ uri: friend.avatar }}
-                  style={styles.connectionAvatar}
-                />
+                {friend.avatar ? (
+                  <Image
+                    source={{ uri: friend.avatar }}
+                    style={styles.connectionAvatar}
+                  />
+                ) : (
+                  <View style={[styles.connectionAvatar, { backgroundColor: '#e2e8f0', justifyContent: 'center', alignItems: 'center' }]}>
+                    <Text style={{ fontSize: 18, fontWeight: '700', color: '#64748b' }}>
+                      {friend.name?.charAt(0).toUpperCase() || '?'}
+                    </Text>
+                  </View>
+                )}
                 <Text style={styles.connectionName} numberOfLines={1}>
                   {friend.name.split(' ')[0]}
                 </Text>

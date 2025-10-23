@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  Dimensions
+  Dimensions,
+  Platform
 } from 'react-native';
 import {
   Search,
@@ -19,7 +20,13 @@ import {
 import BottomNav from '../../components/BottomNav';
 import TopBar from '../../components/TopBar';
 
-const { width } = Dimensions.get('window');
+const getDimensions = () => {
+  if (Platform.OS === 'web') {
+    return { width: typeof window !== 'undefined' ? window.innerWidth : 375 };
+  }
+  return Dimensions.get('window');
+};
+const { width } = getDimensions();
 
 const MOCK = [
   {

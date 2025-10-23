@@ -8,6 +8,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  Platform,
 } from 'react-native';
 import TopBar from '../components/TopBar';
 import BottomNav from '../components/BottomNav';
@@ -18,7 +19,13 @@ import {
   Clock
 } from 'lucide-react-native';
 
-const { width } = Dimensions.get('window');
+const getDimensions = () => {
+  if (Platform.OS === 'web') {
+    return { width: typeof window !== 'undefined' ? window.innerWidth : 375 };
+  }
+  return Dimensions.get('window');
+};
+const { width } = getDimensions();
 
 const MOCK_VISITS = [
   {
