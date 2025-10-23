@@ -123,7 +123,7 @@ export default function FeedScreen() {
             <PostCard
               post={item}
               onLike={handleLike}
-              onOpen={(id) => router.push(`/post/${id}`)}
+              onOpen={(id) => router.push(`/detail/${id}`)}
               onOpenProfile={handleOpenProfile}
             />
           )}
