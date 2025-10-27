@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Text } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import UserProfileView from '../../components/UserProfileView';
-import { getUserById, getUserPosts, ApiUser, ApiPost } from '../../utils/api';
+import { getUserById, getUserPosts, getCurrentUser, ApiUser, ApiPost } from '../../utils/api';
 import { profileData as defaultProfileData } from '../../screens/Profile/Data';
 
 type UserProfile = {
@@ -21,6 +21,8 @@ export default function UserProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState(defaultProfileData);
   const [userPosts, setUserPosts] = useState<any[]>([]);
+  const [editable, setEditable] = useState(false);
+  const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
     let mounted = true;
