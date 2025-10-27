@@ -83,17 +83,17 @@ export const profileData: UserProfile = {
     {
       id: 'f1',
       name: 'Bruno Lima',
-      avatar: 'https://i.pravatar.cc/100?img=12',
+      avatar: '',
     },
     {
       id: 'f2',
       name: 'Carla Mendes',
-      avatar: 'https://i.pravatar.cc/100?img=23',
+      avatar: '',
     },
     {
       id: 'f3',
       name: 'Diego Rocha',
-      avatar: 'https://i.pravatar.cc/100?img=34',
+      avatar: '',
     },
   ],
   testimonials: [
