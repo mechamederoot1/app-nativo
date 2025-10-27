@@ -57,6 +57,7 @@ const { width } = getDimensions();
 export type Props = {
   profile: UserProfile;
   editable: boolean;
+  posts?: any[];
 };
 
 export default function UserProfileView({ profile, editable }: Props) {
