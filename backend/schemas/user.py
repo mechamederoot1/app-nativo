@@ -4,6 +4,7 @@ from pydantic import BaseModel, EmailStr
 class UserBase(BaseModel):
     id: int
     email: EmailStr
+    username: str
     first_name: str
     last_name: str
     profile_photo: str | None = None
