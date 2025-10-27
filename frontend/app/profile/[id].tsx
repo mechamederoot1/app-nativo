@@ -40,10 +40,22 @@ export default function UserProfilePage() {
           return;
         }
 
+        let currentUserId: number | null = null;
+        try {
+          const currentUser = await getCurrentUser();
+          currentUserId = currentUser.id;
+        } catch {
+          currentUserId = null;
+        }
+
         const user = await getUserById(userIdentifier);
         const posts = await getUserPosts(userIdentifier);
 
         if (!mounted) return;
+
+        const isOwnProfile = currentUserId === user.id;
+        setEditable(isOwnProfile);
+        setUserId(user.id);
 
         const fullName = `${user.first_name} ${user.last_name}`;
         const username = user.username || `${user.first_name}${user.last_name}`.toLowerCase().replace(/\s+/g, '');
