@@ -58,6 +58,7 @@ export type Props = {
   profile: UserProfile;
   editable: boolean;
   posts?: any[];
+  userId?: number | null;
 };
 
 export default function UserProfileView({ profile, editable, posts: externalPosts }: Props) {
@@ -712,7 +713,7 @@ export default function UserProfileView({ profile, editable, posts: externalPost
                 activeOpacity={userVotes.legal ? 1 : 0.7}
                 onPress={() => handleRating('legal')}
               >
-                <Text style={styles.ratingEmoji}>😎</Text>
+                <Text style={styles.ratingEmoji}>���</Text>
                 <View style={styles.ratingInfo}>
                   <Text
                     style={[
