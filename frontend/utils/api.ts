@@ -54,10 +54,23 @@ export async function login(email: string, password: string) {
   return data;
 }
 
+export async function checkUsernameAvailable(username: string): Promise<boolean> {
+  try {
+    await request('/auth/check-username', {
+      method: 'POST',
+      body: JSON.stringify({ username }),
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 export async function signup(payload: {
   first_name: string;
   last_name: string;
   email: string;
+  username: string;
   password: string;
 }) {
   const data: LoginResponse = await request('/auth/signup', {
