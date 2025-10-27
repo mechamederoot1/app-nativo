@@ -176,6 +176,10 @@ export type ApiUser = {
   created_at: string;
 };
 
+export async function getCurrentUser(): Promise<ApiUser> {
+  return request('/users/me');
+}
+
 export async function getUserById(id: number | string): Promise<ApiUser> {
   return request(`/users/${id}`);
 }
