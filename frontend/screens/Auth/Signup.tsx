@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,19 +9,22 @@ import {
   ScrollView,
   StyleSheet,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AuthButton from '../../components/AuthButton';
+import { Check, AlertCircle } from 'lucide-react-native';
 
 export default function SignupScreen() {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const totalSteps = 3;
+  const totalSteps = 4;
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [dob, setDob] = useState('');
   const [gender, setGender] = useState('');
   const [password, setPassword] = useState('');
@@ -29,8 +32,44 @@ export default function SignupScreen() {
   const [accepted, setAccepted] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<'checking' | 'available' | 'taken' | null>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const generateUsername = useCallback(() => {
+    const random = Math.floor(Math.random() * 10000);
+    const base = `${firstName.toLowerCase().replace(/\s+/g, '')}${lastName.toLowerCase().replace(/\s+/g, '')}`;
+    if (base.length > 0) {
+      return `${base}${random}`;
+    }
+    return `user${random}`;
+  }, [firstName, lastName]);
+
+  const checkUsername = useCallback(async (name: string) => {
+    if (!name || name.length < 3) {
+      setUsernameStatus(null);
+      return;
+    }
+    try {
+      setCheckingUsername(true);
+      setUsernameStatus('checking');
+      const { checkUsernameAvailable } = await import('../../utils/api');
+      const available = await checkUsernameAvailable(name);
+      setUsernameStatus(available ? 'available' : 'taken');
+    } catch (e) {
+      setUsernameStatus(null);
+    } finally {
+      setCheckingUsername(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (username) checkUsername(username);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [username, checkUsername]);
 
   const validateStep0 = () => {
     const e: Record<string, string> = {};
