@@ -196,6 +196,17 @@ export async function searchUsers(query: string): Promise<ApiUser[]> {
   return request(`/users/search?${params.toString()}`);
 }
 
+export async function deletePost(postId: number | string): Promise<any> {
+  return request(`/posts/${postId}`, { method: 'DELETE' });
+}
+
+export async function updatePost(postId: number | string, content: string, mediaUrl?: string | null): Promise<ApiPost> {
+  return request(`/posts/${postId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ content, media_url: mediaUrl }),
+  });
+}
+
 export function logout() {
   setToken(null);
 }
