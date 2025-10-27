@@ -59,15 +59,16 @@ export default function SignupScreen() {
       setCheckingUsername(false);
       return;
     }
+    setCheckingUsername(true);
     try {
-      setCheckingUsername(true);
       const { checkUsernameAvailable } = await import('../../utils/api');
       const available = await checkUsernameAvailable(name);
-      setCheckingUsername(false);
       setUsernameStatus(available ? 'available' : 'taken');
     } catch (e) {
+      console.error('Erro ao verificar disponibilidade do username:', e);
+      setUsernameStatus(null);
+    } finally {
       setCheckingUsername(false);
-      setUsernameStatus('available');
     }
   }, []);
 
