@@ -42,21 +42,15 @@ export type UserProfile = {
 export const profileData: UserProfile = {
   name: 'Ana Souza',
   username: 'anasouza',
-  avatar: 'https://i.pravatar.cc/150?img=56',
-  cover: 'https://picsum.photos/1200/400?random=12',
+  avatar: '',
+  cover: '',
   bio: 'Criadora, dev mobile e fã de café. Compartilho projetos, ideias e bastidores do que estou construindo. ✨',
   hometown: 'Belo Horizonte, MG',
   currentCity: 'São Paulo, SP',
   relationshipStatus: 'Em um relacionamento',
   workplace: 'Vibe • Engenheira de Software',
   connectionsCount: 248,
-  highlights: [
-    'https://picsum.photos/200?random=31',
-    'https://picsum.photos/200?random=32',
-    'https://picsum.photos/200?random=33',
-    'https://picsum.photos/200?random=34',
-    'https://picsum.photos/200?random=35',
-  ],
+  highlights: [],
   positions: [
     {
       company: 'Vibe',
