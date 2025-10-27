@@ -142,7 +142,6 @@ export default function SignupScreen() {
   };
 
   const next = () => {
-    // call the stateful validators here so errors are set when user presses next
     if (!validateCurrent(step)) return;
     setStep((s) => Math.min(totalSteps - 1, s + 1));
   };
@@ -150,7 +149,7 @@ export default function SignupScreen() {
   const back = () => setStep((s) => Math.max(0, s - 1));
 
   const handleCreate = async () => {
-    if (!validateStep2()) return;
+    if (!validateStep3()) return;
     try {
       setLoading(true);
       const { signup } = await import('../../utils/api');
@@ -158,6 +157,7 @@ export default function SignupScreen() {
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         email: email.trim(),
+        username: username.trim(),
         password,
       });
       router.push('/feed');
@@ -170,13 +170,14 @@ export default function SignupScreen() {
 
   const progressPct = Math.round(((step + 1) / totalSteps) * 100);
 
-  // pure validity for current step — safe to use during render
   const isCurrentValidPure =
     step === 0
       ? isStep0ValidPure()
       : step === 1
         ? isStep1ValidPure()
-        : isStep2ValidPure();
+        : step === 2
+          ? isStep2ValidPure()
+          : isStep3ValidPure();
 
   return (
     <KeyboardAvoidingView
