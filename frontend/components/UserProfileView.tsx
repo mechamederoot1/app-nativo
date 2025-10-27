@@ -381,7 +381,7 @@ export default function UserProfileView({ profile, editable }: Props) {
 
   const highlightsData = [
     { id: 1, name: 'Viagens', image: (Array.isArray(p.highlights) && p.highlights[0]) || undefined, icon: '✈️' },
-    { id: 2, name: 'Família', image: (Array.isArray(p.highlights) && p.highlights[1]) || undefined, icon: '👨‍👩‍����‍👦' },
+    { id: 2, name: 'Família', image: (Array.isArray(p.highlights) && p.highlights[1]) || undefined, icon: '👨‍👩‍👧‍👦' },
     { id: 3, name: 'Trabalho', image: (Array.isArray(p.highlights) && p.highlights[2]) || undefined, icon: '💼' },
     { id: 4, name: 'Amigos', image: (Array.isArray(p.highlights) && p.highlights[3]) || undefined, icon: '🎉' },
     { id: 5, name: 'Hobbies', image: (Array.isArray(p.highlights) && p.highlights[4]) || undefined, icon: '🎮' },
@@ -413,20 +413,24 @@ export default function UserProfileView({ profile, editable }: Props) {
       >
         <View style={styles.headerSection}>
           <View style={styles.coverContainer}>
-            <Image
-              source={{ uri: coverPhoto }}
-              style={[
-                styles.coverImage,
-                {
-                  transform: [
-                    { scale: coverTransform.scale },
-                    { translateX: coverTransform.offsetX },
-                    { translateY: coverTransform.offsetY },
-                  ],
-                },
-              ]}
-              resizeMode="cover"
-            />
+            {coverPhoto && coverPhoto !== '' ? (
+              <Image
+                source={{ uri: coverPhoto }}
+                style={[
+                  styles.coverImage,
+                  {
+                    transform: [
+                      { scale: coverTransform.scale },
+                      { translateX: coverTransform.offsetX },
+                      { translateY: coverTransform.offsetY },
+                    ],
+                  },
+                ]}
+                resizeMode="cover"
+              />
+            ) : (
+              <CoverPlaceholder />
+            )}
             {!coverEditorVisible && (
               <Pressable
                 style={StyleSheet.absoluteFill}
