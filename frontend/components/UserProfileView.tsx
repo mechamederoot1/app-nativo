@@ -60,7 +60,7 @@ export type Props = {
   posts?: any[];
 };
 
-export default function UserProfileView({ profile, editable }: Props) {
+export default function UserProfileView({ profile, editable, posts: externalPosts }: Props) {
   const router = useRouter();
   const [userData, setUserData] = useState(profile);
   const p = userData;
