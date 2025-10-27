@@ -30,30 +30,16 @@ export default function UserProfilePage() {
         setLoading(true);
         setError(null);
 
-        const idParam = String(id ?? '').trim();
-        
-        if (!idParam) {
+        const userIdentifier = String(id ?? '').trim();
+
+        if (!userIdentifier) {
           setError('ID do usuário não fornecido');
           setLoading(false);
           return;
         }
 
-        let userId: number | null = null;
-
-        if (/^\d+$/.test(idParam)) {
-          userId = parseInt(idParam, 10);
-        } else {
-          userId = parseInt(idParam, 10);
-        }
-
-        if (isNaN(userId)) {
-          setError('ID do usuário inválido');
-          setLoading(false);
-          return;
-        }
-
-        const user = await getUserById(userId);
-        const posts = await getUserPosts(userId);
+        const user = await getUserById(userIdentifier);
+        const posts = await getUserPosts(userIdentifier);
 
         if (!mounted) return;
 
