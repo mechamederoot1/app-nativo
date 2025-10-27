@@ -81,67 +81,83 @@ export default function UserProfileView({ profile, editable }: Props) {
   const prevCoverPhotoRef = useRef<string>(coverPhoto);
 
   const AvatarPlaceholder = () => (
-    <View style={{
-      width: 130,
-      height: 130,
-      borderRadius: 65,
-      backgroundColor: '#e2e8f0',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}>
-      <View style={{
-        width: 100,
-        height: 100,
-        backgroundColor: '#cbd5e1',
-        borderRadius: 50,
+    <View
+      style={{
+        width: 130,
+        height: 130,
+        borderRadius: 65,
+        backgroundColor: '#e2e8f0',
         alignItems: 'center',
         justifyContent: 'center',
-      }}>
-        <View style={{
-          width: 60,
-          height: 60,
-          backgroundColor: '#94a3b8',
+      }}
+    >
+      <View
+        style={{
+          width: 100,
+          height: 100,
+          backgroundColor: '#cbd5e1',
           borderRadius: 50,
-        }} />
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <View
+          style={{
+            width: 60,
+            height: 60,
+            backgroundColor: '#94a3b8',
+            borderRadius: 50,
+          }}
+        />
       </View>
-      <View style={{
-        position: 'absolute',
-        bottom: 10,
-        width: 50,
-        height: 30,
-        backgroundColor: '#94a3b8',
-        borderRadius: 4,
-      }} />
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 10,
+          width: 50,
+          height: 30,
+          backgroundColor: '#94a3b8',
+          borderRadius: 4,
+        }}
+      />
     </View>
   );
 
   const CoverPlaceholder = () => (
-    <View style={{
-      width: '100%',
-      height: 200,
-      backgroundColor: '#e2e8f0',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}>
-      <View style={{
+    <View
+      style={{
+        width: '100%',
+        height: 200,
+        backgroundColor: '#e2e8f0',
         alignItems: 'center',
         justifyContent: 'center',
-      }}>
-        <View style={{
-          width: 60,
-          height: 60,
-          backgroundColor: '#cbd5e1',
-          borderRadius: 8,
-          marginBottom: 8,
+      }}
+    >
+      <View
+        style={{
           alignItems: 'center',
           justifyContent: 'center',
-        }}>
-          <View style={{
-            width: 40,
-            height: 40,
-            backgroundColor: '#94a3b8',
-            borderRadius: 4,
-          }} />
+        }}
+      >
+        <View
+          style={{
+            width: 60,
+            height: 60,
+            backgroundColor: '#cbd5e1',
+            borderRadius: 8,
+            marginBottom: 8,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              backgroundColor: '#94a3b8',
+              borderRadius: 4,
+            }}
+          />
         </View>
         <Text style={{ color: '#94a3b8', fontSize: 12, fontWeight: '600' }}>
           Adicione uma capa
@@ -312,7 +328,12 @@ export default function UserProfileView({ profile, editable }: Props) {
       aspect: [1, 1],
       quality: 1,
     });
-    if (!result.canceled && Array.isArray(result.assets) && result.assets.length > 0 && result.assets[0]?.uri) {
+    if (
+      !result.canceled &&
+      Array.isArray(result.assets) &&
+      result.assets.length > 0 &&
+      result.assets[0]?.uri
+    ) {
       setSelectedImageUri(result.assets[0].uri);
       setEditorVisible(true);
     }
@@ -380,11 +401,36 @@ export default function UserProfileView({ profile, editable }: Props) {
   }, [posts, editable, p.username]);
 
   const highlightsData = [
-    { id: 1, name: 'Viagens', image: (Array.isArray(p.highlights) && p.highlights[0]) || undefined, icon: '✈️' },
-    { id: 2, name: 'Família', image: (Array.isArray(p.highlights) && p.highlights[1]) || undefined, icon: '👨‍👩‍👧‍👦' },
-    { id: 3, name: 'Trabalho', image: (Array.isArray(p.highlights) && p.highlights[2]) || undefined, icon: '💼' },
-    { id: 4, name: 'Amigos', image: (Array.isArray(p.highlights) && p.highlights[3]) || undefined, icon: '🎉' },
-    { id: 5, name: 'Hobbies', image: (Array.isArray(p.highlights) && p.highlights[4]) || undefined, icon: '🎮' },
+    {
+      id: 1,
+      name: 'Viagens',
+      image: (Array.isArray(p.highlights) && p.highlights[0]) || undefined,
+      icon: '✈️',
+    },
+    {
+      id: 2,
+      name: 'Família',
+      image: (Array.isArray(p.highlights) && p.highlights[1]) || undefined,
+      icon: '👨‍👩‍👧‍👦',
+    },
+    {
+      id: 3,
+      name: 'Trabalho',
+      image: (Array.isArray(p.highlights) && p.highlights[2]) || undefined,
+      icon: '💼',
+    },
+    {
+      id: 4,
+      name: 'Amigos',
+      image: (Array.isArray(p.highlights) && p.highlights[3]) || undefined,
+      icon: '🎉',
+    },
+    {
+      id: 5,
+      name: 'Hobbies',
+      image: (Array.isArray(p.highlights) && p.highlights[4]) || undefined,
+      icon: '🎮',
+    },
   ];
 
   const [ratings, setRatings] = useState({
@@ -571,7 +617,12 @@ export default function UserProfileView({ profile, editable }: Props) {
                     allowsEditing: false,
                     quality: 1,
                   });
-                  if (!result.canceled && Array.isArray(result.assets) && result.assets.length > 0 && result.assets[0]?.uri) {
+                  if (
+                    !result.canceled &&
+                    Array.isArray(result.assets) &&
+                    result.assets.length > 0 &&
+                    result.assets[0]?.uri
+                  ) {
                     prevCoverPhotoRef.current = coverPhoto;
                     prevCoverTransformRef.current = coverTransform;
                     setCoverPhoto(result.assets[0].uri);
@@ -798,13 +849,18 @@ export default function UserProfileView({ profile, editable }: Props) {
                   >
                     <View style={styles.highlightImageWrapper}>
                       {highlight.image ? (
-                      <Image
-                        source={{ uri: highlight.image }}
-                        style={styles.highlightImage}
-                      />
-                    ) : (
-                      <View style={[styles.highlightImage, { backgroundColor: '#e2e8f0' }]} />
-                    )}
+                        <Image
+                          source={{ uri: highlight.image }}
+                          style={styles.highlightImage}
+                        />
+                      ) : (
+                        <View
+                          style={[
+                            styles.highlightImage,
+                            { backgroundColor: '#e2e8f0' },
+                          ]}
+                        />
+                      )}
                       <LinearGradient
                         colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.7)']}
                         style={styles.highlightOverlay}
@@ -893,30 +949,47 @@ export default function UserProfileView({ profile, editable }: Props) {
           </View>
 
           <View style={styles.connectionsGrid}>
-            {(Array.isArray(p.recentFriends) ? p.recentFriends : []).slice(0, 9).map((friend) => (
-              <TouchableOpacity
-                key={friend.id}
-                style={styles.connectionCard}
-                activeOpacity={0.85}
-              >
-                {friend.avatar ? (
-                  <Image
-                    source={{ uri: friend.avatar }}
-                    style={styles.connectionAvatar}
-                  />
-                ) : (
-                  <View style={[styles.connectionAvatar, { backgroundColor: '#e2e8f0', justifyContent: 'center', alignItems: 'center' }]}>
-                    <Text style={{ fontSize: 18, fontWeight: '700', color: '#64748b' }}>
-                      {friend.name?.charAt(0).toUpperCase() || '?'}
-                    </Text>
-                  </View>
-                )}
-                <Text style={styles.connectionName} numberOfLines={1}>
-                  {friend.name.split(' ')[0]}
-                </Text>
-                <Text style={styles.connectionMutual}>2 em comum</Text>
-              </TouchableOpacity>
-            ))}
+            {(Array.isArray(p.recentFriends) ? p.recentFriends : [])
+              .slice(0, 9)
+              .map((friend) => (
+                <TouchableOpacity
+                  key={friend.id}
+                  style={styles.connectionCard}
+                  activeOpacity={0.85}
+                >
+                  {friend.avatar ? (
+                    <Image
+                      source={{ uri: friend.avatar }}
+                      style={styles.connectionAvatar}
+                    />
+                  ) : (
+                    <View
+                      style={[
+                        styles.connectionAvatar,
+                        {
+                          backgroundColor: '#e2e8f0',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 18,
+                          fontWeight: '700',
+                          color: '#64748b',
+                        }}
+                      >
+                        {friend.name?.charAt(0).toUpperCase() || '?'}
+                      </Text>
+                    </View>
+                  )}
+                  <Text style={styles.connectionName} numberOfLines={1}>
+                    {friend.name.split(' ')[0]}
+                  </Text>
+                  <Text style={styles.connectionMutual}>2 em comum</Text>
+                </TouchableOpacity>
+              ))}
           </View>
         </View>
 

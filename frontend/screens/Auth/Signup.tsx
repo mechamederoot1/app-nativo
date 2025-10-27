@@ -33,7 +33,9 @@ export default function SignupScreen() {
   const [showTerms, setShowTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checkingUsername, setCheckingUsername] = useState(false);
-  const [usernameStatus, setUsernameStatus] = useState<'checking' | 'available' | 'taken' | null>(null);
+  const [usernameStatus, setUsernameStatus] = useState<
+    'checking' | 'available' | 'taken' | null
+  >(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -85,7 +87,9 @@ export default function SignupScreen() {
   };
 
   const validateUsername = (value: string) => {
-    return value.length >= 3 && value.length <= 30 && /^[a-z0-9_.]+$/.test(value);
+    return (
+      value.length >= 3 && value.length <= 30 && /^[a-z0-9_.]+$/.test(value)
+    );
   };
 
   const validateDob = (value: string) => {
@@ -97,7 +101,8 @@ export default function SignupScreen() {
     const e: Record<string, string> = {};
     if (!email.trim() || !validateEmail(email)) e.email = 'E-mail inválido';
     if (!username.trim() || !validateUsername(username))
-      e.username = 'Username deve ter 3-30 caracteres (letras, números, . ou _)';
+      e.username =
+        'Username deve ter 3-30 caracteres (letras, números, . ou _)';
     if (usernameStatus === 'taken') e.username = 'Username já está em uso';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -126,10 +131,11 @@ export default function SignupScreen() {
     firstName.trim().length > 0 && lastName.trim().length > 0;
 
   const isStep1ValidPure = () =>
-    validateEmail(email) && validateUsername(username) && usernameStatus === 'available';
+    validateEmail(email) &&
+    validateUsername(username) &&
+    usernameStatus === 'available';
 
-  const isStep2ValidPure = () =>
-    validateDob(dob) && gender.trim().length > 0;
+  const isStep2ValidPure = () => validateDob(dob) && gender.trim().length > 0;
 
   const isStep3ValidPure = () =>
     password.length >= 6 && confirmPassword === password && accepted === true;
@@ -257,22 +263,50 @@ export default function SignupScreen() {
                   ) : null}
 
                   <View>
-                    <View style={[styles.input, { paddingRight: 12, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 0 }]}>
+                    <View
+                      style={[
+                        styles.input,
+                        {
+                          paddingRight: 12,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          paddingHorizontal: 0,
+                        },
+                      ]}
+                    >
                       <TextInput
                         placeholder="Nome de usuário"
                         placeholderTextColor="#9aa0a6"
                         value={username}
                         onChangeText={setUsername}
-                        style={{ flex: 1, paddingHorizontal: 16, fontSize: 16, color: '#111827' }}
+                        style={{
+                          flex: 1,
+                          paddingHorizontal: 16,
+                          fontSize: 16,
+                          color: '#111827',
+                        }}
                       />
                       {checkingUsername && (
-                        <ActivityIndicator color="#0856d6" style={{ marginRight: 12 }} />
+                        <ActivityIndicator
+                          color="#0856d6"
+                          style={{ marginRight: 12 }}
+                        />
                       )}
                       {!checkingUsername && usernameStatus === 'available' && (
-                        <Check size={20} color="#10b981" strokeWidth={2} style={{ marginRight: 12 }} />
+                        <Check
+                          size={20}
+                          color="#10b981"
+                          strokeWidth={2}
+                          style={{ marginRight: 12 }}
+                        />
                       )}
                       {!checkingUsername && usernameStatus === 'taken' && (
-                        <AlertCircle size={20} color="#dc2626" strokeWidth={2} style={{ marginRight: 12 }} />
+                        <AlertCircle
+                          size={20}
+                          color="#dc2626"
+                          strokeWidth={2}
+                          style={{ marginRight: 12 }}
+                        />
                       )}
                     </View>
                     <TouchableOpacity
@@ -284,7 +318,13 @@ export default function SignupScreen() {
                       }}
                       style={{ marginTop: 8, marginLeft: 6 }}
                     >
-                      <Text style={{ color: '#0856d6', fontSize: 13, fontWeight: '600' }}>
+                      <Text
+                        style={{
+                          color: '#0856d6',
+                          fontSize: 13,
+                          fontWeight: '600',
+                        }}
+                      >
                         Gerar nome de usuário
                       </Text>
                     </TouchableOpacity>

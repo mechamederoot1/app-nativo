@@ -54,7 +54,9 @@ export async function login(email: string, password: string) {
   return data;
 }
 
-export async function checkUsernameAvailable(username: string): Promise<boolean> {
+export async function checkUsernameAvailable(
+  username: string,
+): Promise<boolean> {
   try {
     await request('/auth/check-username', {
       method: 'POST',
