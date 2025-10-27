@@ -1,19 +1,9 @@
-import React from 'react';
-import { Platform } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator, Text } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import UserProfileView from '../../components/UserProfileView';
-import { profileData as seed } from '../../screens/Profile/Data';
-
-const getDimensions = () => {
-  if (Platform.OS === 'web') {
-    return { width: typeof window !== 'undefined' ? window.innerWidth : 375, height: typeof window !== 'undefined' ? window.innerHeight : 812 };
-  }
-  const { Dimensions } = require('react-native');
-  return Dimensions.get('window');
-};
-
-const { width } = getDimensions();
-const COVER_HEIGHT = 200;
+import { getUserById, getUserPosts, ApiUser, ApiPost } from '../../utils/api';
+import { profileData as defaultProfileData } from '../../screens/Profile/Data';
 
 type UserProfile = {
   id: number;
@@ -25,59 +15,107 @@ type UserProfile = {
   created_at: string;
 };
 
-type Post = {
-  id: string;
-  userId: number;
-  user: string;
-  avatar?: string;
-  cover?: string;
-  content: string;
-  time: string;
-  image?: string;
-  likes?: number;
-  liked?: boolean;
-  comments: any[];
-};
-
 export default function UserProfilePage() {
-  const router = useRouter();
   const { id } = useLocalSearchParams();
-  const idStr = String(id ?? '')
-    .trim()
-    .toLowerCase();
-  const displayName = idStr ? idStr.replace(/[._-]+/g, ' ') : seed.name;
-  const [profile, setProfile] = React.useState({
-    ...seed,
-    name: displayName,
-    username: idStr || seed.username,
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [profile, setProfile] = useState(defaultProfileData);
+  const [userPosts, setUserPosts] = useState<any[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let mounted = true;
+
     (async () => {
       try {
-        const api = await import('../../utils/api');
-        const posts = await api.getPosts();
-        const toSlug = (s: string) =>
-          String(s || '')
-            .replace(/\s+/g, '')
-            .toLowerCase();
-        const match = posts.find((p) => toSlug(p.user_name) === idStr);
-        if (!mounted) return;
-        if (match) {
-          setProfile((prev) => ({
-            ...prev,
-            name: match.user_name,
-            avatar: api.absoluteUrl(match.user_profile_photo) || prev.avatar,
-            cover: api.absoluteUrl(match.user_cover_photo) || prev.cover,
-          }));
+        setLoading(true);
+        setError(null);
+
+        const idParam = String(id ?? '').trim();
+        
+        if (!idParam) {
+          setError('ID do usuário não fornecido');
+          setLoading(false);
+          return;
         }
-      } catch {}
+
+        let userId: number | null = null;
+
+        if (/^\d+$/.test(idParam)) {
+          userId = parseInt(idParam, 10);
+        } else {
+          userId = parseInt(idParam, 10);
+        }
+
+        if (isNaN(userId)) {
+          setError('ID do usuário inválido');
+          setLoading(false);
+          return;
+        }
+
+        const user = await getUserById(userId);
+        const posts = await getUserPosts(userId);
+
+        if (!mounted) return;
+
+        const fullName = `${user.first_name} ${user.last_name}`;
+        const username = user.username || `${user.first_name}${user.last_name}`.toLowerCase().replace(/\s+/g, '');
+
+        const formattedPosts = posts.map((post: ApiPost) => ({
+          id: post.id.toString(),
+          userId: post.user_id,
+          user: `${post.user_name}`,
+          avatar: post.user_profile_photo || undefined,
+          cover: post.user_cover_photo || undefined,
+          content: post.content,
+          time: new Date(post.created_at).toLocaleDateString('pt-BR'),
+          image: post.media_url || undefined,
+          likes: 0,
+          liked: false,
+          comments: [],
+        }));
+
+        setProfile({
+          ...defaultProfileData,
+          name: fullName,
+          username: username,
+          avatar: user.profile_photo || defaultProfileData.avatar,
+          cover: user.cover_photo || defaultProfileData.cover,
+        });
+
+        setUserPosts(formattedPosts);
+      } catch (err: any) {
+        if (!mounted) return;
+        console.error('Erro ao carregar perfil:', err);
+        setError(err.message || 'Erro ao carregar perfil do usuário');
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
     })();
+
     return () => {
       mounted = false;
     };
-  }, [idStr]);
+  }, [id]);
 
-  return <UserProfileView profile={profile} editable={false} />;
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc' }}>
+        <ActivityIndicator size="large" color="#3b82f6" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc', paddingHorizontal: 20 }}>
+        <Text style={{ fontSize: 16, color: '#ef4444', textAlign: 'center' }}>
+          {error}
+        </Text>
+      </View>
+    );
+  }
+
+  return <UserProfileView profile={profile} posts={userPosts} editable={false} />;
 }
