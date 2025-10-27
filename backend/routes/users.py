@@ -8,6 +8,7 @@ from database.models import User, Post
 import os
 import uuid
 from pathlib import Path
+from typing import List
 
 router = APIRouter()
 
