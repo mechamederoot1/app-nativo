@@ -255,6 +255,48 @@ export default function SignupScreen() {
                   {errors.email ? (
                     <Text style={styles.error}>{errors.email}</Text>
                   ) : null}
+
+                  <View>
+                    <View style={[styles.input, { paddingRight: 12, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 0 }]}>
+                      <TextInput
+                        placeholder="Nome de usuário"
+                        placeholderTextColor="#9aa0a6"
+                        value={username}
+                        onChangeText={setUsername}
+                        style={{ flex: 1, paddingHorizontal: 16, fontSize: 16, color: '#111827' }}
+                      />
+                      {checkingUsername && (
+                        <ActivityIndicator color="#0856d6" style={{ marginRight: 12 }} />
+                      )}
+                      {!checkingUsername && usernameStatus === 'available' && (
+                        <Check size={20} color="#10b981" strokeWidth={2} style={{ marginRight: 12 }} />
+                      )}
+                      {!checkingUsername && usernameStatus === 'taken' && (
+                        <AlertCircle size={20} color="#dc2626" strokeWidth={2} style={{ marginRight: 12 }} />
+                      )}
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        const generated = generateUsername();
+                        setUsername(generated);
+                        setUsernameStatus('checking');
+                        checkUsername(generated);
+                      }}
+                      style={{ marginTop: 8, marginLeft: 6 }}
+                    >
+                      <Text style={{ color: '#0856d6', fontSize: 13, fontWeight: '600' }}>
+                        Gerar nome de usuário
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  {errors.username ? (
+                    <Text style={styles.error}>{errors.username}</Text>
+                  ) : null}
+                </>
+              )}
+
+              {step === 2 && (
+                <>
                   <TextInput
                     placeholder="Data de nascimento (DD/MM/AAAA)"
                     placeholderTextColor="#9aa0a6"
@@ -278,7 +320,7 @@ export default function SignupScreen() {
                 </>
               )}
 
-              {step === 2 && (
+              {step === 3 && (
                 <>
                   <TextInput
                     placeholder="Senha"
