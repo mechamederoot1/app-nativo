@@ -393,13 +393,14 @@ export default function UserProfileView({ profile, editable, posts: externalPost
 
   const myPosts = useMemo(() => {
     if (editable) return posts.filter((x) => x.user === 'Você');
+    if (externalPosts && externalPosts.length > 0) return externalPosts;
     const toSlug = (s: string) =>
       String(s || '')
         .replace(/\s+/g, '')
         .toLowerCase();
     const target = String(p.username || '').toLowerCase();
     return posts.filter((x) => toSlug(x.user) === target);
-  }, [posts, editable, p.username]);
+  }, [posts, editable, p.username, externalPosts]);
 
   const highlightsData = [
     {
