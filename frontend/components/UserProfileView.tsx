@@ -588,7 +588,11 @@ export default function UserProfileView({ profile, editable }: Props) {
           <View style={styles.mainContainer}>
             <View style={styles.avatarWrapper}>
               <Pressable onPress={() => setShowAvatarMenu(true)}>
-                <Image source={{ uri: profilePhoto }} style={styles.avatar} />
+                {profilePhoto && profilePhoto !== '' ? (
+                  <Image source={{ uri: profilePhoto }} style={styles.avatar} />
+                ) : (
+                  <AvatarPlaceholder />
+                )}
               </Pressable>
               <View style={styles.onlineDot} />
               {editable && (
