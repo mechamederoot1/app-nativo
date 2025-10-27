@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,19 +9,22 @@ import {
   ScrollView,
   StyleSheet,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AuthButton from '../../components/AuthButton';
+import { Check, AlertCircle } from 'lucide-react-native';
 
 export default function SignupScreen() {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const totalSteps = 3;
+  const totalSteps = 4;
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [dob, setDob] = useState('');
   const [gender, setGender] = useState('');
   const [password, setPassword] = useState('');
@@ -29,8 +32,46 @@ export default function SignupScreen() {
   const [accepted, setAccepted] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<
+    'checking' | 'available' | 'taken' | null
+  >(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const generateUsername = useCallback(() => {
+    const random = Math.floor(Math.random() * 10000);
+    const base = `${firstName.toLowerCase().replace(/\s+/g, '')}${lastName.toLowerCase().replace(/\s+/g, '')}`;
+    if (base.length > 0) {
+      return `${base}${random}`;
+    }
+    return `user${random}`;
+  }, [firstName, lastName]);
+
+  const checkUsername = useCallback(async (name: string) => {
+    if (!name || name.length < 3) {
+      setUsernameStatus(null);
+      return;
+    }
+    try {
+      setCheckingUsername(true);
+      setUsernameStatus('checking');
+      const { checkUsernameAvailable } = await import('../../utils/api');
+      const available = await checkUsernameAvailable(name);
+      setUsernameStatus(available ? 'available' : 'taken');
+    } catch (e) {
+      setUsernameStatus(null);
+    } finally {
+      setCheckingUsername(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (username) checkUsername(username);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [username, checkUsername]);
 
   const validateStep0 = () => {
     const e: Record<string, string> = {};
@@ -45,8 +86,13 @@ export default function SignupScreen() {
     return re.test(value);
   };
 
+  const validateUsername = (value: string) => {
+    return (
+      value.length >= 3 && value.length <= 30 && /^[a-z0-9_.]+$/.test(value)
+    );
+  };
+
   const validateDob = (value: string) => {
-    // basic dd/mm/yyyy check
     const re = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(19|20)\d{2}$/;
     return re.test(value);
   };
@@ -54,13 +100,23 @@ export default function SignupScreen() {
   const validateStep1 = () => {
     const e: Record<string, string> = {};
     if (!email.trim() || !validateEmail(email)) e.email = 'E-mail inválido';
+    if (!username.trim() || !validateUsername(username))
+      e.username =
+        'Username deve ter 3-30 caracteres (letras, números, . ou _)';
+    if (usernameStatus === 'taken') e.username = 'Username já está em uso';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const validateStep2 = () => {
+    const e: Record<string, string> = {};
     if (!dob.trim() || !validateDob(dob)) e.dob = 'Data inválida (DD/MM/AAAA)';
     if (!gender.trim()) e.gender = 'Gênero obrigatório';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const validateStep2 = () => {
+  const validateStep3 = () => {
     const e: Record<string, string> = {};
     if (!password || password.length < 6)
       e.password = 'Senha deve ter ao menos 6 caracteres';
@@ -71,22 +127,27 @@ export default function SignupScreen() {
     return Object.keys(e).length === 0;
   };
 
-  // Pure validators (do NOT call setErrors) — safe to use during render
   const isStep0ValidPure = () =>
     firstName.trim().length > 0 && lastName.trim().length > 0;
+
   const isStep1ValidPure = () =>
-    validateEmail(email) && validateDob(dob) && gender.trim().length > 0;
-  const isStep2ValidPure = () =>
+    validateEmail(email) &&
+    validateUsername(username) &&
+    usernameStatus === 'available';
+
+  const isStep2ValidPure = () => validateDob(dob) && gender.trim().length > 0;
+
+  const isStep3ValidPure = () =>
     password.length >= 6 && confirmPassword === password && accepted === true;
 
   const validateCurrent = (current: number) => {
     if (current === 0) return validateStep0();
     if (current === 1) return validateStep1();
-    return validateStep2();
+    if (current === 2) return validateStep2();
+    return validateStep3();
   };
 
   const next = () => {
-    // call the stateful validators here so errors are set when user presses next
     if (!validateCurrent(step)) return;
     setStep((s) => Math.min(totalSteps - 1, s + 1));
   };
@@ -94,7 +155,7 @@ export default function SignupScreen() {
   const back = () => setStep((s) => Math.max(0, s - 1));
 
   const handleCreate = async () => {
-    if (!validateStep2()) return;
+    if (!validateStep3()) return;
     try {
       setLoading(true);
       const { signup } = await import('../../utils/api');
@@ -102,6 +163,7 @@ export default function SignupScreen() {
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         email: email.trim(),
+        username: username.trim(),
         password,
       });
       router.push('/feed');
@@ -114,13 +176,14 @@ export default function SignupScreen() {
 
   const progressPct = Math.round(((step + 1) / totalSteps) * 100);
 
-  // pure validity for current step — safe to use during render
   const isCurrentValidPure =
     step === 0
       ? isStep0ValidPure()
       : step === 1
         ? isStep1ValidPure()
-        : isStep2ValidPure();
+        : step === 2
+          ? isStep2ValidPure()
+          : isStep3ValidPure();
 
   return (
     <KeyboardAvoidingView
@@ -198,6 +261,82 @@ export default function SignupScreen() {
                   {errors.email ? (
                     <Text style={styles.error}>{errors.email}</Text>
                   ) : null}
+
+                  <View>
+                    <View
+                      style={[
+                        styles.input,
+                        {
+                          paddingRight: 12,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          paddingHorizontal: 0,
+                        },
+                      ]}
+                    >
+                      <TextInput
+                        placeholder="Nome de usuário"
+                        placeholderTextColor="#9aa0a6"
+                        value={username}
+                        onChangeText={setUsername}
+                        style={{
+                          flex: 1,
+                          paddingHorizontal: 16,
+                          fontSize: 16,
+                          color: '#111827',
+                        }}
+                      />
+                      {checkingUsername && (
+                        <ActivityIndicator
+                          color="#0856d6"
+                          style={{ marginRight: 12 }}
+                        />
+                      )}
+                      {!checkingUsername && usernameStatus === 'available' && (
+                        <Check
+                          size={20}
+                          color="#10b981"
+                          strokeWidth={2}
+                          style={{ marginRight: 12 }}
+                        />
+                      )}
+                      {!checkingUsername && usernameStatus === 'taken' && (
+                        <AlertCircle
+                          size={20}
+                          color="#dc2626"
+                          strokeWidth={2}
+                          style={{ marginRight: 12 }}
+                        />
+                      )}
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        const generated = generateUsername();
+                        setUsername(generated);
+                        setUsernameStatus('checking');
+                        checkUsername(generated);
+                      }}
+                      style={{ marginTop: 8, marginLeft: 6 }}
+                    >
+                      <Text
+                        style={{
+                          color: '#0856d6',
+                          fontSize: 13,
+                          fontWeight: '600',
+                        }}
+                      >
+                        Gerar nome de usuário
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  {errors.username ? (
+                    <Text style={styles.error}>{errors.username}</Text>
+                  ) : null}
+                </>
+              )}
+
+              {step === 2 && (
+                <>
                   <TextInput
                     placeholder="Data de nascimento (DD/MM/AAAA)"
                     placeholderTextColor="#9aa0a6"
@@ -221,7 +360,7 @@ export default function SignupScreen() {
                 </>
               )}
 
-              {step === 2 && (
+              {step === 3 && (
                 <>
                   <TextInput
                     placeholder="Senha"
