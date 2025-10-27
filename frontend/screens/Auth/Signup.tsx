@@ -41,16 +41,15 @@ export default function SignupScreen() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const generateUsername = useCallback((addNumber: boolean = false): string => {
+  const generateUsername = useCallback((attempt: number = 0): string => {
     const base = `${firstName.toLowerCase().replace(/\s+/g, '')}${lastName.toLowerCase().replace(/\s+/g, '')}`;
     if (base.length === 0) {
-      return 'user';
+      return `user${Math.floor(Math.random() * 10000)}`;
     }
-    if (addNumber) {
-      const random = Math.floor(Math.random() * 10000);
-      return `${base}${random}`;
+    if (attempt === 0) {
+      return base;
     }
-    return base;
+    return `${base}${Math.floor(Math.random() * 10000)}`;
   }, [firstName, lastName]);
 
   const checkUsername = useCallback(async (name: string) => {
