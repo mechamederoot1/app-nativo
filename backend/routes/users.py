@@ -19,6 +19,33 @@ os.makedirs(MEDIA_DIR, exist_ok=True)
 async def me(current: User = Depends(get_current_user)):
     return current
 
+@router.get("/{user_id}", response_model=UserBase)
+async def get_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    return user
+
+@router.get("/{user_id}/posts", response_model=List[PostOut])
+async def get_user_posts(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    posts = db.query(Post).filter(Post.user_id == user_id).order_by(Post.created_at.desc()).all()
+    return [
+        PostOut(
+            id=p.id,
+            content=p.content,
+            media_url=p.media_url,
+            created_at=p.created_at,
+            user_id=p.user_id,
+            user_name=f"{p.author.first_name} {p.author.last_name}" if p.author else "Anônimo",
+            user_profile_photo=p.author.profile_photo if p.author else None,
+            user_cover_photo=p.author.cover_photo if p.author else None,
+        ) for p in posts
+    ]
+
 @router.get("/search")
 async def search_users(q: str = Query(""), db: Session = Depends(get_db)):
     term = (q or "").strip()
