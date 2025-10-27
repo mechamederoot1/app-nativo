@@ -80,6 +80,76 @@ export default function UserProfileView({ profile, editable }: Props) {
   const prevCoverTransformRef = useRef<CoverTransform>(coverTransform);
   const prevCoverPhotoRef = useRef<string>(coverPhoto);
 
+  const AvatarPlaceholder = () => (
+    <View style={{
+      width: 130,
+      height: 130,
+      borderRadius: 65,
+      backgroundColor: '#e2e8f0',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      <View style={{
+        width: 100,
+        height: 100,
+        backgroundColor: '#cbd5e1',
+        borderRadius: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <View style={{
+          width: 60,
+          height: 60,
+          backgroundColor: '#94a3b8',
+          borderRadius: 50,
+        }} />
+      </View>
+      <View style={{
+        position: 'absolute',
+        bottom: 10,
+        width: 50,
+        height: 30,
+        backgroundColor: '#94a3b8',
+        borderRadius: 4,
+      }} />
+    </View>
+  );
+
+  const CoverPlaceholder = () => (
+    <View style={{
+      width: '100%',
+      height: 200,
+      backgroundColor: '#e2e8f0',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      <View style={{
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <View style={{
+          width: 60,
+          height: 60,
+          backgroundColor: '#cbd5e1',
+          borderRadius: 8,
+          marginBottom: 8,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <View style={{
+            width: 40,
+            height: 40,
+            backgroundColor: '#94a3b8',
+            borderRadius: 4,
+          }} />
+        </View>
+        <Text style={{ color: '#94a3b8', fontSize: 12, fontWeight: '600' }}>
+          Adicione uma capa
+        </Text>
+      </View>
+    </View>
+  );
+
   const COVER_HEIGHT = 200;
 
   const gestureState = useRef({
@@ -311,7 +381,7 @@ export default function UserProfileView({ profile, editable }: Props) {
 
   const highlightsData = [
     { id: 1, name: 'Viagens', image: (Array.isArray(p.highlights) && p.highlights[0]) || undefined, icon: '✈️' },
-    { id: 2, name: 'Família', image: (Array.isArray(p.highlights) && p.highlights[1]) || undefined, icon: '👨‍👩‍👧‍👦' },
+    { id: 2, name: 'Família', image: (Array.isArray(p.highlights) && p.highlights[1]) || undefined, icon: '👨‍👩‍����‍👦' },
     { id: 3, name: 'Trabalho', image: (Array.isArray(p.highlights) && p.highlights[2]) || undefined, icon: '💼' },
     { id: 4, name: 'Amigos', image: (Array.isArray(p.highlights) && p.highlights[3]) || undefined, icon: '🎉' },
     { id: 5, name: 'Hobbies', image: (Array.isArray(p.highlights) && p.highlights[4]) || undefined, icon: '🎮' },
