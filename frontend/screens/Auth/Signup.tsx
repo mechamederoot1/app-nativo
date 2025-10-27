@@ -84,8 +84,11 @@ export default function SignupScreen() {
     return re.test(value);
   };
 
+  const validateUsername = (value: string) => {
+    return value.length >= 3 && value.length <= 30 && /^[a-z0-9_.]+$/.test(value);
+  };
+
   const validateDob = (value: string) => {
-    // basic dd/mm/yyyy check
     const re = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(19|20)\d{2}$/;
     return re.test(value);
   };
@@ -93,13 +96,22 @@ export default function SignupScreen() {
   const validateStep1 = () => {
     const e: Record<string, string> = {};
     if (!email.trim() || !validateEmail(email)) e.email = 'E-mail inválido';
+    if (!username.trim() || !validateUsername(username))
+      e.username = 'Username deve ter 3-30 caracteres (letras, números, . ou _)';
+    if (usernameStatus === 'taken') e.username = 'Username já está em uso';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const validateStep2 = () => {
+    const e: Record<string, string> = {};
     if (!dob.trim() || !validateDob(dob)) e.dob = 'Data inválida (DD/MM/AAAA)';
     if (!gender.trim()) e.gender = 'Gênero obrigatório';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const validateStep2 = () => {
+  const validateStep3 = () => {
     const e: Record<string, string> = {};
     if (!password || password.length < 6)
       e.password = 'Senha deve ter ao menos 6 caracteres';
@@ -110,18 +122,23 @@ export default function SignupScreen() {
     return Object.keys(e).length === 0;
   };
 
-  // Pure validators (do NOT call setErrors) — safe to use during render
   const isStep0ValidPure = () =>
     firstName.trim().length > 0 && lastName.trim().length > 0;
+
   const isStep1ValidPure = () =>
-    validateEmail(email) && validateDob(dob) && gender.trim().length > 0;
+    validateEmail(email) && validateUsername(username) && usernameStatus === 'available';
+
   const isStep2ValidPure = () =>
+    validateDob(dob) && gender.trim().length > 0;
+
+  const isStep3ValidPure = () =>
     password.length >= 6 && confirmPassword === password && accepted === true;
 
   const validateCurrent = (current: number) => {
     if (current === 0) return validateStep0();
     if (current === 1) return validateStep1();
-    return validateStep2();
+    if (current === 2) return validateStep2();
+    return validateStep3();
   };
 
   const next = () => {
