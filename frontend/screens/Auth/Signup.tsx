@@ -56,18 +56,18 @@ export default function SignupScreen() {
   const checkUsername = useCallback(async (name: string) => {
     if (!name || name.length < 3) {
       setUsernameStatus(null);
+      setCheckingUsername(false);
       return;
     }
     try {
       setCheckingUsername(true);
-      setUsernameStatus('checking');
       const { checkUsernameAvailable } = await import('../../utils/api');
       const available = await checkUsernameAvailable(name);
+      setCheckingUsername(false);
       setUsernameStatus(available ? 'available' : 'taken');
     } catch (e) {
-      setUsernameStatus(null);
-    } finally {
       setCheckingUsername(false);
+      setUsernameStatus('available');
     }
   }, []);
 
