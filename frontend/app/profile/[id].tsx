@@ -117,5 +117,5 @@ export default function UserProfilePage() {
     );
   }
 
-  return <UserProfileView profile={profile} posts={userPosts} editable={false} />;
+  return <UserProfileView profile={profile} posts={userPosts} editable={editable} userId={userId} />;
 }
