@@ -94,14 +94,7 @@ export default function SignupScreen() {
   const isStep0ValidPure = () =>
     firstName.trim().length > 0 && lastName.trim().length > 0;
 
-  const isStep1ValidPure = () => {
-    const emailValid = validateEmail(email);
-    const usernameValid = validateUsername(username);
-
-    if (!emailValid || !usernameValid) return false;
-
-    return usernameStatus === 'available';
-  };
+  const isStep1ValidPure = () => validateEmail(email);
 
   const isStep2ValidPure = () => validateDob(dob) && gender.trim().length > 0;
 
