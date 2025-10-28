@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from database.session import get_db
 from schemas.user import UserBase
 from schemas.post import PostOut
+from schemas.profile import ProfileOut, ProfileUpdate
 from dependencies import get_current_user
 from database.models import User, Post, UserProfile, UserPosition, UserEducation
 import os
