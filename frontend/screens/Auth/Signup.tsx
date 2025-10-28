@@ -14,7 +14,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AuthButton from '../../components/AuthButton';
-import { Check, AlertCircle } from 'lucide-react-native';
 
 export default function SignupScreen() {
   const router = useRouter();
