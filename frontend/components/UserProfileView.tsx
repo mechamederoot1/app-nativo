@@ -828,11 +828,6 @@ export default function UserProfileView({ profile, editable, posts: externalPost
             <View style={styles.highlightsWrapper}>
               <View style={styles.highlightsHeader}>
                 <Text style={styles.highlightsTitle}>Destaques</Text>
-                {editable && (
-                  <TouchableOpacity>
-                    <Text style={styles.highlightsEdit}>Editar</Text>
-                  </TouchableOpacity>
-                )}
               </View>
 
               <ScrollView
@@ -840,31 +835,29 @@ export default function UserProfileView({ profile, editable, posts: externalPost
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.highlightsContainer}
               >
-                {highlightsData.map((highlight) => (
+                {highlights.map((highlight) => (
                   <TouchableOpacity
                     key={highlight.id}
                     style={styles.highlightItem}
                     activeOpacity={0.9}
+                    onLongPress={
+                      editable
+                        ? () => handleDeleteHighlight(highlight.id)
+                        : undefined
+                    }
+                    onPress={
+                      editable ? () => setEditingHighlight(highlight) : undefined
+                    }
                   >
                     <View style={styles.highlightImageWrapper}>
-                      {highlight.image ? (
-                        <Image
-                          source={{ uri: highlight.image }}
-                          style={styles.highlightImage}
-                        />
-                      ) : (
-                        <View
-                          style={[
-                            styles.highlightImage,
-                            { backgroundColor: '#e2e8f0' },
-                          ]}
-                        />
-                      )}
+                      <Image
+                        source={{ uri: highlight.cover }}
+                        style={styles.highlightImage}
+                      />
                       <LinearGradient
                         colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.7)']}
                         style={styles.highlightOverlay}
                       />
-                      <Text style={styles.highlightIcon}>{highlight.icon}</Text>
                     </View>
                     <Text style={styles.highlightName}>{highlight.name}</Text>
                   </TouchableOpacity>
@@ -874,6 +867,10 @@ export default function UserProfileView({ profile, editable, posts: externalPost
                   <TouchableOpacity
                     style={styles.addHighlightItem}
                     activeOpacity={0.8}
+                    onPress={() => {
+                      setEditingHighlight(undefined);
+                      setHighlightManagerVisible(true);
+                    }}
                   >
                     <View style={styles.addHighlightCircle}>
                       <Plus size={18} color="#64748b" strokeWidth={2.5} />
