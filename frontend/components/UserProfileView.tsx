@@ -848,6 +848,7 @@ export default function UserProfileView({
                   <TouchableOpacity
                     style={styles.primaryBtn}
                     activeOpacity={0.85}
+                    onPress={() => router.push('/profile/edit')}
                   >
                     <Edit3 size={16} color="#ffffff" strokeWidth={2.5} />
                     <Text style={styles.primaryBtnText}>Editar perfil</Text>
