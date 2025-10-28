@@ -210,6 +210,105 @@ export default function EditProfilePage() {
           keyboardType="phone-pad"
         />
 
+        <View style={{ marginTop: 20, marginBottom: 12 }}>
+          <Text style={[styles.label, { fontWeight: '800', marginBottom: 12 }]}>
+            Visibilidade das Informações Pessoais
+          </Text>
+          <Text style={{ color: '#94a3b8', fontSize: 13, marginBottom: 12 }}>
+            Escolha quais informações deseja mostrar no seu perfil
+          </Text>
+
+          <View style={styles.visibilityItem}>
+            <View>
+              <Text style={styles.visibilityLabel}>Cidade natal</Text>
+              <Text style={styles.visibilityDescription}>
+                {showHometown ? 'Visível no perfil' : 'Oculta no perfil'}
+              </Text>
+            </View>
+            <Switch
+              value={showHometown}
+              onValueChange={setShowHometown}
+              trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+              thumbColor={showHometown ? '#22c55e' : '#e2e8f0'}
+            />
+          </View>
+
+          <View style={styles.visibilityItem}>
+            <View>
+              <Text style={styles.visibilityLabel}>Cidade atual</Text>
+              <Text style={styles.visibilityDescription}>
+                {showCurrentCity ? 'Visível no perfil' : 'Oculta no perfil'}
+              </Text>
+            </View>
+            <Switch
+              value={showCurrentCity}
+              onValueChange={setShowCurrentCity}
+              trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+              thumbColor={showCurrentCity ? '#22c55e' : '#e2e8f0'}
+            />
+          </View>
+
+          <View style={styles.visibilityItem}>
+            <View>
+              <Text style={styles.visibilityLabel}>Estado civil</Text>
+              <Text style={styles.visibilityDescription}>
+                {showRelationshipStatus ? 'Visível no perfil' : 'Oculta no perfil'}
+              </Text>
+            </View>
+            <Switch
+              value={showRelationshipStatus}
+              onValueChange={setShowRelationshipStatus}
+              trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+              thumbColor={showRelationshipStatus ? '#22c55e' : '#e2e8f0'}
+            />
+          </View>
+
+          <View style={styles.visibilityItem}>
+            <View>
+              <Text style={styles.visibilityLabel}>Email para contato</Text>
+              <Text style={styles.visibilityDescription}>
+                {showContactEmail ? 'Visível no perfil' : 'Oculto no perfil'}
+              </Text>
+            </View>
+            <Switch
+              value={showContactEmail}
+              onValueChange={setShowContactEmail}
+              trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+              thumbColor={showContactEmail ? '#22c55e' : '#e2e8f0'}
+            />
+          </View>
+
+          <View style={styles.visibilityItem}>
+            <View>
+              <Text style={styles.visibilityLabel}>Telefone para contato</Text>
+              <Text style={styles.visibilityDescription}>
+                {showContactPhone ? 'Visível no perfil' : 'Oculto no perfil'}
+              </Text>
+            </View>
+            <Switch
+              value={showContactPhone}
+              onValueChange={setShowContactPhone}
+              trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+              thumbColor={showContactPhone ? '#22c55e' : '#e2e8f0'}
+            />
+          </View>
+
+          <View style={styles.visibilityItem}>
+            <View>
+              <Text style={styles.visibilityLabel}>Informações de trabalho</Text>
+              <Text style={styles.visibilityDescription}>
+                {showWorkplace ? 'Visível no perfil' : 'Ocultas no perfil'}
+              </Text>
+            </View>
+            <Switch
+              value={showWorkplace}
+              onValueChange={setShowWorkplace}
+              trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+              thumbColor={showWorkplace ? '#22c55e' : '#e2e8f0'}
+            />
+          </View>
+        </View>
+
         <Text style={styles.label}>Trabalho - Empresa</Text>
         <TextInput
           style={styles.input}
