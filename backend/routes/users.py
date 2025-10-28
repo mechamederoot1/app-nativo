@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session
 from database.session import get_db
 from schemas.user import UserBase
 from schemas.post import PostOut
+from schemas.profile import ProfileOut, ProfileUpdate
 from dependencies import get_current_user
-from database.models import User, Post
+from database.models import User, Post, UserProfile, UserPosition, UserEducation
 import os
 import uuid
 from pathlib import Path
@@ -152,3 +153,169 @@ async def update_cover_photo(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error uploading cover photo: {str(e)}")
+
+@router.get("/me/profile", response_model=ProfileOut)
+async def get_my_profile(current: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    prof = db.query(UserProfile).filter(UserProfile.user_id == current.id).first()
+    positions = db.query(UserPosition).filter(UserPosition.user_id == current.id).all()
+    education = db.query(UserEducation).filter(UserEducation.user_id == current.id).all()
+
+    if not prof:
+        return ProfileOut(
+            id=None,
+            user_id=current.id,
+            bio=None,
+            hometown=None,
+            current_city=None,
+            relationship_status=None,
+            contact_email=current.email,
+            contact_phone=None,
+            workplace_company=None,
+            workplace_title=None,
+            connections_count=0,
+            positions=[],
+            education=[],
+            created_at=None,
+            updated_at=None,
+        )
+
+    return ProfileOut(
+        id=prof.id,
+        user_id=current.id,
+        bio=prof.bio,
+        hometown=prof.hometown,
+        current_city=prof.current_city,
+        relationship_status=prof.relationship_status,
+        contact_email=prof.contact_email,
+        contact_phone=prof.contact_phone,
+        workplace_company=prof.workplace_company,
+        workplace_title=prof.workplace_title,
+        connections_count=prof.connections_count or 0,
+        positions=[
+            {"company": p.company, "title": p.title, "start": p.start, "end": p.end}
+            for p in positions
+        ],
+        education=[
+            {"institution": e.institution, "degree": e.degree, "start": e.start, "end": e.end}
+            for e in education
+        ],
+        created_at=prof.created_at,
+        updated_at=prof.updated_at,
+    )
+
+@router.put("/me/profile", response_model=ProfileOut)
+async def update_my_profile(
+    payload: ProfileUpdate,
+    current: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    prof = db.query(UserProfile).filter(UserProfile.user_id == current.id).first()
+    if not prof:
+        prof = UserProfile(user_id=current.id)
+        db.add(prof)
+
+    prof.bio = payload.bio
+    prof.hometown = payload.hometown
+    prof.current_city = payload.current_city
+    prof.relationship_status = payload.relationship_status
+    prof.contact_email = payload.contact_email or current.email
+    prof.contact_phone = payload.contact_phone
+    prof.workplace_company = payload.workplace_company
+    prof.workplace_title = payload.workplace_title
+    prof.connections_count = payload.connections_count or 0
+
+    db.query(UserPosition).filter(UserPosition.user_id == current.id).delete()
+    db.query(UserEducation).filter(UserEducation.user_id == current.id).delete()
+
+    for p in (payload.positions or []):
+        db.add(UserPosition(user_id=current.id, company=p.company, title=p.title, start=p.start, end=p.end))
+    for e in (payload.education or []):
+        db.add(UserEducation(user_id=current.id, institution=e.institution, degree=e.degree, start=e.start, end=e.end))
+
+    db.commit()
+    db.refresh(prof)
+
+    positions = db.query(UserPosition).filter(UserPosition.user_id == current.id).all()
+    education = db.query(UserEducation).filter(UserEducation.user_id == current.id).all()
+
+    return ProfileOut(
+        id=prof.id,
+        user_id=current.id,
+        bio=prof.bio,
+        hometown=prof.hometown,
+        current_city=prof.current_city,
+        relationship_status=prof.relationship_status,
+        contact_email=prof.contact_email,
+        contact_phone=prof.contact_phone,
+        workplace_company=prof.workplace_company,
+        workplace_title=prof.workplace_title,
+        connections_count=prof.connections_count or 0,
+        positions=[
+            {"company": p.company, "title": p.title, "start": p.start, "end": p.end}
+            for p in positions
+        ],
+        education=[
+            {"institution": e.institution, "degree": e.degree, "start": e.start, "end": e.end}
+            for e in education
+        ],
+        created_at=prof.created_at,
+        updated_at=prof.updated_at,
+    )
+
+@router.get("/{user_id}/profile", response_model=ProfileOut)
+async def get_user_profile(user_id: str, db: Session = Depends(get_db)):
+    user = None
+    if user_id.isdigit():
+        user = db.query(User).filter(User.id == int(user_id)).first()
+    else:
+        user = db.query(User).filter(User.username == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    prof = db.query(UserProfile).filter(UserProfile.user_id == user.id).first()
+    positions = db.query(UserPosition).filter(UserPosition.user_id == user.id).all()
+    education = db.query(UserEducation).filter(UserEducation.user_id == user.id).all()
+
+    if not prof:
+        return ProfileOut(
+            id=None,
+            user_id=user.id,
+            bio=None,
+            hometown=None,
+            current_city=None,
+            relationship_status=None,
+            contact_email=user.email,
+            contact_phone=None,
+            workplace_company=None,
+            workplace_title=None,
+            connections_count=0,
+            positions=[],
+            education=[],
+            created_at=None,
+            updated_at=None,
+        )
+
+    return ProfileOut(
+        id=prof.id,
+        user_id=user.id,
+        bio=prof.bio,
+        hometown=prof.hometown,
+        current_city=prof.current_city,
+        relationship_status=prof.relationship_status,
+        contact_email=prof.contact_email,
+        contact_phone=prof.contact_phone,
+        workplace_company=prof.workplace_company,
+        workplace_title=prof.workplace_title,
+        connections_count=prof.connections_count or 0,
+        positions=[
+            {"company": p.company, "title": p.title, "start": p.start, "end": p.end}
+            for p in positions
+        ],
+        education=[
+            {"institution": e.institution, "degree": e.degree, "start": e.start, "end": e.end}
+            for e in education
+        ],
+        created_at=prof.created_at,
+        updated_at=prof.updated_at,
+    )

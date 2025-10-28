@@ -447,7 +447,9 @@ export default function UserProfileView({
       const isExisting = highlights.some((h) => h.id === highlight.id);
 
       if (isExisting) {
-        const highlightId = parseInt(highlight.id.toString().split('_')[1] || highlight.id.toString());
+        const highlightId = parseInt(
+          highlight.id.toString().split('_')[1] || highlight.id.toString(),
+        );
         const savedHighlight = await api.updateHighlight(highlightId, {
           name: highlight.name,
           cover: highlight.cover,
@@ -485,7 +487,9 @@ export default function UserProfileView({
           onPress: async () => {
             try {
               const api = await import('../utils/api');
-              const highlightId = parseInt(id.toString().split('_')[1] || id.toString());
+              const highlightId = parseInt(
+                id.toString().split('_')[1] || id.toString(),
+              );
               await api.deleteHighlight(highlightId);
               setHighlights(highlights.filter((h) => h.id !== id));
             } catch (error) {
@@ -523,7 +527,9 @@ export default function UserProfileView({
         showsVerticalScrollIndicator={false}
         bounces
         refreshControl={
-          editable ? <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} /> : undefined
+          editable ? (
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          ) : undefined
         }
       >
         <View style={styles.headerSection}>
@@ -848,6 +854,7 @@ export default function UserProfileView({
                   <TouchableOpacity
                     style={styles.primaryBtn}
                     activeOpacity={0.85}
+                    onPress={() => router.push('/profile/edit')}
                   >
                     <Edit3 size={16} color="#ffffff" strokeWidth={2.5} />
                     <Text style={styles.primaryBtnText}>Editar perfil</Text>
@@ -970,10 +977,22 @@ export default function UserProfileView({
           </View>
 
           <View style={styles.infoGrid}>
-            <View style={styles.infoItem}>
-              <Briefcase size={18} color="#64748b" strokeWidth={2} />
-              <Text style={styles.infoText}>{p.workplace}</Text>
-            </View>
+            {Array.isArray(p.positions) && p.positions.length > 0 ? (
+              p.positions.map((pos, i) => (
+                <View key={`pos_${i}`} style={styles.infoItem}>
+                  <Briefcase size={18} color="#64748b" strokeWidth={2} />
+                  <Text
+                    style={styles.infoText}
+                  >{`${pos.company}${pos.title ? ' • ' + pos.title : ''}`}</Text>
+                </View>
+              ))
+            ) : (
+              <View style={styles.infoItem}>
+                <Briefcase size={18} color="#64748b" strokeWidth={2} />
+                <Text style={styles.infoText}>{p.workplace}</Text>
+              </View>
+            )}
+
             <View style={styles.infoItem}>
               <MapPin size={18} color="#64748b" strokeWidth={2} />
               <Text style={styles.infoText}>{p.currentCity}</Text>
@@ -993,7 +1012,7 @@ export default function UserProfileView({
             <View style={styles.infoItem}>
               <Mail size={18} color="#64748b" strokeWidth={2} />
               <Text style={[styles.infoText, styles.linkText]}>
-                contato@email.com
+                {p.contact_email || 'contato@email.com'}
               </Text>
             </View>
           </View>
