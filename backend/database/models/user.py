@@ -19,3 +19,8 @@ class User(Base):
     posts: Mapped[list["Post"]] = relationship("Post", back_populates="author", cascade="all,delete-orphan")
     stories: Mapped[list["Story"]] = relationship("Story", back_populates="author", cascade="all,delete-orphan")
     highlights: Mapped[list["Highlight"]] = relationship("Highlight", back_populates="author", cascade="all,delete-orphan")
+
+    # Profile relations
+    profile = relationship("UserProfile", back_populates="user", uselist=False, cascade="all,delete-orphan")
+    positions = relationship("UserPosition", back_populates="user", cascade="all,delete-orphan")
+    education = relationship("UserEducation", back_populates="user", cascade="all,delete-orphan")
