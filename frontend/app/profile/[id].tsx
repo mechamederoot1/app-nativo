@@ -101,6 +101,7 @@ export default function UserProfilePage() {
           relationshipStatus: profileDetails?.relationship_status ?? '',
           workplace: profileDetails?.workplace_company && profileDetails?.workplace_title ? `${profileDetails.workplace_company} • ${profileDetails.workplace_title}` : (profileDetails?.workplace_company ?? ''),
           connectionsCount: profileDetails?.connections_count ?? 0,
+          contact_email: profileDetails?.contact_email ?? '',
 
           // lists
           positions: Array.isArray(profileDetails?.positions) ? profileDetails.positions.map((p: any) => ({ company: p.company, title: p.title, start: p.start, end: p.end })) : [],
