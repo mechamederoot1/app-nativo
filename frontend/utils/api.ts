@@ -207,6 +207,39 @@ export async function updatePost(postId: number | string, content: string, media
   });
 }
 
+export async function getHighlights(): Promise<any[]> {
+  return request('/highlights');
+}
+
+export async function createHighlight(payload: {
+  name: string;
+  cover: string;
+  photos: string[];
+}): Promise<any> {
+  return request('/highlights', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateHighlight(
+  id: number,
+  payload: {
+    name?: string;
+    cover?: string;
+    photos?: string[];
+  },
+): Promise<any> {
+  return request(`/highlights/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteHighlight(id: number): Promise<any> {
+  return request(`/highlights/${id}`, { method: 'DELETE' });
+}
+
 export function logout() {
   setToken(null);
 }
