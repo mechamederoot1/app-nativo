@@ -211,6 +211,18 @@ export async function getHighlights(): Promise<any[]> {
   return request('/highlights');
 }
 
+export async function getMyProfile(): Promise<any> {
+  return request('/users/me/profile');
+}
+
+export async function getProfileById(id: number | string): Promise<any> {
+  return request(`/users/${id}/profile`);
+}
+
+export async function updateMyProfile(payload: any): Promise<any> {
+  return request('/users/me/profile', { method: 'PUT', body: JSON.stringify(payload) });
+}
+
 export async function createHighlight(payload: {
   name: string;
   cover: string;
