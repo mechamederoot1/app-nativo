@@ -334,8 +334,20 @@ export default function UserProfileView({
     }
   };
 
+  const loadHighlights = async () => {
+    try {
+      if (!editable) return;
+      const api = await import('../utils/api');
+      const highlightsData = await api.getHighlights();
+      setHighlights(highlightsData || []);
+    } catch (error) {
+      console.error('Erro ao carregar destaques:', error);
+    }
+  };
+
   useEffect(() => {
     loadUserData();
+    loadHighlights();
     const unsub = subscribe(() => setPosts(getPosts()));
     return unsub;
   }, [editable]);
