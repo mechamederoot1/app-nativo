@@ -481,8 +481,16 @@ export default function UserProfileView({
         { text: 'Cancelar', onPress: () => {} },
         {
           text: 'Deletar',
-          onPress: () => {
-            setHighlights(highlights.filter((h) => h.id !== id));
+          onPress: async () => {
+            try {
+              const api = await import('../utils/api');
+              const highlightId = parseInt(id.toString().split('_')[1] || id.toString());
+              await api.deleteHighlight(highlightId);
+              setHighlights(highlights.filter((h) => h.id !== id));
+            } catch (error) {
+              console.error('Erro ao deletar destaque:', error);
+              Alert.alert('Erro', 'Falha ao deletar destaque');
+            }
           },
           style: 'destructive',
         },
