@@ -37,6 +37,7 @@ app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 app.include_router(_auth.router, prefix="/auth", tags=["auth"])
 app.include_router(_users.router, prefix="/users", tags=["users"])
 app.include_router(_posts.router, prefix="/posts", tags=["posts"])
+app.include_router(_highlights.router, prefix="/highlights", tags=["highlights"])
 
 @app.get("/")
 def root():
