@@ -407,38 +407,30 @@ export default function UserProfileView({ profile, editable, posts: externalPost
     return posts.filter((x) => toSlug(x.user) === target);
   }, [posts, editable, p.username, externalPosts]);
 
-  const highlightsData = [
-    {
-      id: 1,
-      name: 'Viagens',
-      image: (Array.isArray(p.highlights) && p.highlights[0]) || undefined,
-      icon: '✈️',
-    },
-    {
-      id: 2,
-      name: 'Família',
-      image: (Array.isArray(p.highlights) && p.highlights[1]) || undefined,
-      icon: '👨‍👩‍👧‍👦',
-    },
-    {
-      id: 3,
-      name: 'Trabalho',
-      image: (Array.isArray(p.highlights) && p.highlights[2]) || undefined,
-      icon: '💼',
-    },
-    {
-      id: 4,
-      name: 'Amigos',
-      image: (Array.isArray(p.highlights) && p.highlights[3]) || undefined,
-      icon: '🎉',
-    },
-    {
-      id: 5,
-      name: 'Hobbies',
-      image: (Array.isArray(p.highlights) && p.highlights[4]) || undefined,
-      icon: '🎮',
-    },
-  ];
+  const handleSaveHighlight = (highlight: Highlight) => {
+    const existingIndex = highlights.findIndex((h) => h.id === highlight.id);
+    if (existingIndex >= 0) {
+      const updatedHighlights = [...highlights];
+      updatedHighlights[existingIndex] = highlight;
+      setHighlights(updatedHighlights);
+    } else {
+      setHighlights([...highlights, highlight]);
+    }
+    setEditingHighlight(undefined);
+  };
+
+  const handleDeleteHighlight = (id: string) => {
+    Alert.alert('Deletar Destaque', 'Tem certeza que deseja deletar este destaque?', [
+      { text: 'Cancelar', onPress: () => {} },
+      {
+        text: 'Deletar',
+        onPress: () => {
+          setHighlights(highlights.filter((h) => h.id !== id));
+        },
+        style: 'destructive',
+      },
+    ]);
+  };
 
   const [ratings, setRatings] = useState({
     confiavel: 142,
