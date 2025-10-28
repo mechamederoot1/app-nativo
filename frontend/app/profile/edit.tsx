@@ -51,6 +51,12 @@ export default function EditProfilePage() {
         setWorkplaceTitle(prof.workplace_title || '');
         setPositions(Array.isArray(prof.positions) ? prof.positions : []);
         setEducation(Array.isArray(prof.education) ? prof.education : []);
+        setShowHometown(prof.show_hometown !== false);
+        setShowCurrentCity(prof.show_current_city !== false);
+        setShowRelationshipStatus(prof.show_relationship_status !== false);
+        setShowContactEmail(prof.show_contact_email === true);
+        setShowContactPhone(prof.show_contact_phone === true);
+        setShowWorkplace(prof.show_workplace !== false);
       } catch (err: any) {
         console.error('Erro ao carregar perfil:', err);
         Alert.alert('Erro', err?.message || 'Falha ao carregar perfil');
