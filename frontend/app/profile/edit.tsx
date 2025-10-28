@@ -448,6 +448,27 @@ const styles = StyleSheet.create({
     minHeight: 80,
     textAlignVertical: 'top',
   },
+  visibilityItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    padding: 12,
+    marginBottom: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  visibilityLabel: {
+    color: '#0f172a',
+    fontWeight: '600',
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  visibilityDescription: {
+    color: '#94a3b8',
+    fontSize: 12,
+  },
   rowItem: {
     marginBottom: 8,
     backgroundColor: '#fff',
