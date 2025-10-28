@@ -117,4 +117,11 @@ export const profileData: UserProfile = {
       date: '3 sem',
     },
   ],
+  contact_email: 'ana@example.com',
+  show_hometown: true,
+  show_current_city: true,
+  show_relationship_status: true,
+  show_contact_email: false,
+  show_contact_phone: false,
+  show_workplace: true,
 };
