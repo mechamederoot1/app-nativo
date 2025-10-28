@@ -28,6 +28,12 @@ export default function EditProfilePage() {
   const [workplaceTitle, setWorkplaceTitle] = useState('');
   const [positions, setPositions] = useState<Array<any>>([]);
   const [education, setEducation] = useState<Array<any>>([]);
+  const [showHometown, setShowHometown] = useState(true);
+  const [showCurrentCity, setShowCurrentCity] = useState(true);
+  const [showRelationshipStatus, setShowRelationshipStatus] = useState(true);
+  const [showContactEmail, setShowContactEmail] = useState(false);
+  const [showContactPhone, setShowContactPhone] = useState(false);
+  const [showWorkplace, setShowWorkplace] = useState(true);
 
   useEffect(() => {
     let mounted = true;
