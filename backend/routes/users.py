@@ -173,6 +173,12 @@ async def get_my_profile(current: User = Depends(get_current_user), db: Session 
             workplace_company=None,
             workplace_title=None,
             connections_count=0,
+            show_hometown=True,
+            show_current_city=True,
+            show_relationship_status=True,
+            show_contact_email=False,
+            show_contact_phone=False,
+            show_workplace=True,
             positions=[],
             education=[],
             created_at=None,
@@ -191,6 +197,12 @@ async def get_my_profile(current: User = Depends(get_current_user), db: Session 
         workplace_company=prof.workplace_company,
         workplace_title=prof.workplace_title,
         connections_count=prof.connections_count or 0,
+        show_hometown=prof.show_hometown,
+        show_current_city=prof.show_current_city,
+        show_relationship_status=prof.show_relationship_status,
+        show_contact_email=prof.show_contact_email,
+        show_contact_phone=prof.show_contact_phone,
+        show_workplace=prof.show_workplace,
         positions=[
             {"company": p.company, "title": p.title, "start": p.start, "end": p.end}
             for p in positions
