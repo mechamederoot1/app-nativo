@@ -4,6 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import UserProfileView from '../../components/UserProfileView';
 import { getUserById, getUserPosts, getCurrentUser, ApiUser, ApiPost } from '../../utils/api';
 import { profileData as defaultProfileData } from '../../screens/Profile/Data';
+import { getMyProfile, getProfileById } from '../../utils/api';
 
 type UserProfile = {
   id: number;
