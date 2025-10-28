@@ -62,7 +62,11 @@ export type Props = {
   userId?: number | null;
 };
 
-export default function UserProfileView({ profile, editable, posts: externalPosts }: Props) {
+export default function UserProfileView({
+  profile,
+  editable,
+  posts: externalPosts,
+}: Props) {
   const router = useRouter();
   const [userData, setUserData] = useState(profile);
   const p = userData;
@@ -270,7 +274,9 @@ export default function UserProfileView({ profile, editable, posts: externalPost
 
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
   const [highlightManagerVisible, setHighlightManagerVisible] = useState(false);
-  const [editingHighlight, setEditingHighlight] = useState<Highlight | undefined>();
+  const [editingHighlight, setEditingHighlight] = useState<
+    Highlight | undefined
+  >();
   const [highlights, setHighlights] = useState<Highlight[]>([]);
 
   useEffect(() => {
@@ -420,16 +426,20 @@ export default function UserProfileView({ profile, editable, posts: externalPost
   };
 
   const handleDeleteHighlight = (id: string) => {
-    Alert.alert('Deletar Destaque', 'Tem certeza que deseja deletar este destaque?', [
-      { text: 'Cancelar', onPress: () => {} },
-      {
-        text: 'Deletar',
-        onPress: () => {
-          setHighlights(highlights.filter((h) => h.id !== id));
+    Alert.alert(
+      'Deletar Destaque',
+      'Tem certeza que deseja deletar este destaque?',
+      [
+        { text: 'Cancelar', onPress: () => {} },
+        {
+          text: 'Deletar',
+          onPress: () => {
+            setHighlights(highlights.filter((h) => h.id !== id));
+          },
+          style: 'destructive',
         },
-        style: 'destructive',
-      },
-    ]);
+      ],
+    );
   };
 
   const [ratings, setRatings] = useState({
@@ -846,7 +856,9 @@ export default function UserProfileView({ profile, editable, posts: externalPost
                         : undefined
                     }
                     onPress={
-                      editable ? () => setEditingHighlight(highlight) : undefined
+                      editable
+                        ? () => setEditingHighlight(highlight)
+                        : undefined
                     }
                   >
                     <View style={styles.highlightImageWrapper}>

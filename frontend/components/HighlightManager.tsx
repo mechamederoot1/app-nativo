@@ -50,7 +50,9 @@ export default function HighlightManager({
   const [photos, setPhotos] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectingCover, setSelectingCover] = useState(false);
-  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
     if (highlight) {
@@ -180,7 +182,10 @@ export default function HighlightManager({
           <TouchableOpacity
             onPress={handleSave}
             disabled={loading || !name || !cover || photos.length === 0}
-            style={{ opacity: loading || !name || !cover || photos.length === 0 ? 0.5 : 1 }}
+            style={{
+              opacity:
+                loading || !name || !cover || photos.length === 0 ? 0.5 : 1,
+            }}
           >
             {loading ? (
               <ActivityIndicator color="#3b82f6" />
@@ -190,7 +195,10 @@ export default function HighlightManager({
           </TouchableOpacity>
         </View>
 
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Nome do Destaque */}
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Nome do Destaque</Text>
@@ -242,7 +250,8 @@ export default function HighlightManager({
             {photos.length === 0 ? (
               <View style={styles.emptyPhotos}>
                 <Text style={styles.emptyText}>
-                  Nenhuma foto adicionada. Toque em "Adicionar Foto" para começar.
+                  Nenhuma foto adicionada. Toque em "Adicionar Foto" para
+                  começar.
                 </Text>
               </View>
             ) : (
@@ -287,7 +296,9 @@ export default function HighlightManager({
                       <TouchableOpacity
                         onPress={() => movePhotoDown(index)}
                         disabled={index === photos.length - 1}
-                        style={{ opacity: index === photos.length - 1 ? 0.3 : 1 }}
+                        style={{
+                          opacity: index === photos.length - 1 ? 0.3 : 1,
+                        }}
                       >
                         <ChevronDown
                           size={20}
@@ -306,7 +317,9 @@ export default function HighlightManager({
             )}
 
             {photos.length > 0 && (
-              <Text style={styles.photosCount}>Total: {photos.length} foto(s)</Text>
+              <Text style={styles.photosCount}>
+                Total: {photos.length} foto(s)
+              </Text>
             )}
           </View>
         </ScrollView>

@@ -33,8 +33,6 @@ export default function SignupScreen() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-
-
   const validateStep0 = () => {
     const e: Record<string, string> = {};
     if (!firstName.trim()) e.firstName = 'Nome obrigatório';
