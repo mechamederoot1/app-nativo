@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import TopBar from '../../components/TopBar';
 import BottomNav from '../../components/BottomNav';
-import { getMyProfile, updateMyProfile } from '../../utils/api';
+import { getMyProfile, updateMyProfile, getCurrentUser } from '../../utils/api';
 import { useRouter } from 'expo-router';
 
 export default function EditProfilePage() {
