@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,8 @@ import {
   StyleSheet,
   Image,
   Dimensions,
-  Platform
+  Platform,
+  RefreshControl,
 } from 'react-native';
 import {
   Search,
@@ -129,6 +130,14 @@ const ChatItem = ({ item, onPress }) => (
 
 export default function MessagesScreen() {
   const [query, setQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 500);
+  }, []);
 
   const filteredChats = useMemo(() => {
     if (!query.trim()) return MOCK;
@@ -171,6 +180,9 @@ export default function MessagesScreen() {
           renderItem={({ item }) => <ChatItem item={item} onPress={() => { }} />}
           contentContainerStyle={styles.chatList}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <MessageCircle size={48} color="#cbd5e1" strokeWidth={1.5} />

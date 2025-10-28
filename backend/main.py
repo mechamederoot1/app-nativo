@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
 from database.session import Base, engine
-from routes import auth as _auth, users as _users, posts as _posts
+from routes import auth as _auth, users as _users, posts as _posts, highlights as _highlights
 import database.models as _models  # ensure models are registered
 
 # Load env from backend/.env
@@ -37,6 +37,7 @@ app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 app.include_router(_auth.router, prefix="/auth", tags=["auth"])
 app.include_router(_users.router, prefix="/users", tags=["users"])
 app.include_router(_posts.router, prefix="/posts", tags=["posts"])
+app.include_router(_highlights.router, prefix="/highlights", tags=["highlights"])
 
 @app.get("/")
 def root():

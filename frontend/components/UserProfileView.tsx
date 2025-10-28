@@ -13,6 +13,7 @@ import {
   PanResponder,
   Modal,
   Platform,
+  RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
@@ -278,49 +279,76 @@ export default function UserProfileView({
     Highlight | undefined
   >();
   const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadUserData = async () => {
+    try {
+      if (!editable) return;
+      const api = await import('../utils/api');
+      const token = api.getToken();
+      if (!token) return;
+      const BASE_URL =
+        (typeof process !== 'undefined' &&
+          (process as any).env &&
+          (process as any).env.EXPO_PUBLIC_API_URL) ||
+        'http://localhost:5050';
+      const response = await fetch(`${BASE_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const user = await response.json();
+        const profilePhotoUrl = user.profile_photo
+          ? user.profile_photo.startsWith('http')
+            ? user.profile_photo
+            : `${BASE_URL}${user.profile_photo}`
+          : p.avatar;
+        const coverPhotoUrl = user.cover_photo
+          ? user.cover_photo.startsWith('http')
+            ? user.cover_photo
+            : `${BASE_URL}${user.cover_photo}`
+          : p.cover;
+        setUserData((prev) => ({
+          ...prev,
+          avatar: profilePhotoUrl,
+          cover: coverPhotoUrl,
+          name: `${user.first_name} ${user.last_name}`,
+          username: user.username,
+        }));
+        setProfilePhoto(profilePhotoUrl);
+        setCoverPhoto(coverPhotoUrl);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados do usuário:', error);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await loadUserData();
+      await loadHighlights();
+      setPosts(getPosts());
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const loadHighlights = async () => {
+    try {
+      if (!editable) return;
+      const api = await import('../utils/api');
+      const highlightsData = await api.getHighlights();
+      setHighlights(highlightsData || []);
+    } catch (error) {
+      console.error('Erro ao carregar destaques:', error);
+    }
+  };
 
   useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        if (!editable) return;
-        const api = await import('../utils/api');
-        const token = api.getToken();
-        if (!token) return;
-        const BASE_URL =
-          (typeof process !== 'undefined' &&
-            (process as any).env &&
-            (process as any).env.EXPO_PUBLIC_API_URL) ||
-          'http://localhost:5050';
-        const response = await fetch(`${BASE_URL}/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.ok) {
-          const user = await response.json();
-          const profilePhotoUrl = user.profile_photo
-            ? user.profile_photo.startsWith('http')
-              ? user.profile_photo
-              : `${BASE_URL}${user.profile_photo}`
-            : p.avatar;
-          const coverPhotoUrl = user.cover_photo
-            ? user.cover_photo.startsWith('http')
-              ? user.cover_photo
-              : `${BASE_URL}${user.cover_photo}`
-            : p.cover;
-          setUserData((prev) => ({
-            ...prev,
-            avatar: profilePhotoUrl,
-            cover: coverPhotoUrl,
-            name: `${user.first_name} ${user.last_name}`,
-          }));
-          setProfilePhoto(profilePhotoUrl);
-          setCoverPhoto(coverPhotoUrl);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar dados do usuário:', error);
-      }
-    };
-
     loadUserData();
+    loadHighlights();
     const unsub = subscribe(() => setPosts(getPosts()));
     return unsub;
   }, [editable]);
@@ -413,16 +441,37 @@ export default function UserProfileView({
     return posts.filter((x) => toSlug(x.user) === target);
   }, [posts, editable, p.username, externalPosts]);
 
-  const handleSaveHighlight = (highlight: Highlight) => {
-    const existingIndex = highlights.findIndex((h) => h.id === highlight.id);
-    if (existingIndex >= 0) {
-      const updatedHighlights = [...highlights];
-      updatedHighlights[existingIndex] = highlight;
-      setHighlights(updatedHighlights);
-    } else {
-      setHighlights([...highlights, highlight]);
+  const handleSaveHighlight = async (highlight: Highlight) => {
+    try {
+      const api = await import('../utils/api');
+      const isExisting = highlights.some((h) => h.id === highlight.id);
+
+      if (isExisting) {
+        const highlightId = parseInt(highlight.id.toString().split('_')[1] || highlight.id.toString());
+        const savedHighlight = await api.updateHighlight(highlightId, {
+          name: highlight.name,
+          cover: highlight.cover,
+          photos: highlight.photos,
+        });
+        const updatedIndex = highlights.findIndex((h) => h.id === highlight.id);
+        if (updatedIndex >= 0) {
+          const updatedHighlights = [...highlights];
+          updatedHighlights[updatedIndex] = savedHighlight;
+          setHighlights(updatedHighlights);
+        }
+      } else {
+        const savedHighlight = await api.createHighlight({
+          name: highlight.name,
+          cover: highlight.cover,
+          photos: highlight.photos,
+        });
+        setHighlights([...highlights, savedHighlight]);
+      }
+      setEditingHighlight(undefined);
+    } catch (error) {
+      console.error('Erro ao salvar destaque:', error);
+      Alert.alert('Erro', 'Falha ao salvar destaque');
     }
-    setEditingHighlight(undefined);
   };
 
   const handleDeleteHighlight = (id: string) => {
@@ -433,8 +482,16 @@ export default function UserProfileView({
         { text: 'Cancelar', onPress: () => {} },
         {
           text: 'Deletar',
-          onPress: () => {
-            setHighlights(highlights.filter((h) => h.id !== id));
+          onPress: async () => {
+            try {
+              const api = await import('../utils/api');
+              const highlightId = parseInt(id.toString().split('_')[1] || id.toString());
+              await api.deleteHighlight(highlightId);
+              setHighlights(highlights.filter((h) => h.id !== id));
+            } catch (error) {
+              console.error('Erro ao deletar destaque:', error);
+              Alert.alert('Erro', 'Falha ao deletar destaque');
+            }
           },
           style: 'destructive',
         },
@@ -465,6 +522,9 @@ export default function UserProfileView({
         contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
         bounces
+        refreshControl={
+          editable ? <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} /> : undefined
+        }
       >
         <View style={styles.headerSection}>
           <View style={styles.coverContainer}>
