@@ -37,6 +37,13 @@ export type UserProfile = {
   recentFriends: Friend[];
   testimonials: Testimonial[];
   hasStory?: boolean;
+  contact_email?: string;
+  show_hometown?: boolean;
+  show_current_city?: boolean;
+  show_relationship_status?: boolean;
+  show_contact_email?: boolean;
+  show_contact_phone?: boolean;
+  show_workplace?: boolean;
 };
 
 export const profileData: UserProfile = {
