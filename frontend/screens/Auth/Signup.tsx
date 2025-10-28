@@ -23,7 +23,6 @@ export default function SignupScreen() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
   const [dob, setDob] = useState('');
   const [gender, setGender] = useState('');
   const [password, setPassword] = useState('');
@@ -31,10 +30,6 @@ export default function SignupScreen() {
   const [accepted, setAccepted] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [checkingUsername, setCheckingUsername] = useState(false);
-  const [usernameStatus, setUsernameStatus] = useState<
-    'checking' | 'available' | 'taken' | null
-  >(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
