@@ -12,7 +12,11 @@ export default function ProfileRedirect() {
       try {
         const me = await getCurrentUser();
         if (!mounted) return;
-        const username = me?.username || `${(me?.first_name || '') + (me?.last_name || '')}`.toLowerCase().replace(/\s+/g, '');
+        const username =
+          me?.username ||
+          `${(me?.first_name || '') + (me?.last_name || '')}`
+            .toLowerCase()
+            .replace(/\s+/g, '');
         if (username) {
           router.replace(`/profile/${encodeURIComponent(username)}`);
         } else {
@@ -24,7 +28,9 @@ export default function ProfileRedirect() {
         router.replace('/');
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return null;

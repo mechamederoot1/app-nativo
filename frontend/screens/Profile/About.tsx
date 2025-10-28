@@ -39,17 +39,47 @@ export default function AboutScreen() {
 
             setP((prev) => ({
               ...prev,
-              name: (userInfo && `${userInfo.first_name} ${userInfo.last_name}`) || prev.name,
+              name:
+                (userInfo && `${userInfo.first_name} ${userInfo.last_name}`) ||
+                prev.name,
               username: slug,
-              avatar: absoluteUrl((userInfo && userInfo.profile_photo) || profile.profile_photo || prev.avatar) || prev.avatar,
-              cover: absoluteUrl((userInfo && userInfo.cover_photo) || profile.cover || prev.cover) || prev.cover,
+              avatar:
+                absoluteUrl(
+                  (userInfo && userInfo.profile_photo) ||
+                    profile.profile_photo ||
+                    prev.avatar,
+                ) || prev.avatar,
+              cover:
+                absoluteUrl(
+                  (userInfo && userInfo.cover_photo) ||
+                    profile.cover ||
+                    prev.cover,
+                ) || prev.cover,
               bio: profile.bio ?? prev.bio,
               hometown: profile.hometown ?? prev.hometown,
               currentCity: profile.current_city ?? prev.currentCity,
-              relationshipStatus: profile.relationship_status ?? prev.relationshipStatus,
-              workplace: profile.workplace_company && profile.workplace_title ? `${profile.workplace_company} • ${profile.workplace_title}` : prev.workplace,
-              positions: Array.isArray(profile.positions) ? profile.positions.map((p: any) => ({ company: p.company, title: p.title, start: p.start, end: p.end })) : prev.positions,
-              education: Array.isArray(profile.education) ? profile.education.map((e: any) => ({ institution: e.institution, degree: e.degree, start: e.start, end: e.end })) : prev.education,
+              relationshipStatus:
+                profile.relationship_status ?? prev.relationshipStatus,
+              workplace:
+                profile.workplace_company && profile.workplace_title
+                  ? `${profile.workplace_company} • ${profile.workplace_title}`
+                  : prev.workplace,
+              positions: Array.isArray(profile.positions)
+                ? profile.positions.map((p: any) => ({
+                    company: p.company,
+                    title: p.title,
+                    start: p.start,
+                    end: p.end,
+                  }))
+                : prev.positions,
+              education: Array.isArray(profile.education)
+                ? profile.education.map((e: any) => ({
+                    institution: e.institution,
+                    degree: e.degree,
+                    start: e.start,
+                    end: e.end,
+                  }))
+                : prev.education,
             }));
             return;
           }

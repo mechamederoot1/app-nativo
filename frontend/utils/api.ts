@@ -200,7 +200,11 @@ export async function deletePost(postId: number | string): Promise<any> {
   return request(`/posts/${postId}`, { method: 'DELETE' });
 }
 
-export async function updatePost(postId: number | string, content: string, mediaUrl?: string | null): Promise<ApiPost> {
+export async function updatePost(
+  postId: number | string,
+  content: string,
+  mediaUrl?: string | null,
+): Promise<ApiPost> {
   return request(`/posts/${postId}`, {
     method: 'PUT',
     body: JSON.stringify({ content, media_url: mediaUrl }),
@@ -220,7 +224,10 @@ export async function getProfileById(id: number | string): Promise<any> {
 }
 
 export async function updateMyProfile(payload: any): Promise<any> {
-  return request('/users/me/profile', { method: 'PUT', body: JSON.stringify(payload) });
+  return request('/users/me/profile', {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function createHighlight(payload: {

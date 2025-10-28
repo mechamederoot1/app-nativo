@@ -2,7 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Text } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import UserProfileView from '../../components/UserProfileView';
-import { getUserById, getUserPosts, getCurrentUser, ApiUser, ApiPost } from '../../utils/api';
+import {
+  getUserById,
+  getUserPosts,
+  getCurrentUser,
+  ApiUser,
+  ApiPost,
+} from '../../utils/api';
 import { profileData as defaultProfileData } from '../../screens/Profile/Data';
 import { getMyProfile, getProfileById } from '../../utils/api';
 
@@ -59,7 +65,11 @@ export default function UserProfilePage() {
         setUserId(user.id);
 
         const fullName = `${user.first_name} ${user.last_name}`;
-        const username = user.username || `${user.first_name}${user.last_name}`.toLowerCase().replace(/\s+/g, '');
+        const username =
+          user.username ||
+          `${user.first_name}${user.last_name}`
+            .toLowerCase()
+            .replace(/\s+/g, '');
 
         const formattedPosts = posts.map((post: ApiPost) => ({
           id: post.id.toString(),
@@ -99,13 +109,30 @@ export default function UserProfilePage() {
           hometown: profileDetails?.hometown ?? '',
           currentCity: profileDetails?.current_city ?? '',
           relationshipStatus: profileDetails?.relationship_status ?? '',
-          workplace: profileDetails?.workplace_company && profileDetails?.workplace_title ? `${profileDetails.workplace_company} • ${profileDetails.workplace_title}` : (profileDetails?.workplace_company ?? ''),
+          workplace:
+            profileDetails?.workplace_company && profileDetails?.workplace_title
+              ? `${profileDetails.workplace_company} • ${profileDetails.workplace_title}`
+              : (profileDetails?.workplace_company ?? ''),
           connectionsCount: profileDetails?.connections_count ?? 0,
           contact_email: profileDetails?.contact_email ?? '',
 
           // lists
-          positions: Array.isArray(profileDetails?.positions) ? profileDetails.positions.map((p: any) => ({ company: p.company, title: p.title, start: p.start, end: p.end })) : [],
-          education: Array.isArray(profileDetails?.education) ? profileDetails.education.map((e: any) => ({ institution: e.institution, degree: e.degree, start: e.start, end: e.end })) : [],
+          positions: Array.isArray(profileDetails?.positions)
+            ? profileDetails.positions.map((p: any) => ({
+                company: p.company,
+                title: p.title,
+                start: p.start,
+                end: p.end,
+              }))
+            : [],
+          education: Array.isArray(profileDetails?.education)
+            ? profileDetails.education.map((e: any) => ({
+                institution: e.institution,
+                degree: e.degree,
+                start: e.start,
+                end: e.end,
+              }))
+            : [],
 
           // keep placeholder arrays for UI sections that are not yet implemented server-side
           recentFriends: defaultProfileData.recentFriends,
@@ -134,7 +161,14 @@ export default function UserProfilePage() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc' }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#f8fafc',
+        }}
+      >
         <ActivityIndicator size="large" color="#3b82f6" />
       </View>
     );
@@ -142,7 +176,15 @@ export default function UserProfilePage() {
 
   if (error) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc', paddingHorizontal: 20 }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#f8fafc',
+          paddingHorizontal: 20,
+        }}
+      >
         <Text style={{ fontSize: 16, color: '#ef4444', textAlign: 'center' }}>
           {error}
         </Text>
@@ -150,5 +192,12 @@ export default function UserProfilePage() {
     );
   }
 
-  return <UserProfileView profile={profile} posts={userPosts} editable={editable} userId={userId} />;
+  return (
+    <UserProfileView
+      profile={profile}
+      posts={userPosts}
+      editable={editable}
+      userId={userId}
+    />
+  );
 }
