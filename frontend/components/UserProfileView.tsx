@@ -326,6 +326,7 @@ export default function UserProfileView({
     setRefreshing(true);
     try {
       await loadUserData();
+      await loadHighlights();
       setPosts(getPosts());
     } catch (error) {
       console.error('Erro ao atualizar perfil:', error);
