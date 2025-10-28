@@ -187,9 +187,8 @@ export default function CoverPhotoEditor({
                 ]}
                 resizeMode="cover"
               />
+              <View style={styles.gestureOverlay} {...panResponder.panHandlers} />
             </View>
-
-            <View style={styles.gestureOverlay} {...panResponder.panHandlers} />
           </View>
 
           <TouchableOpacity
