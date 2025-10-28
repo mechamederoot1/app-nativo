@@ -108,6 +108,12 @@ export default function EditProfilePage() {
         workplace_company: workplaceCompany || undefined,
         workplace_title: workplaceTitle || undefined,
         connections_count: 0,
+        show_hometown: showHometown,
+        show_current_city: showCurrentCity,
+        show_relationship_status: showRelationshipStatus,
+        show_contact_email: showContactEmail,
+        show_contact_phone: showContactPhone,
+        show_workplace: showWorkplace,
         positions: positions.map((p) => ({
           company: p.company,
           title: p.title,
