@@ -187,7 +187,10 @@ export default function CoverPhotoEditor({
                 ]}
                 resizeMode="cover"
               />
-              <View style={styles.gestureOverlay} {...panResponder.panHandlers} />
+              <View
+                style={styles.gestureOverlay}
+                {...panResponder.panHandlers}
+              />
             </View>
           </View>
 

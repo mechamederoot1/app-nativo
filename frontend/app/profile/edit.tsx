@@ -162,7 +162,7 @@ export default function EditProfilePage() {
         {/* SEÇÃO: INFORMAÇÕES PESSOAIS */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Informações Pessoais</Text>
-          
+
           <Text style={styles.label}>Biografia</Text>
           <TextInput
             style={styles.inputMultiline}
@@ -200,7 +200,7 @@ export default function EditProfilePage() {
         {/* SEÇÃO: CONTATO */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Informações de Contato</Text>
-          
+
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}
@@ -223,7 +223,7 @@ export default function EditProfilePage() {
         {/* SEÇÃO: TRABALHO */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Informações Profissionais</Text>
-          
+
           <Text style={styles.label}>Empresa atual</Text>
           <TextInput
             style={styles.input}
@@ -289,7 +289,7 @@ export default function EditProfilePage() {
         {/* SEÇÃO: EDUCAÇÃO */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Formação Acadêmica</Text>
-          
+
           {education.map((edu, i) => (
             <View key={`edu_${i}`} style={styles.rowItem}>
               <TextInput
@@ -415,7 +415,9 @@ export default function EditProfilePage() {
 
           <View style={styles.visibilityItem}>
             <View style={styles.visibilityContent}>
-              <Text style={styles.visibilityLabel}>Informações profissionais</Text>
+              <Text style={styles.visibilityLabel}>
+                Informações profissionais
+              </Text>
               <Text style={styles.visibilityDescription}>
                 {showWorkplace ? 'Visível para todos' : 'Ocultas'}
               </Text>
