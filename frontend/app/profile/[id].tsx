@@ -75,13 +75,38 @@ export default function UserProfilePage() {
           comments: [],
         }));
 
-        setProfile({
+        // fetch profile details (real data) if available
+        let profileDetails: any = null;
+        try {
+          if (isOwnProfile) {
+            profileDetails = await getMyProfile();
+          } else {
+            profileDetails = await getProfileById(userIdentifier);
+          }
+        } catch (e) {
+          profileDetails = null;
+        }
+
+        const mappedProfile = {
           ...defaultProfileData,
           name: fullName,
           username: username,
           avatar: user.profile_photo || defaultProfileData.avatar,
           cover: user.cover_photo || defaultProfileData.cover,
-        });
+          bio: profileDetails?.bio ?? defaultProfileData.bio,
+          hometown: profileDetails?.hometown ?? defaultProfileData.hometown,
+          currentCity: profileDetails?.current_city ?? defaultProfileData.currentCity,
+          relationshipStatus: profileDetails?.relationship_status ?? defaultProfileData.relationshipStatus,
+          workplace: profileDetails?.workplace_company && profileDetails?.workplace_title ? `${profileDetails.workplace_company} • ${profileDetails.workplace_title}` : (profileDetails?.workplace_company || defaultProfileData.workplace),
+          connectionsCount: profileDetails?.connections_count ?? defaultProfileData.connectionsCount,
+          positions: Array.isArray(profileDetails?.positions) ? profileDetails.positions.map((p: any) => ({ company: p.company, title: p.title, start: p.start, end: p.end })) : defaultProfileData.positions,
+          education: Array.isArray(profileDetails?.education) ? profileDetails.education.map((e: any) => ({ institution: e.institution, degree: e.degree, start: e.start, end: e.end })) : defaultProfileData.education,
+          recentFriends: defaultProfileData.recentFriends,
+          testimonials: defaultProfileData.testimonials,
+          highlights: defaultProfileData.highlights,
+        };
+
+        setProfile(mappedProfile);
 
         setUserPosts(formattedPosts);
       } catch (err: any) {
