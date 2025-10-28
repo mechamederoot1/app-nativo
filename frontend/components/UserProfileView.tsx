@@ -440,16 +440,37 @@ export default function UserProfileView({
     return posts.filter((x) => toSlug(x.user) === target);
   }, [posts, editable, p.username, externalPosts]);
 
-  const handleSaveHighlight = (highlight: Highlight) => {
-    const existingIndex = highlights.findIndex((h) => h.id === highlight.id);
-    if (existingIndex >= 0) {
-      const updatedHighlights = [...highlights];
-      updatedHighlights[existingIndex] = highlight;
-      setHighlights(updatedHighlights);
-    } else {
-      setHighlights([...highlights, highlight]);
+  const handleSaveHighlight = async (highlight: Highlight) => {
+    try {
+      const api = await import('../utils/api');
+      const isExisting = highlights.some((h) => h.id === highlight.id);
+
+      if (isExisting) {
+        const highlightId = parseInt(highlight.id.toString().split('_')[1] || highlight.id.toString());
+        const savedHighlight = await api.updateHighlight(highlightId, {
+          name: highlight.name,
+          cover: highlight.cover,
+          photos: highlight.photos,
+        });
+        const updatedIndex = highlights.findIndex((h) => h.id === highlight.id);
+        if (updatedIndex >= 0) {
+          const updatedHighlights = [...highlights];
+          updatedHighlights[updatedIndex] = savedHighlight;
+          setHighlights(updatedHighlights);
+        }
+      } else {
+        const savedHighlight = await api.createHighlight({
+          name: highlight.name,
+          cover: highlight.cover,
+          photos: highlight.photos,
+        });
+        setHighlights([...highlights, savedHighlight]);
+      }
+      setEditingHighlight(undefined);
+    } catch (error) {
+      console.error('Erro ao salvar destaque:', error);
+      Alert.alert('Erro', 'Falha ao salvar destaque');
     }
-    setEditingHighlight(undefined);
   };
 
   const handleDeleteHighlight = (id: string) => {
