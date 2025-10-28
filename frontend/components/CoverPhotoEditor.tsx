@@ -259,7 +259,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#e2e8f0',
   },
-  rectMask: { overflow: 'hidden' },
+  rectMask: {
+    overflow: 'hidden',
+    position: 'relative',
+  },
   gestureOverlay: {
     position: 'absolute',
     top: 0,
@@ -267,6 +270,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'transparent',
+    zIndex: 10,
   },
   image: {},
   resetBtn: {
