@@ -180,6 +180,9 @@ export default function MessagesScreen() {
           renderItem={({ item }) => <ChatItem item={item} onPress={() => { }} />}
           contentContainerStyle={styles.chatList}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <MessageCircle size={48} color="#cbd5e1" strokeWidth={1.5} />
