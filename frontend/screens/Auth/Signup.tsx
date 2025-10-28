@@ -48,12 +48,6 @@ export default function SignupScreen() {
     return re.test(value);
   };
 
-  const validateUsername = (value: string) => {
-    return (
-      value.length >= 3 && value.length <= 30 && /^[a-z0-9_.]+$/.test(value)
-    );
-  };
-
   const validateDob = (value: string) => {
     const re = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(19|20)\d{2}$/;
     return re.test(value);
