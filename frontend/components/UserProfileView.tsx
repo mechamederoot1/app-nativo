@@ -500,6 +500,9 @@ export default function UserProfileView({
         contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
         bounces
+        refreshControl={
+          editable ? <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} /> : undefined
+        }
       >
         <View style={styles.headerSection}>
           <View style={styles.coverContainer}>
