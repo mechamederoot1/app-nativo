@@ -130,6 +130,14 @@ const ChatItem = ({ item, onPress }) => (
 
 export default function MessagesScreen() {
   const [query, setQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 500);
+  }, []);
 
   const filteredChats = useMemo(() => {
     if (!query.trim()) return MOCK;
