@@ -25,6 +25,33 @@ export default function AboutScreen() {
       try {
         if (!slug) return;
         const api = await import('../../utils/api');
+
+        // try to get profile by username
+        try {
+          const profile = await api.getProfileById(slug);
+          if (!mounted) return;
+          if (profile) {
+            setP((prev) => ({
+              ...prev,
+              name: profile.name || prev.name,
+              username: profile.username || slug,
+              avatar: absoluteUrl(profile.contact_photo || profile.profile_photo || prev.avatar) || prev.avatar,
+              cover: absoluteUrl(profile.cover || prev.cover) || prev.cover,
+              bio: profile.bio ?? prev.bio,
+              hometown: profile.hometown ?? prev.hometown,
+              currentCity: profile.current_city ?? prev.currentCity,
+              relationshipStatus: profile.relationship_status ?? prev.relationshipStatus,
+              workplace: profile.workplace_company && profile.workplace_title ? `${profile.workplace_company} • ${profile.workplace_title}` : prev.workplace,
+              positions: Array.isArray(profile.positions) ? profile.positions.map((p: any) => ({ company: p.company, title: p.title, start: p.start, end: p.end })) : prev.positions,
+              education: Array.isArray(profile.education) ? profile.education.map((e: any) => ({ institution: e.institution, degree: e.degree, start: e.start, end: e.end })) : prev.education,
+            }));
+            return;
+          }
+        } catch (e) {
+          // fall back to posts if profile endpoint not available
+        }
+
+        // fallback: try to infer from posts
         const posts = await api.getPosts();
         const toSlug = (s: string) =>
           String(s || '')
