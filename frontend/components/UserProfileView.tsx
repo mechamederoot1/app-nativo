@@ -279,6 +279,7 @@ export default function UserProfileView({
     Highlight | undefined
   >();
   const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const loadUserData = async () => {
