@@ -259,6 +259,35 @@ export async function deleteHighlight(id: number): Promise<any> {
   return request(`/highlights/${id}`, { method: 'DELETE' });
 }
 
+// Stories API
+export type ApiStory = {
+  id: number;
+  content?: string | null;
+  media_url?: string | null;
+  created_at: string;
+  user_id: number;
+  user_name: string;
+  user_profile_photo?: string | null;
+};
+
+export async function getStories(): Promise<ApiStory[]> {
+  return request('/stories');
+}
+
+export async function getStoryById(id: number | string): Promise<ApiStory> {
+  return request(`/stories/${id}`);
+}
+
+export async function createStory(content?: string, file?: File | Blob) {
+  if (file) {
+    const form = new FormData();
+    if (typeof content === 'string') form.append('content', content);
+    form.append('file', file as any);
+    return request('/stories/upload', { method: 'POST', body: form });
+  }
+  return request('/stories', { method: 'POST', body: JSON.stringify({ content: content || '' }) });
+}
+
 export function logout() {
   setToken(null);
 }
