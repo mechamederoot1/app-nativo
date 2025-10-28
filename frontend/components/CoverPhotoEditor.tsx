@@ -228,9 +228,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#f1f5f9',
+    zIndex: 100,
   },
   headerTitle: { fontSize: 18, fontWeight: '700', color: '#0f172a' },
-  headerBtn: { padding: 8, borderRadius: 20 },
+  headerBtn: {
+    padding: 8,
+    borderRadius: 20,
+    zIndex: 100,
+  },
   editorSection: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
