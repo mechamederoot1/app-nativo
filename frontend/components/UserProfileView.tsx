@@ -77,7 +77,9 @@ export default function UserProfileView({
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const [coverEditorVisible, setCoverEditorVisible] = useState(false);
   const [coverPhoto, setCoverPhoto] = useState(p.cover);
-  const [editingCoverPhoto, setEditingCoverPhoto] = useState<string | null>(null);
+  const [editingCoverPhoto, setEditingCoverPhoto] = useState<string | null>(
+    null,
+  );
   const [coverTransform, setCoverTransform] = useState<CoverTransform>({
     scale: 1,
     offsetX: 0,
@@ -1194,7 +1196,11 @@ export default function UserProfileView({
             try {
               const { uploadCoverPhoto } = await import('../utils/api');
               const { type, name } = guessMime(imageUri);
-              const response = await uploadCoverPhoto({ uri: imageUri, type, name });
+              const response = await uploadCoverPhoto({
+                uri: imageUri,
+                type,
+                name,
+              });
               const BASE_URL =
                 (typeof process !== 'undefined' &&
                   (process as any).env &&
@@ -1211,12 +1217,18 @@ export default function UserProfileView({
               setCoverEditorVisible(false);
               setEditingCoverPhoto(null);
               try {
-                await postImageToFeed(coverPhotoUrl, 'Atualizou a foto de capa');
+                await postImageToFeed(
+                  coverPhotoUrl,
+                  'Atualizou a foto de capa',
+                );
               } catch {}
               Alert.alert('Sucesso', 'Foto de capa atualizada!');
             } catch (error: any) {
               console.error('Erro ao salvar foto de capa:', error);
-              Alert.alert('Erro', error?.message || 'Falha ao salvar foto de capa');
+              Alert.alert(
+                'Erro',
+                error?.message || 'Falha ao salvar foto de capa',
+              );
             }
           }}
           onCancel={() => {
