@@ -235,6 +235,12 @@ async def update_my_profile(
     prof.workplace_company = payload.workplace_company
     prof.workplace_title = payload.workplace_title
     prof.connections_count = payload.connections_count or 0
+    prof.show_hometown = payload.show_hometown
+    prof.show_current_city = payload.show_current_city
+    prof.show_relationship_status = payload.show_relationship_status
+    prof.show_contact_email = payload.show_contact_email
+    prof.show_contact_phone = payload.show_contact_phone
+    prof.show_workplace = payload.show_workplace
 
     db.query(UserPosition).filter(UserPosition.user_id == current.id).delete()
     db.query(UserEducation).filter(UserEducation.user_id == current.id).delete()
@@ -262,6 +268,12 @@ async def update_my_profile(
         workplace_company=prof.workplace_company,
         workplace_title=prof.workplace_title,
         connections_count=prof.connections_count or 0,
+        show_hometown=prof.show_hometown,
+        show_current_city=prof.show_current_city,
+        show_relationship_status=prof.show_relationship_status,
+        show_contact_email=prof.show_contact_email,
+        show_contact_phone=prof.show_contact_phone,
+        show_workplace=prof.show_workplace,
         positions=[
             {"company": p.company, "title": p.title, "start": p.start, "end": p.end}
             for p in positions
