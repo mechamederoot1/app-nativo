@@ -269,6 +269,9 @@ export default function UserProfileView({ profile, editable, posts: externalPost
   );
 
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
+  const [highlightManagerVisible, setHighlightManagerVisible] = useState(false);
+  const [editingHighlight, setEditingHighlight] = useState<Highlight | undefined>();
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
 
   useEffect(() => {
     const loadUserData = async () => {
