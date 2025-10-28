@@ -288,6 +288,18 @@ export async function createStory(content?: string, file?: File | Blob) {
   return request('/stories', { method: 'POST', body: JSON.stringify({ content: content || '' }) });
 }
 
+// React Native helper: upload image/video from local URI
+export async function createStoryWithImage(content: string, file: { uri: string; type: string; name?: string }) {
+  const form = new FormData();
+  form.append('content', content);
+  form.append('file', {
+    uri: file.uri,
+    type: file.type,
+    name: file.name || 'story.jpg',
+  } as any);
+  return request('/stories/upload', { method: 'POST', body: form });
+}
+
 export function logout() {
   setToken(null);
 }
