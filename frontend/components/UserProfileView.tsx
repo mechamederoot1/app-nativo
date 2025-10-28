@@ -1251,6 +1251,16 @@ export default function UserProfileView({ profile, editable, posts: externalPost
           </View>
         </Pressable>
       </Modal>
+
+      <HighlightManager
+        visible={highlightManagerVisible}
+        onClose={() => {
+          setHighlightManagerVisible(false);
+          setEditingHighlight(undefined);
+        }}
+        onSave={handleSaveHighlight}
+        highlight={editingHighlight}
+      />
     </SafeAreaView>
   );
 }
