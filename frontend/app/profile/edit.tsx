@@ -80,7 +80,17 @@ export default function EditProfilePage() {
       };
       await updateMyProfile(payload);
       Alert.alert('Sucesso', 'Perfil atualizado com sucesso');
-      router.back();
+      try {
+        const me = await getCurrentUser();
+        const username = me?.username || `${me?.first_name || ''}${me?.last_name || ''}`.toLowerCase().replace(/\s+/g, '');
+        if (username) {
+          router.replace(`/profile/${encodeURIComponent(username)}`);
+        } else {
+          router.back();
+        }
+      } catch {
+        router.back();
+      }
     } catch (err: any) {
       console.error('Erro ao salvar perfil:', err);
       Alert.alert('Erro', err?.message || 'Falha ao salvar perfil');
