@@ -187,9 +187,11 @@ export default function CoverPhotoEditor({
                 ]}
                 resizeMode="cover"
               />
+              <View
+                style={styles.gestureOverlay}
+                {...panResponder.panHandlers}
+              />
             </View>
-
-            <View style={styles.gestureOverlay} {...panResponder.panHandlers} />
           </View>
 
           <TouchableOpacity
@@ -229,9 +231,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#f1f5f9',
+    zIndex: 100,
   },
   headerTitle: { fontSize: 18, fontWeight: '700', color: '#0f172a' },
-  headerBtn: { padding: 8, borderRadius: 20 },
+  headerBtn: {
+    padding: 8,
+    borderRadius: 20,
+    zIndex: 100,
+  },
   editorSection: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
@@ -260,7 +267,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#e2e8f0',
   },
-  rectMask: { overflow: 'hidden' },
+  rectMask: {
+    overflow: 'hidden',
+    position: 'relative',
+  },
   gestureOverlay: {
     position: 'absolute',
     top: 0,
@@ -268,6 +278,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'transparent',
+    zIndex: 10,
   },
   image: {},
   resetBtn: {

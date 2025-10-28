@@ -977,44 +977,60 @@ export default function UserProfileView({
           </View>
 
           <View style={styles.infoGrid}>
-            {Array.isArray(p.positions) && p.positions.length > 0 ? (
-              p.positions.map((pos, i) => (
-                <View key={`pos_${i}`} style={styles.infoItem}>
-                  <Briefcase size={18} color="#64748b" strokeWidth={2} />
-                  <Text
-                    style={styles.infoText}
-                  >{`${pos.company}${pos.title ? ' • ' + pos.title : ''}`}</Text>
-                </View>
-              ))
-            ) : (
+            {p.show_workplace !== false && (
+              <>
+                {Array.isArray(p.positions) && p.positions.length > 0 ? (
+                  p.positions.map((pos, i) => (
+                    <View key={`pos_${i}`} style={styles.infoItem}>
+                      <Briefcase size={18} color="#64748b" strokeWidth={2} />
+                      <Text
+                        style={styles.infoText}
+                      >{`${pos.company}${pos.title ? ' • ' + pos.title : ''}`}</Text>
+                    </View>
+                  ))
+                ) : (
+                  <View style={styles.infoItem}>
+                    <Briefcase size={18} color="#64748b" strokeWidth={2} />
+                    <Text style={styles.infoText}>{p.workplace}</Text>
+                  </View>
+                )}
+              </>
+            )}
+
+            {p.show_current_city !== false && p.currentCity && (
               <View style={styles.infoItem}>
-                <Briefcase size={18} color="#64748b" strokeWidth={2} />
-                <Text style={styles.infoText}>{p.workplace}</Text>
+                <MapPin size={18} color="#64748b" strokeWidth={2} />
+                <Text style={styles.infoText}>{p.currentCity}</Text>
+              </View>
+            )}
+
+            {p.show_hometown !== false && p.hometown && (
+              <View style={styles.infoItem}>
+                <Home size={18} color="#64748b" strokeWidth={2} />
+                <Text style={styles.infoText}>{p.hometown}</Text>
+              </View>
+            )}
+
+            {p.show_relationship_status !== false && p.relationshipStatus && (
+              <View style={styles.infoItem}>
+                <Heart size={18} color="#64748b" strokeWidth={2} />
+                <Text style={styles.infoText}>{p.relationshipStatus}</Text>
               </View>
             )}
 
             <View style={styles.infoItem}>
-              <MapPin size={18} color="#64748b" strokeWidth={2} />
-              <Text style={styles.infoText}>{p.currentCity}</Text>
-            </View>
-            <View style={styles.infoItem}>
-              <Home size={18} color="#64748b" strokeWidth={2} />
-              <Text style={styles.infoText}>{p.hometown}</Text>
-            </View>
-            <View style={styles.infoItem}>
-              <Heart size={18} color="#64748b" strokeWidth={2} />
-              <Text style={styles.infoText}>{p.relationshipStatus}</Text>
-            </View>
-            <View style={styles.infoItem}>
               <Calendar size={18} color="#64748b" strokeWidth={2} />
               <Text style={styles.infoText}>Entrou em Janeiro 2020</Text>
             </View>
-            <View style={styles.infoItem}>
-              <Mail size={18} color="#64748b" strokeWidth={2} />
-              <Text style={[styles.infoText, styles.linkText]}>
-                {p.contact_email || 'contato@email.com'}
-              </Text>
-            </View>
+
+            {p.show_contact_email === true && p.contact_email && (
+              <View style={styles.infoItem}>
+                <Mail size={18} color="#64748b" strokeWidth={2} />
+                <Text style={[styles.infoText, styles.linkText]}>
+                  {p.contact_email}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 

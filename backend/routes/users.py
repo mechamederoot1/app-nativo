@@ -173,6 +173,12 @@ async def get_my_profile(current: User = Depends(get_current_user), db: Session 
             workplace_company=None,
             workplace_title=None,
             connections_count=0,
+            show_hometown=True,
+            show_current_city=True,
+            show_relationship_status=True,
+            show_contact_email=False,
+            show_contact_phone=False,
+            show_workplace=True,
             positions=[],
             education=[],
             created_at=None,
@@ -191,6 +197,12 @@ async def get_my_profile(current: User = Depends(get_current_user), db: Session 
         workplace_company=prof.workplace_company,
         workplace_title=prof.workplace_title,
         connections_count=prof.connections_count or 0,
+        show_hometown=prof.show_hometown,
+        show_current_city=prof.show_current_city,
+        show_relationship_status=prof.show_relationship_status,
+        show_contact_email=prof.show_contact_email,
+        show_contact_phone=prof.show_contact_phone,
+        show_workplace=prof.show_workplace,
         positions=[
             {"company": p.company, "title": p.title, "start": p.start, "end": p.end}
             for p in positions
@@ -223,6 +235,12 @@ async def update_my_profile(
     prof.workplace_company = payload.workplace_company
     prof.workplace_title = payload.workplace_title
     prof.connections_count = payload.connections_count or 0
+    prof.show_hometown = payload.show_hometown
+    prof.show_current_city = payload.show_current_city
+    prof.show_relationship_status = payload.show_relationship_status
+    prof.show_contact_email = payload.show_contact_email
+    prof.show_contact_phone = payload.show_contact_phone
+    prof.show_workplace = payload.show_workplace
 
     db.query(UserPosition).filter(UserPosition.user_id == current.id).delete()
     db.query(UserEducation).filter(UserEducation.user_id == current.id).delete()
@@ -250,6 +268,12 @@ async def update_my_profile(
         workplace_company=prof.workplace_company,
         workplace_title=prof.workplace_title,
         connections_count=prof.connections_count or 0,
+        show_hometown=prof.show_hometown,
+        show_current_city=prof.show_current_city,
+        show_relationship_status=prof.show_relationship_status,
+        show_contact_email=prof.show_contact_email,
+        show_contact_phone=prof.show_contact_phone,
+        show_workplace=prof.show_workplace,
         positions=[
             {"company": p.company, "title": p.title, "start": p.start, "end": p.end}
             for p in positions
@@ -290,6 +314,12 @@ async def get_user_profile(user_id: str, db: Session = Depends(get_db)):
             workplace_company=None,
             workplace_title=None,
             connections_count=0,
+            show_hometown=True,
+            show_current_city=True,
+            show_relationship_status=True,
+            show_contact_email=False,
+            show_contact_phone=False,
+            show_workplace=True,
             positions=[],
             education=[],
             created_at=None,
@@ -300,18 +330,24 @@ async def get_user_profile(user_id: str, db: Session = Depends(get_db)):
         id=prof.id,
         user_id=user.id,
         bio=prof.bio,
-        hometown=prof.hometown,
-        current_city=prof.current_city,
-        relationship_status=prof.relationship_status,
-        contact_email=prof.contact_email,
-        contact_phone=prof.contact_phone,
-        workplace_company=prof.workplace_company,
-        workplace_title=prof.workplace_title,
+        hometown=prof.hometown if prof.show_hometown else None,
+        current_city=prof.current_city if prof.show_current_city else None,
+        relationship_status=prof.relationship_status if prof.show_relationship_status else None,
+        contact_email=prof.contact_email if prof.show_contact_email else None,
+        contact_phone=prof.contact_phone if prof.show_contact_phone else None,
+        workplace_company=prof.workplace_company if prof.show_workplace else None,
+        workplace_title=prof.workplace_title if prof.show_workplace else None,
         connections_count=prof.connections_count or 0,
+        show_hometown=prof.show_hometown,
+        show_current_city=prof.show_current_city,
+        show_relationship_status=prof.show_relationship_status,
+        show_contact_email=prof.show_contact_email,
+        show_contact_phone=prof.show_contact_phone,
+        show_workplace=prof.show_workplace,
         positions=[
             {"company": p.company, "title": p.title, "start": p.start, "end": p.end}
             for p in positions
-        ],
+        ] if prof.show_workplace else [],
         education=[
             {"institution": e.institution, "degree": e.degree, "start": e.start, "end": e.end}
             for e in education
