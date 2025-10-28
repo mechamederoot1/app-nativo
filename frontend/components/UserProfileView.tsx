@@ -77,6 +77,7 @@ export default function UserProfileView({
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const [coverEditorVisible, setCoverEditorVisible] = useState(false);
   const [coverPhoto, setCoverPhoto] = useState(p.cover);
+  const [editingCoverPhoto, setEditingCoverPhoto] = useState<string | null>(null);
   const [coverTransform, setCoverTransform] = useState<CoverTransform>({
     scale: 1,
     offsetX: 0,
@@ -558,117 +559,6 @@ export default function UserProfileView({
                 onPress={() => setShowCoverMenu(true)}
               />
             )}
-            {editable && coverEditorVisible && (
-              <View
-                style={StyleSheet.absoluteFill}
-                {...panResponder.panHandlers}
-              >
-                <View
-                  style={{
-                    position: 'absolute',
-                    bottom: 12,
-                    left: 12,
-                    right: 12,
-                    flexDirection: 'row',
-                    gap: 8,
-                  }}
-                >
-                  <TouchableOpacity
-                    onPress={() => {
-                      setCoverEditorVisible(false);
-                      setCoverPhoto(prevCoverPhotoRef.current);
-                      setCoverTransform(prevCoverTransformRef.current);
-                    }}
-                    style={{
-                      flex: 1,
-                      paddingVertical: 10,
-                      borderRadius: 12,
-                      backgroundColor: '#ffffff',
-                      alignItems: 'center',
-                      borderWidth: 1,
-                      borderColor: '#e2e8f0',
-                    }}
-                  >
-                    <Text style={{ fontWeight: '700', color: '#64748b' }}>
-                      Cancelar
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() =>
-                      setCoverTransform({ scale: 1, offsetX: 0, offsetY: 0 })
-                    }
-                    style={{
-                      paddingVertical: 10,
-                      paddingHorizontal: 16,
-                      borderRadius: 12,
-                      backgroundColor: '#f8fafc',
-                      alignItems: 'center',
-                      borderWidth: 1,
-                      borderColor: '#e2e8f0',
-                    }}
-                  >
-                    <Text style={{ fontWeight: '700', color: '#64748b' }}>
-                      Resetar
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={async () => {
-                      try {
-                        const { uploadCoverPhoto } = await import(
-                          '../utils/api'
-                        );
-                        const { type, name } = guessMime(coverPhoto);
-                        const response = await uploadCoverPhoto({
-                          uri: coverPhoto,
-                          type,
-                          name,
-                        });
-                        const BASE_URL =
-                          (typeof process !== 'undefined' &&
-                            (process as any).env &&
-                            (process as any).env.EXPO_PUBLIC_API_URL) ||
-                          'http://localhost:5050';
-                        const coverPhotoUrl = response.cover_photo
-                          ? response.cover_photo.startsWith('http')
-                            ? response.cover_photo
-                            : `${BASE_URL}${response.cover_photo}`
-                          : coverPhoto;
-                        setCoverPhoto(coverPhotoUrl);
-                        setUserData((prev) => ({
-                          ...prev,
-                          cover: coverPhotoUrl,
-                        }));
-                        setCoverEditorVisible(false);
-                        try {
-                          await postImageToFeed(
-                            coverPhotoUrl,
-                            'Atualizou a foto de capa',
-                          );
-                        } catch {}
-                        Alert.alert('Sucesso', 'Foto de capa atualizada!');
-                      } catch (error: any) {
-                        console.error('Erro ao salvar foto de capa:', error);
-                        Alert.alert(
-                          'Erro',
-                          error?.message || 'Falha ao salvar foto de capa',
-                        );
-                      }
-                    }}
-                    style={{
-                      flex: 1,
-                      paddingVertical: 10,
-                      borderRadius: 12,
-                      backgroundColor: '#3b82f6',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Text style={{ fontWeight: '700', color: '#ffffff' }}>
-                      Salvar
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
             <LinearGradient
               colors={['transparent', 'rgba(0,0,0,0.4)']}
               style={styles.coverGradient}
@@ -700,8 +590,7 @@ export default function UserProfileView({
                   ) {
                     prevCoverPhotoRef.current = coverPhoto;
                     prevCoverTransformRef.current = coverTransform;
-                    setCoverPhoto(result.assets[0].uri);
-                    setCoverTransform({ scale: 1, offsetX: 0, offsetY: 0 });
+                    setEditingCoverPhoto(result.assets[0].uri);
                     setCoverEditorVisible(true);
                   }
                 }}
@@ -1292,6 +1181,47 @@ export default function UserProfileView({
           onCancel={() => {
             setEditorVisible(false);
             setSelectedImageUri(null);
+          }}
+        />
+      )}
+
+      {editingCoverPhoto && (
+        <CoverPhotoEditor
+          imageUri={editingCoverPhoto}
+          isVisible={coverEditorVisible}
+          height={COVER_HEIGHT}
+          onSave={async ({ imageUri, scale, offsetX, offsetY }) => {
+            try {
+              const { uploadCoverPhoto } = await import('../utils/api');
+              const { type, name } = guessMime(imageUri);
+              const response = await uploadCoverPhoto({ uri: imageUri, type, name });
+              const BASE_URL =
+                (typeof process !== 'undefined' &&
+                  (process as any).env &&
+                  (process as any).env.EXPO_PUBLIC_API_URL) ||
+                'http://localhost:5050';
+              const coverPhotoUrl = response.cover_photo
+                ? response.cover_photo.startsWith('http')
+                  ? response.cover_photo
+                  : `${BASE_URL}${response.cover_photo}`
+                : imageUri;
+              setCoverPhoto(coverPhotoUrl);
+              setUserData((prev) => ({ ...prev, cover: coverPhotoUrl }));
+              setCoverTransform({ scale, offsetX, offsetY });
+              setCoverEditorVisible(false);
+              setEditingCoverPhoto(null);
+              try {
+                await postImageToFeed(coverPhotoUrl, 'Atualizou a foto de capa');
+              } catch {}
+              Alert.alert('Sucesso', 'Foto de capa atualizada!');
+            } catch (error: any) {
+              console.error('Erro ao salvar foto de capa:', error);
+              Alert.alert('Erro', error?.message || 'Falha ao salvar foto de capa');
+            }
+          }}
+          onCancel={() => {
+            setCoverEditorVisible(false);
+            setEditingCoverPhoto(null);
           }}
         />
       )}
