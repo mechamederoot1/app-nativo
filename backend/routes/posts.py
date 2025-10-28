@@ -95,3 +95,42 @@ def create_post_with_upload(
         user_profile_photo=current.profile_photo,
         user_cover_photo=current.cover_photo,
     )
+
+@router.delete("/{post_id}")
+def delete_post(post_id: int, db: Session = Depends(get_db), current=Depends(get_current_user)):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post não encontrado")
+    if post.user_id != current.id:
+        raise HTTPException(status_code=403, detail="Você não tem permissão para deletar este post")
+    db.delete(post)
+    db.commit()
+    return {"message": "Post deletado com sucesso"}
+
+@router.put("/{post_id}", response_model=PostOut)
+def update_post(
+    post_id: int,
+    payload: PostCreate,
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user),
+):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post não encontrado")
+    if post.user_id != current.id:
+        raise HTTPException(status_code=403, detail="Você não tem permissão para editar este post")
+    post.content = payload.content
+    if payload.media_url:
+        post.media_url = payload.media_url
+    db.commit()
+    db.refresh(post)
+    return PostOut(
+        id=post.id,
+        content=post.content,
+        media_url=post.media_url,
+        created_at=post.created_at,
+        user_id=post.user_id,
+        user_name=f"{post.author.first_name} {post.author.last_name}" if post.author else "Anônimo",
+        user_profile_photo=post.author.profile_photo if post.author else None,
+        user_cover_photo=post.author.cover_photo if post.author else None,
+    )

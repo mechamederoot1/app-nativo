@@ -21,6 +21,7 @@ import PostCard from './PostCard';
 import TopBar from './TopBar';
 import ProfilePhotoEditor from './ProfilePhotoEditor';
 import CoverPhotoEditor, { CoverTransform } from './CoverPhotoEditor';
+import HighlightManager, { Highlight } from './HighlightManager';
 import {
   Heart,
   Home,
@@ -57,9 +58,15 @@ const { width } = getDimensions();
 export type Props = {
   profile: UserProfile;
   editable: boolean;
+  posts?: any[];
+  userId?: number | null;
 };
 
-export default function UserProfileView({ profile, editable }: Props) {
+export default function UserProfileView({
+  profile,
+  editable,
+  posts: externalPosts,
+}: Props) {
   const router = useRouter();
   const [userData, setUserData] = useState(profile);
   const p = userData;
@@ -266,6 +273,11 @@ export default function UserProfileView({ profile, editable }: Props) {
   );
 
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
+  const [highlightManagerVisible, setHighlightManagerVisible] = useState(false);
+  const [editingHighlight, setEditingHighlight] = useState<
+    Highlight | undefined
+  >();
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -392,46 +404,43 @@ export default function UserProfileView({ profile, editable }: Props) {
 
   const myPosts = useMemo(() => {
     if (editable) return posts.filter((x) => x.user === 'Você');
+    if (externalPosts && externalPosts.length > 0) return externalPosts;
     const toSlug = (s: string) =>
       String(s || '')
         .replace(/\s+/g, '')
         .toLowerCase();
     const target = String(p.username || '').toLowerCase();
     return posts.filter((x) => toSlug(x.user) === target);
-  }, [posts, editable, p.username]);
+  }, [posts, editable, p.username, externalPosts]);
 
-  const highlightsData = [
-    {
-      id: 1,
-      name: 'Viagens',
-      image: (Array.isArray(p.highlights) && p.highlights[0]) || undefined,
-      icon: '✈️',
-    },
-    {
-      id: 2,
-      name: 'Família',
-      image: (Array.isArray(p.highlights) && p.highlights[1]) || undefined,
-      icon: '👨‍👩‍👧‍👦',
-    },
-    {
-      id: 3,
-      name: 'Trabalho',
-      image: (Array.isArray(p.highlights) && p.highlights[2]) || undefined,
-      icon: '💼',
-    },
-    {
-      id: 4,
-      name: 'Amigos',
-      image: (Array.isArray(p.highlights) && p.highlights[3]) || undefined,
-      icon: '🎉',
-    },
-    {
-      id: 5,
-      name: 'Hobbies',
-      image: (Array.isArray(p.highlights) && p.highlights[4]) || undefined,
-      icon: '🎮',
-    },
-  ];
+  const handleSaveHighlight = (highlight: Highlight) => {
+    const existingIndex = highlights.findIndex((h) => h.id === highlight.id);
+    if (existingIndex >= 0) {
+      const updatedHighlights = [...highlights];
+      updatedHighlights[existingIndex] = highlight;
+      setHighlights(updatedHighlights);
+    } else {
+      setHighlights([...highlights, highlight]);
+    }
+    setEditingHighlight(undefined);
+  };
+
+  const handleDeleteHighlight = (id: string) => {
+    Alert.alert(
+      'Deletar Destaque',
+      'Tem certeza que deseja deletar este destaque?',
+      [
+        { text: 'Cancelar', onPress: () => {} },
+        {
+          text: 'Deletar',
+          onPress: () => {
+            setHighlights(highlights.filter((h) => h.id !== id));
+          },
+          style: 'destructive',
+        },
+      ],
+    );
+  };
 
   const [ratings, setRatings] = useState({
     confiavel: 142,
@@ -710,7 +719,7 @@ export default function UserProfileView({ profile, editable }: Props) {
                 activeOpacity={userVotes.legal ? 1 : 0.7}
                 onPress={() => handleRating('legal')}
               >
-                <Text style={styles.ratingEmoji}>😎</Text>
+                <Text style={styles.ratingEmoji}>���</Text>
                 <View style={styles.ratingInfo}>
                   <Text
                     style={[
@@ -829,11 +838,6 @@ export default function UserProfileView({ profile, editable }: Props) {
             <View style={styles.highlightsWrapper}>
               <View style={styles.highlightsHeader}>
                 <Text style={styles.highlightsTitle}>Destaques</Text>
-                {editable && (
-                  <TouchableOpacity>
-                    <Text style={styles.highlightsEdit}>Editar</Text>
-                  </TouchableOpacity>
-                )}
               </View>
 
               <ScrollView
@@ -841,31 +845,31 @@ export default function UserProfileView({ profile, editable }: Props) {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.highlightsContainer}
               >
-                {highlightsData.map((highlight) => (
+                {highlights.map((highlight) => (
                   <TouchableOpacity
                     key={highlight.id}
                     style={styles.highlightItem}
                     activeOpacity={0.9}
+                    onLongPress={
+                      editable
+                        ? () => handleDeleteHighlight(highlight.id)
+                        : undefined
+                    }
+                    onPress={
+                      editable
+                        ? () => setEditingHighlight(highlight)
+                        : undefined
+                    }
                   >
                     <View style={styles.highlightImageWrapper}>
-                      {highlight.image ? (
-                        <Image
-                          source={{ uri: highlight.image }}
-                          style={styles.highlightImage}
-                        />
-                      ) : (
-                        <View
-                          style={[
-                            styles.highlightImage,
-                            { backgroundColor: '#e2e8f0' },
-                          ]}
-                        />
-                      )}
+                      <Image
+                        source={{ uri: highlight.cover }}
+                        style={styles.highlightImage}
+                      />
                       <LinearGradient
                         colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.7)']}
                         style={styles.highlightOverlay}
                       />
-                      <Text style={styles.highlightIcon}>{highlight.icon}</Text>
                     </View>
                     <Text style={styles.highlightName}>{highlight.name}</Text>
                   </TouchableOpacity>
@@ -875,6 +879,10 @@ export default function UserProfileView({ profile, editable }: Props) {
                   <TouchableOpacity
                     style={styles.addHighlightItem}
                     activeOpacity={0.8}
+                    onPress={() => {
+                      setEditingHighlight(undefined);
+                      setHighlightManagerVisible(true);
+                    }}
                   >
                     <View style={styles.addHighlightCircle}>
                       <Plus size={18} color="#64748b" strokeWidth={2.5} />
@@ -1255,6 +1263,16 @@ export default function UserProfileView({ profile, editable }: Props) {
           </View>
         </Pressable>
       </Modal>
+
+      <HighlightManager
+        visible={highlightManagerVisible}
+        onClose={() => {
+          setHighlightManagerVisible(false);
+          setEditingHighlight(undefined);
+        }}
+        onSave={handleSaveHighlight}
+        highlight={editingHighlight}
+      />
     </SafeAreaView>
   );
 }

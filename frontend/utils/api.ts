@@ -176,6 +176,10 @@ export type ApiUser = {
   created_at: string;
 };
 
+export async function getCurrentUser(): Promise<ApiUser> {
+  return request('/users/me');
+}
+
 export async function getUserById(id: number | string): Promise<ApiUser> {
   return request(`/users/${id}`);
 }
@@ -190,6 +194,17 @@ export async function searchUsers(query: string): Promise<ApiUser[]> {
     params.append('q', query.trim());
   }
   return request(`/users/search?${params.toString()}`);
+}
+
+export async function deletePost(postId: number | string): Promise<any> {
+  return request(`/posts/${postId}`, { method: 'DELETE' });
+}
+
+export async function updatePost(postId: number | string, content: string, mediaUrl?: string | null): Promise<ApiPost> {
+  return request(`/posts/${postId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ content, media_url: mediaUrl }),
+  });
 }
 
 export function logout() {
