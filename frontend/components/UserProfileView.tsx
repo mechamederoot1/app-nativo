@@ -21,6 +21,7 @@ import PostCard from './PostCard';
 import TopBar from './TopBar';
 import ProfilePhotoEditor from './ProfilePhotoEditor';
 import CoverPhotoEditor, { CoverTransform } from './CoverPhotoEditor';
+import HighlightManager, { Highlight } from './HighlightManager';
 import {
   Heart,
   Home,
