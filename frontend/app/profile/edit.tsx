@@ -602,4 +602,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 16,
   },
+  bottomActionBar: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    zIndex: 50,
+  },
 });
