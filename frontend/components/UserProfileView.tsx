@@ -281,47 +281,80 @@ export default function UserProfileView({
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        if (!editable) return;
-        const api = await import('../utils/api');
-        const token = api.getToken();
-        if (!token) return;
-        const BASE_URL =
-          (typeof process !== 'undefined' &&
-            (process as any).env &&
-            (process as any).env.EXPO_PUBLIC_API_URL) ||
-          'http://localhost:5050';
-        const response = await fetch(`${BASE_URL}/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.ok) {
-          const user = await response.json();
-          const profilePhotoUrl = user.profile_photo
-            ? user.profile_photo.startsWith('http')
-              ? user.profile_photo
-              : `${BASE_URL}${user.profile_photo}`
-            : p.avatar;
-          const coverPhotoUrl = user.cover_photo
-            ? user.cover_photo.startsWith('http')
-              ? user.cover_photo
-              : `${BASE_URL}${user.cover_photo}`
-            : p.cover;
-          setUserData((prev) => ({
-            ...prev,
-            avatar: profilePhotoUrl,
-            cover: coverPhotoUrl,
-            name: `${user.first_name} ${user.last_name}`,
-          }));
-          setProfilePhoto(profilePhotoUrl);
-          setCoverPhoto(coverPhotoUrl);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar dados do usuário:', error);
+  const loadUserData = async () => {
+    try {
+      if (!editable) return;
+      const api = await import('../utils/api');
+      const token = api.getToken();
+      if (!token) return;
+      const BASE_URL =
+        (typeof process !== 'undefined' &&
+          (process as any).env &&
+          (process as any).env.EXPO_PUBLIC_API_URL) ||
+        'http://localhost:5050';
+      const response = await fetch(`${BASE_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const user = await response.json();
+        const profilePhotoUrl = user.profile_photo
+          ? user.profile_photo.startsWith('http')
+            ? user.profile_photo
+            : `${BASE_URL}${user.profile_photo}`
+          : p.avatar;
+        const coverPhotoUrl = user.cover_photo
+          ? user.cover_photo.startsWith('http')
+            ? user.cover_photo
+            : `${BASE_URL}${user.cover_photo}`
+          : p.cover;
+        setUserData((prev) => ({
+          ...prev,
+          avatar: profilePhotoUrl,
+          cover: coverPhotoUrl,
+          name: `${user.first_name} ${user.last_name}`,
+          username: user.username,
+        }));
+        setProfilePhoto(profilePhotoUrl);
+        setCoverPhoto(coverPhotoUrl);
       }
-    };
+    } catch (error) {
+      console.error('Erro ao carregar dados do usuário:', error);
+    }
+  };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await loadUserData();
+      const freshPosts = await import('../utils/api').then(api => api.getPosts());
+      setPosts(freshPosts.map((p: any) => ({
+        id: String(p.id),
+        user: p.user_name,
+        avatar: (p: any) => {
+          const api = require('../utils/api');
+          return api.absoluteUrl(p.user_profile_photo) || undefined;
+        },
+        content: p.content,
+        time: (p: any) => {
+          const { formatPostTime } = require('../utils/time');
+          return formatPostTime(p.created_at);
+        },
+        image: (p: any) => {
+          const api = require('../utils/api');
+          return api.absoluteUrl(p.media_url) || undefined;
+        },
+        likes: 0,
+        liked: false,
+        comments: [],
+      })));
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
     loadUserData();
     const unsub = subscribe(() => setPosts(getPosts()));
     return unsub;
