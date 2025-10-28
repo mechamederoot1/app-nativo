@@ -971,10 +971,20 @@ export default function UserProfileView({
           </View>
 
           <View style={styles.infoGrid}>
-            <View style={styles.infoItem}>
-              <Briefcase size={18} color="#64748b" strokeWidth={2} />
-              <Text style={styles.infoText}>{p.workplace}</Text>
-            </View>
+            {Array.isArray(p.positions) && p.positions.length > 0 ? (
+              p.positions.map((pos, i) => (
+                <View key={`pos_${i}`} style={styles.infoItem}>
+                  <Briefcase size={18} color="#64748b" strokeWidth={2} />
+                  <Text style={styles.infoText}>{`${pos.company}${pos.title ? ' • ' + pos.title : ''}`}</Text>
+                </View>
+              ))
+            ) : (
+              <View style={styles.infoItem}>
+                <Briefcase size={18} color="#64748b" strokeWidth={2} />
+                <Text style={styles.infoText}>{p.workplace}</Text>
+              </View>
+            )}
+
             <View style={styles.infoItem}>
               <MapPin size={18} color="#64748b" strokeWidth={2} />
               <Text style={styles.infoText}>{p.currentCity}</Text>
@@ -994,7 +1004,7 @@ export default function UserProfileView({
             <View style={styles.infoItem}>
               <Mail size={18} color="#64748b" strokeWidth={2} />
               <Text style={[styles.infoText, styles.linkText]}>
-                contato@email.com
+                {p.contact_email || 'contato@email.com'}
               </Text>
             </View>
           </View>
