@@ -428,7 +428,9 @@ export default function EditProfilePage() {
             />
           </View>
         </View>
+      </ScrollView>
 
+      <View style={styles.bottomActionBar}>
         <TouchableOpacity
           onPress={handleSave}
           disabled={saving}
@@ -438,7 +440,8 @@ export default function EditProfilePage() {
             {saving ? 'Salvando...' : 'Salvar alterações'}
           </Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
+
       <BottomNav active="profile" />
     </SafeAreaView>
   );
