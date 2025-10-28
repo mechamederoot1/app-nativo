@@ -39,35 +39,6 @@ export default function SignupScreen() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const generateUsername = useCallback((attempt: number = 0): string => {
-    const base = `${firstName.toLowerCase().replace(/\s+/g, '')}${lastName.toLowerCase().replace(/\s+/g, '')}`;
-    if (base.length === 0) {
-      return `user${Math.floor(Math.random() * 10000)}`;
-    }
-    if (attempt === 0) {
-      return base;
-    }
-    return `${base}${Math.floor(Math.random() * 10000)}`;
-  }, [firstName, lastName]);
-
-  const checkUsername = useCallback(async (name: string) => {
-    if (!name || name.length < 3) {
-      setUsernameStatus(null);
-      setCheckingUsername(false);
-      return;
-    }
-    setCheckingUsername(true);
-    try {
-      const { checkUsernameAvailable } = await import('../../utils/api');
-      const available = await checkUsernameAvailable(name);
-      setUsernameStatus(available ? 'available' : 'taken');
-    } catch (e) {
-      console.error('Erro ao verificar disponibilidade do username:', e);
-      setUsernameStatus(null);
-    } finally {
-      setCheckingUsername(false);
-    }
-  }, []);
 
   useEffect(() => {
     if (step === 1 && firstName && lastName && !username) {
