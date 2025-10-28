@@ -159,70 +159,190 @@ export default function EditProfilePage() {
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
         <Text style={styles.title}>Editar perfil</Text>
 
-        <Text style={styles.label}>Biografia</Text>
-        <TextInput
-          style={styles.inputMultiline}
-          multiline
-          value={bio}
-          onChangeText={setBio}
-          placeholder="Fale sobre você"
-        />
+        {/* SEÇÃO: INFORMAÇÕES PESSOAIS */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Informações Pessoais</Text>
+          
+          <Text style={styles.label}>Biografia</Text>
+          <TextInput
+            style={styles.inputMultiline}
+            multiline
+            value={bio}
+            onChangeText={setBio}
+            placeholder="Fale sobre você"
+          />
 
-        <Text style={styles.label}>Cidade natal</Text>
-        <TextInput
-          style={styles.input}
-          value={hometown}
-          onChangeText={setHometown}
-          placeholder="Cidade natal"
-        />
+          <Text style={styles.label}>Cidade natal</Text>
+          <TextInput
+            style={styles.input}
+            value={hometown}
+            onChangeText={setHometown}
+            placeholder="Cidade natal"
+          />
 
-        <Text style={styles.label}>Cidade atual</Text>
-        <TextInput
-          style={styles.input}
-          value={currentCity}
-          onChangeText={setCurrentCity}
-          placeholder="Cidade atual"
-        />
+          <Text style={styles.label}>Cidade atual</Text>
+          <TextInput
+            style={styles.input}
+            value={currentCity}
+            onChangeText={setCurrentCity}
+            placeholder="Cidade atual"
+          />
 
-        <Text style={styles.label}>Relacionamento</Text>
-        <TextInput
-          style={styles.input}
-          value={relationshipStatus}
-          onChangeText={setRelationshipStatus}
-          placeholder="Estado civil"
-        />
+          <Text style={styles.label}>Estado civil</Text>
+          <TextInput
+            style={styles.input}
+            value={relationshipStatus}
+            onChangeText={setRelationshipStatus}
+            placeholder="Estado civil"
+          />
+        </View>
 
-        <Text style={styles.label}>Contato (email)</Text>
-        <TextInput
-          style={styles.input}
-          value={contactEmail}
-          onChangeText={setContactEmail}
-          placeholder="email@exemplo.com"
-          keyboardType="email-address"
-        />
+        {/* SEÇÃO: CONTATO */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Informações de Contato</Text>
+          
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            value={contactEmail}
+            onChangeText={setContactEmail}
+            placeholder="email@exemplo.com"
+            keyboardType="email-address"
+          />
 
-        <Text style={styles.label}>Contato (telefone)</Text>
-        <TextInput
-          style={styles.input}
-          value={contactPhone}
-          onChangeText={setContactPhone}
-          placeholder="(99) 9 9999-9999"
-          keyboardType="phone-pad"
-        />
+          <Text style={styles.label}>Telefone</Text>
+          <TextInput
+            style={styles.input}
+            value={contactPhone}
+            onChangeText={setContactPhone}
+            placeholder="(99) 9 9999-9999"
+            keyboardType="phone-pad"
+          />
+        </View>
 
-        <View style={{ marginTop: 20, marginBottom: 12 }}>
-          <Text style={[styles.label, { fontWeight: '800', marginBottom: 12 }]}>
-            Visibilidade das Informações Pessoais
-          </Text>
-          <Text style={{ color: '#94a3b8', fontSize: 13, marginBottom: 12 }}>
+        {/* SEÇÃO: TRABALHO */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Informações Profissionais</Text>
+          
+          <Text style={styles.label}>Empresa atual</Text>
+          <TextInput
+            style={styles.input}
+            value={workplaceCompany}
+            onChangeText={setWorkplaceCompany}
+            placeholder="Empresa"
+          />
+
+          <Text style={styles.label}>Cargo atual</Text>
+          <TextInput
+            style={styles.input}
+            value={workplaceTitle}
+            onChangeText={setWorkplaceTitle}
+            placeholder="Cargo"
+          />
+
+          <View style={{ marginTop: 12 }}>
+            <Text style={[styles.label, { fontWeight: '800' }]}>
+              Histórico de cargos e empregos
+            </Text>
+            {positions.map((pos, i) => (
+              <View key={`pos_${i}`} style={styles.rowItem}>
+                <TextInput
+                  placeholder="Empresa"
+                  style={styles.rowInput}
+                  value={pos.company}
+                  onChangeText={(v) => handlePositionChange(i, 'company', v)}
+                />
+                <TextInput
+                  placeholder="Cargo"
+                  style={styles.rowInput}
+                  value={pos.title}
+                  onChangeText={(v) => handlePositionChange(i, 'title', v)}
+                />
+                <View style={styles.dateRow}>
+                  <TextInput
+                    placeholder="Início"
+                    style={styles.rowInputSmall}
+                    value={pos.start}
+                    onChangeText={(v) => handlePositionChange(i, 'start', v)}
+                  />
+                  <TextInput
+                    placeholder="Fim"
+                    style={styles.rowInputSmall}
+                    value={pos.end}
+                    onChangeText={(v) => handlePositionChange(i, 'end', v)}
+                  />
+                </View>
+                <TouchableOpacity
+                  onPress={() => handleRemovePosition(i)}
+                  style={styles.removeBtn}
+                >
+                  <Text style={styles.removeBtnText}>Remover</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+            <TouchableOpacity onPress={handleAddPosition} style={styles.addBtn}>
+              <Text style={styles.addBtnText}>+ Adicionar cargo anterior</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* SEÇÃO: EDUCAÇÃO */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Formação Acadêmica</Text>
+          
+          {education.map((edu, i) => (
+            <View key={`edu_${i}`} style={styles.rowItem}>
+              <TextInput
+                placeholder="Instituição"
+                style={styles.rowInput}
+                value={edu.institution}
+                onChangeText={(v) => handleEducationChange(i, 'institution', v)}
+              />
+              <TextInput
+                placeholder="Grau de instrução"
+                style={styles.rowInput}
+                value={edu.degree}
+                onChangeText={(v) => handleEducationChange(i, 'degree', v)}
+              />
+              <View style={styles.dateRow}>
+                <TextInput
+                  placeholder="Início"
+                  style={styles.rowInputSmall}
+                  value={edu.start}
+                  onChangeText={(v) => handleEducationChange(i, 'start', v)}
+                />
+                <TextInput
+                  placeholder="Fim"
+                  style={styles.rowInputSmall}
+                  value={edu.end}
+                  onChangeText={(v) => handleEducationChange(i, 'end', v)}
+                />
+              </View>
+              <TouchableOpacity
+                onPress={() => handleRemoveEducation(i)}
+                style={styles.removeBtn}
+              >
+                <Text style={styles.removeBtnText}>Remover</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+          <TouchableOpacity onPress={handleAddEducation} style={styles.addBtn}>
+            <Text style={styles.addBtnText}>+ Adicionar formação</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* SEÇÃO: PRIVACIDADE */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Controle de Privacidade</Text>
+          <Text style={styles.privacyDescription}>
             Escolha quais informações deseja mostrar no seu perfil
           </Text>
 
           <View style={styles.visibilityItem}>
-            <View>
+            <View style={styles.visibilityContent}>
               <Text style={styles.visibilityLabel}>Cidade natal</Text>
               <Text style={styles.visibilityDescription}>
-                {showHometown ? 'Visível no perfil' : 'Oculta no perfil'}
+                {showHometown ? 'Visível para todos' : 'Oculta'}
               </Text>
             </View>
             <Switch
@@ -234,10 +354,10 @@ export default function EditProfilePage() {
           </View>
 
           <View style={styles.visibilityItem}>
-            <View>
+            <View style={styles.visibilityContent}>
               <Text style={styles.visibilityLabel}>Cidade atual</Text>
               <Text style={styles.visibilityDescription}>
-                {showCurrentCity ? 'Visível no perfil' : 'Oculta no perfil'}
+                {showCurrentCity ? 'Visível para todos' : 'Oculta'}
               </Text>
             </View>
             <Switch
@@ -249,10 +369,10 @@ export default function EditProfilePage() {
           </View>
 
           <View style={styles.visibilityItem}>
-            <View>
+            <View style={styles.visibilityContent}>
               <Text style={styles.visibilityLabel}>Estado civil</Text>
               <Text style={styles.visibilityDescription}>
-                {showRelationshipStatus ? 'Visível no perfil' : 'Oculta no perfil'}
+                {showRelationshipStatus ? 'Visível para todos' : 'Oculto'}
               </Text>
             </View>
             <Switch
@@ -264,10 +384,10 @@ export default function EditProfilePage() {
           </View>
 
           <View style={styles.visibilityItem}>
-            <View>
+            <View style={styles.visibilityContent}>
               <Text style={styles.visibilityLabel}>Email para contato</Text>
               <Text style={styles.visibilityDescription}>
-                {showContactEmail ? 'Visível no perfil' : 'Oculto no perfil'}
+                {showContactEmail ? 'Visível para todos' : 'Oculto'}
               </Text>
             </View>
             <Switch
@@ -279,10 +399,10 @@ export default function EditProfilePage() {
           </View>
 
           <View style={styles.visibilityItem}>
-            <View>
+            <View style={styles.visibilityContent}>
               <Text style={styles.visibilityLabel}>Telefone para contato</Text>
               <Text style={styles.visibilityDescription}>
-                {showContactPhone ? 'Visível no perfil' : 'Oculto no perfil'}
+                {showContactPhone ? 'Visível para todos' : 'Oculto'}
               </Text>
             </View>
             <Switch
@@ -294,10 +414,10 @@ export default function EditProfilePage() {
           </View>
 
           <View style={styles.visibilityItem}>
-            <View>
-              <Text style={styles.visibilityLabel}>Informações de trabalho</Text>
+            <View style={styles.visibilityContent}>
+              <Text style={styles.visibilityLabel}>Informações profissionais</Text>
               <Text style={styles.visibilityDescription}>
-                {showWorkplace ? 'Visível no perfil' : 'Ocultas no perfil'}
+                {showWorkplace ? 'Visível para todos' : 'Ocultas'}
               </Text>
             </View>
             <Switch
@@ -309,113 +429,13 @@ export default function EditProfilePage() {
           </View>
         </View>
 
-        <Text style={styles.label}>Trabalho - Empresa</Text>
-        <TextInput
-          style={styles.input}
-          value={workplaceCompany}
-          onChangeText={setWorkplaceCompany}
-          placeholder="Empresa"
-        />
-
-        <Text style={styles.label}>Trabalho - Cargo</Text>
-        <TextInput
-          style={styles.input}
-          value={workplaceTitle}
-          onChangeText={setWorkplaceTitle}
-          placeholder="Cargo"
-        />
-
-        <View style={{ marginTop: 12 }}>
-          <Text style={[styles.label, { fontWeight: '800' }]}>
-            Cargos e Empregos
-          </Text>
-          {positions.map((pos, i) => (
-            <View key={`pos_${i}`} style={styles.rowItem}>
-              <TextInput
-                placeholder="Empresa"
-                style={styles.rowInput}
-                value={pos.company}
-                onChangeText={(v) => handlePositionChange(i, 'company', v)}
-              />
-              <TextInput
-                placeholder="Cargo"
-                style={styles.rowInput}
-                value={pos.title}
-                onChangeText={(v) => handlePositionChange(i, 'title', v)}
-              />
-              <TextInput
-                placeholder="Início"
-                style={styles.rowInputSmall}
-                value={pos.start}
-                onChangeText={(v) => handlePositionChange(i, 'start', v)}
-              />
-              <TextInput
-                placeholder="Fim"
-                style={styles.rowInputSmall}
-                value={pos.end}
-                onChangeText={(v) => handlePositionChange(i, 'end', v)}
-              />
-              <TouchableOpacity
-                onPress={() => handleRemovePosition(i)}
-                style={styles.removeBtn}
-              >
-                <Text>Remover</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-          <TouchableOpacity onPress={handleAddPosition} style={styles.addBtn}>
-            <Text>Adicionar cargo</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={{ marginTop: 12 }}>
-          <Text style={[styles.label, { fontWeight: '800' }]}>Formações</Text>
-          {education.map((edu, i) => (
-            <View key={`edu_${i}`} style={styles.rowItem}>
-              <TextInput
-                placeholder="Instituição"
-                style={styles.rowInput}
-                value={edu.institution}
-                onChangeText={(v) => handleEducationChange(i, 'institution', v)}
-              />
-              <TextInput
-                placeholder="Grau"
-                style={styles.rowInput}
-                value={edu.degree}
-                onChangeText={(v) => handleEducationChange(i, 'degree', v)}
-              />
-              <TextInput
-                placeholder="Início"
-                style={styles.rowInputSmall}
-                value={edu.start}
-                onChangeText={(v) => handleEducationChange(i, 'start', v)}
-              />
-              <TextInput
-                placeholder="Fim"
-                style={styles.rowInputSmall}
-                value={edu.end}
-                onChangeText={(v) => handleEducationChange(i, 'end', v)}
-              />
-              <TouchableOpacity
-                onPress={() => handleRemoveEducation(i)}
-                style={styles.removeBtn}
-              >
-                <Text>Remover</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-          <TouchableOpacity onPress={handleAddEducation} style={styles.addBtn}>
-            <Text>Adicionar formação</Text>
-          </TouchableOpacity>
-        </View>
-
         <TouchableOpacity
           onPress={handleSave}
           disabled={saving}
           style={[styles.saveBtn, saving && { opacity: 0.6 }]}
         >
           <Text style={styles.saveBtnText}>
-            {saving ? 'Salvando...' : 'Salvar perfil'}
+            {saving ? 'Salvando...' : 'Salvar alterações'}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -426,27 +446,119 @@ export default function EditProfilePage() {
 
 const styles = StyleSheet.create({
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '800',
-    marginBottom: 12,
+    marginBottom: 20,
     color: '#0f172a',
   },
-  label: { color: '#64748b', marginTop: 8, marginBottom: 6 },
-  input: {
+  section: {
     backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#e6eef8',
+    borderColor: '#e2e8f0',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  label: {
+    color: '#475569',
+    marginTop: 10,
+    marginBottom: 6,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  input: {
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
     padding: 10,
     borderRadius: 8,
+    color: '#0f172a',
+    fontSize: 14,
   },
   inputMultiline: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f8fafc',
     borderWidth: 1,
-    borderColor: '#e6eef8',
+    borderColor: '#e2e8f0',
     padding: 10,
     borderRadius: 8,
     minHeight: 80,
     textAlignVertical: 'top',
+    color: '#0f172a',
+    fontSize: 14,
+  },
+  dateRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 8,
+  },
+  rowItem: {
+    marginBottom: 12,
+    backgroundColor: '#f8fafc',
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  rowInput: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    padding: 8,
+    borderRadius: 6,
+    marginBottom: 6,
+    color: '#0f172a',
+    fontSize: 13,
+  },
+  rowInputSmall: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    padding: 8,
+    borderRadius: 6,
+    flex: 1,
+    color: '#0f172a',
+    fontSize: 13,
+  },
+  removeBtn: {
+    marginTop: 6,
+    alignSelf: 'flex-end',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  removeBtnText: {
+    color: '#e11d48',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  addBtn: {
+    marginTop: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: '#eef2ff',
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#c7d2fe',
+  },
+  addBtnText: {
+    color: '#4f46e5',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  privacyDescription: {
+    color: '#64748b',
+    fontSize: 13,
+    marginBottom: 12,
+    fontStyle: 'italic',
   },
   visibilityItem: {
     flexDirection: 'row',
@@ -459,6 +571,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
+  visibilityContent: {
+    flex: 1,
+    marginRight: 10,
+  },
   visibilityLabel: {
     color: '#0f172a',
     fontWeight: '600',
@@ -466,48 +582,21 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   visibilityDescription: {
-    color: '#94a3b8',
+    color: '#64748b',
     fontSize: 12,
   },
-  rowItem: {
-    marginBottom: 8,
-    backgroundColor: '#fff',
-    padding: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#eef2ff',
-  },
-  rowInput: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#e6eef8',
-    padding: 8,
-    borderRadius: 6,
-    marginBottom: 6,
-  },
-  rowInputSmall: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#e6eef8',
-    padding: 8,
-    borderRadius: 6,
-    width: 100,
-    marginBottom: 6,
-  },
-  removeBtn: { marginTop: 6, alignSelf: 'flex-end' },
-  addBtn: {
-    marginTop: 8,
-    padding: 10,
-    backgroundColor: '#eef2ff',
-    borderRadius: 8,
-    alignItems: 'center',
-  },
   saveBtn: {
-    marginTop: 16,
-    padding: 14,
+    marginTop: 20,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     backgroundColor: '#3b82f6',
     borderRadius: 10,
     alignItems: 'center',
+    marginBottom: 20,
   },
-  saveBtnText: { color: '#fff', fontWeight: '800' },
+  saveBtnText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+  },
 });
