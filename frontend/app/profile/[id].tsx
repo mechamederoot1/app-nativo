@@ -116,6 +116,14 @@ export default function UserProfilePage() {
           connectionsCount: profileDetails?.connections_count ?? 0,
           contact_email: profileDetails?.contact_email ?? '',
 
+          // visibility settings
+          show_hometown: profileDetails?.show_hometown ?? true,
+          show_current_city: profileDetails?.show_current_city ?? true,
+          show_relationship_status: profileDetails?.show_relationship_status ?? true,
+          show_contact_email: profileDetails?.show_contact_email ?? false,
+          show_contact_phone: profileDetails?.show_contact_phone ?? false,
+          show_workplace: profileDetails?.show_workplace ?? true,
+
           // lists
           positions: Array.isArray(profileDetails?.positions)
             ? profileDetails.positions.map((p: any) => ({
