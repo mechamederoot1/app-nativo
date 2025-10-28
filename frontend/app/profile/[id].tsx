@@ -88,19 +88,25 @@ export default function UserProfilePage() {
         }
 
         const mappedProfile = {
-          ...defaultProfileData,
+          // base identity
           name: fullName,
           username: username,
           avatar: user.profile_photo || defaultProfileData.avatar,
           cover: user.cover_photo || defaultProfileData.cover,
-          bio: profileDetails?.bio ?? defaultProfileData.bio,
-          hometown: profileDetails?.hometown ?? defaultProfileData.hometown,
-          currentCity: profileDetails?.current_city ?? defaultProfileData.currentCity,
-          relationshipStatus: profileDetails?.relationship_status ?? defaultProfileData.relationshipStatus,
-          workplace: profileDetails?.workplace_company && profileDetails?.workplace_title ? `${profileDetails.workplace_company} • ${profileDetails.workplace_title}` : (profileDetails?.workplace_company || defaultProfileData.workplace),
-          connectionsCount: profileDetails?.connections_count ?? defaultProfileData.connectionsCount,
-          positions: Array.isArray(profileDetails?.positions) ? profileDetails.positions.map((p: any) => ({ company: p.company, title: p.title, start: p.start, end: p.end })) : defaultProfileData.positions,
-          education: Array.isArray(profileDetails?.education) ? profileDetails.education.map((e: any) => ({ institution: e.institution, degree: e.degree, start: e.start, end: e.end })) : defaultProfileData.education,
+
+          // personal info — prefer saved values, otherwise empty (no mocks)
+          bio: profileDetails?.bio ?? '',
+          hometown: profileDetails?.hometown ?? '',
+          currentCity: profileDetails?.current_city ?? '',
+          relationshipStatus: profileDetails?.relationship_status ?? '',
+          workplace: profileDetails?.workplace_company && profileDetails?.workplace_title ? `${profileDetails.workplace_company} • ${profileDetails.workplace_title}` : (profileDetails?.workplace_company ?? ''),
+          connectionsCount: profileDetails?.connections_count ?? 0,
+
+          // lists
+          positions: Array.isArray(profileDetails?.positions) ? profileDetails.positions.map((p: any) => ({ company: p.company, title: p.title, start: p.start, end: p.end })) : [],
+          education: Array.isArray(profileDetails?.education) ? profileDetails.education.map((e: any) => ({ institution: e.institution, degree: e.degree, start: e.start, end: e.end })) : [],
+
+          // keep placeholder arrays for UI sections that are not yet implemented server-side
           recentFriends: defaultProfileData.recentFriends,
           testimonials: defaultProfileData.testimonials,
           highlights: defaultProfileData.highlights,
