@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Switch,
 } from 'react-native';
 import TopBar from '../../components/TopBar';
 import BottomNav from '../../components/BottomNav';
