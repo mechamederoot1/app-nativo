@@ -68,10 +68,6 @@ export default function SignupScreen() {
   const validateStep1 = () => {
     const e: Record<string, string> = {};
     if (!email.trim() || !validateEmail(email)) e.email = 'E-mail inválido';
-    if (!username.trim() || !validateUsername(username))
-      e.username =
-        'Username deve ter 3-30 caracteres (letras, números, . ou _)';
-    if (usernameStatus === 'taken') e.username = 'Username já está em uso';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
