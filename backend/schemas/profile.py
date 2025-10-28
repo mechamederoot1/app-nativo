@@ -26,6 +26,13 @@ class ProfileBase(BaseModel):
     workplace_title: Optional[str] = None
     connections_count: int = 0
 
+    show_hometown: bool = True
+    show_current_city: bool = True
+    show_relationship_status: bool = True
+    show_contact_email: bool = False
+    show_contact_phone: bool = False
+    show_workplace: bool = True
+
     positions: List[Position] = []
     education: List[Education] = []
 
