@@ -31,12 +31,18 @@ export default function AboutScreen() {
           const profile = await api.getProfileById(slug);
           if (!mounted) return;
           if (profile) {
+            // ensure we have basic user info as fallback
+            let userInfo: any = null;
+            try {
+              userInfo = await api.getUserById(slug);
+            } catch {}
+
             setP((prev) => ({
               ...prev,
-              name: profile.name || prev.name,
-              username: profile.username || slug,
-              avatar: absoluteUrl(profile.contact_photo || profile.profile_photo || prev.avatar) || prev.avatar,
-              cover: absoluteUrl(profile.cover || prev.cover) || prev.cover,
+              name: (userInfo && `${userInfo.first_name} ${userInfo.last_name}`) || prev.name,
+              username: slug,
+              avatar: absoluteUrl((userInfo && userInfo.profile_photo) || profile.profile_photo || prev.avatar) || prev.avatar,
+              cover: absoluteUrl((userInfo && userInfo.cover_photo) || profile.cover || prev.cover) || prev.cover,
               bio: profile.bio ?? prev.bio,
               hometown: profile.hometown ?? prev.hometown,
               currentCity: profile.current_city ?? prev.currentCity,
