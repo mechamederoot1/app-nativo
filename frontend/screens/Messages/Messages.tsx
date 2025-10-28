@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,8 @@ import {
   StyleSheet,
   Image,
   Dimensions,
-  Platform
+  Platform,
+  RefreshControl,
 } from 'react-native';
 import {
   Search,
