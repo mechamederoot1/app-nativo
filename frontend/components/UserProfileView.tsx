@@ -326,27 +326,7 @@ export default function UserProfileView({
     setRefreshing(true);
     try {
       await loadUserData();
-      const freshPosts = await import('../utils/api').then(api => api.getPosts());
-      setPosts(freshPosts.map((p: any) => ({
-        id: String(p.id),
-        user: p.user_name,
-        avatar: (p: any) => {
-          const api = require('../utils/api');
-          return api.absoluteUrl(p.user_profile_photo) || undefined;
-        },
-        content: p.content,
-        time: (p: any) => {
-          const { formatPostTime } = require('../utils/time');
-          return formatPostTime(p.created_at);
-        },
-        image: (p: any) => {
-          const api = require('../utils/api');
-          return api.absoluteUrl(p.media_url) || undefined;
-        },
-        likes: 0,
-        liked: false,
-        comments: [],
-      })));
+      setPosts(getPosts());
     } catch (error) {
       console.error('Erro ao atualizar perfil:', error);
     } finally {
