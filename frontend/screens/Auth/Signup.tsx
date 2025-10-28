@@ -115,16 +115,25 @@ export default function SignupScreen() {
 
   const back = () => setStep((s) => Math.max(0, s - 1));
 
+  const generateUsernameAuto = (): string => {
+    const base = `${firstName.toLowerCase().replace(/\s+/g, '')}${lastName.toLowerCase().replace(/\s+/g, '')}`;
+    if (base.length === 0) {
+      return `user${Math.floor(Math.random() * 100000)}`;
+    }
+    return base;
+  };
+
   const handleCreate = async () => {
     if (!validateStep3()) return;
     try {
       setLoading(true);
+      const generatedUsername = generateUsernameAuto();
       const { signup } = await import('../../utils/api');
       await signup({
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         email: email.trim(),
-        username: username.trim(),
+        username: generatedUsername,
         password,
       });
       router.push('/feed');
