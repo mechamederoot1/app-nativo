@@ -156,7 +156,7 @@ export default function EditProfilePage() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }}>
       <TopBar />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 16 }}>
         <Text style={styles.title}>Editar perfil</Text>
 
         {/* SEÇÃO: INFORMAÇÕES PESSOAIS */}
