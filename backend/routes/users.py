@@ -4,7 +4,7 @@ from database.session import get_db
 from schemas.user import UserBase
 from schemas.post import PostOut
 from dependencies import get_current_user
-from database.models import User, Post
+from database.models import User, Post, UserProfile, UserPosition, UserEducation
 import os
 import uuid
 from pathlib import Path
