@@ -189,68 +189,13 @@ async def emit_post_share(post_id: int, post_author_id: int, sharer_id: int, sha
 
 async def emit_message(receiver_id: int, sender_id: int, sender_name: str, sender_avatar: str = None, message_text: str = ""):
     """Emit new message notification"""
-    db = SessionLocal()
-    try:
-        notification_data = create_notification_data(
-            event_type="message",
-            user_id=receiver_id,
-            actor_id=sender_id,
-            actor_name=sender_name,
-            actor_avatar=sender_avatar,
-            message=message_text[:100]
-        )
-        
-        notification = Notification(
-            user_id=receiver_id,
-            type="message",
-            actor_id=sender_id,
-            data=notification_data
-        )
-        db.add(notification)
-        db.commit()
-        
-        if manager.is_user_online(receiver_id):
-            await sio.emit('message', notification_data, to=[
-                sid for uid, sids in manager.active_connections.items()
-                if uid == receiver_id
-                for sid in sids
-            ])
-    finally:
-        db.close()
+    # This is now handled by the chat_handler.emit_message_to_conversation()
+    pass
 
 
 # ============= REACTION EVENTS =============
 
 async def emit_reaction(target_type: str, target_id: int, target_author_id: int, reactor_id: int, reactor_name: str, reactor_avatar: str = None, reaction: str = "👍"):
     """Emit reaction notification (for comments, posts, etc.)"""
-    db = SessionLocal()
-    try:
-        notification_data = create_notification_data(
-            event_type=f"{target_type}_reaction",
-            user_id=target_author_id,
-            actor_id=reactor_id,
-            actor_name=reactor_name,
-            actor_avatar=reactor_avatar,
-            message=f"{reactor_name} reagiu com {reaction}",
-            related_id=target_id,
-            related_type=target_type
-        )
-        
-        notification = Notification(
-            user_id=target_author_id,
-            type=f"{target_type}_reaction",
-            actor_id=reactor_id,
-            related_id=target_id,
-            data=notification_data
-        )
-        db.add(notification)
-        db.commit()
-        
-        if manager.is_user_online(target_author_id):
-            await sio.emit(f'{target_type}_reaction', notification_data, to=[
-                sid for uid, sids in manager.active_connections.items()
-                if uid == target_author_id
-                for sid in sids
-            ])
-    finally:
-        db.close()
+    # TODO: Implementar reações no sistema de notificações
+    pass
