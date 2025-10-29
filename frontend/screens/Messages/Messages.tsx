@@ -57,64 +57,91 @@ interface ChatItem {
   is_group: boolean;
 }
 
-const ChatItem = ({ item, onPress }) => (
-  <TouchableOpacity
-    style={[
-      styles.chatItem,
-      item.unread && styles.chatItemUnread
-    ]}
-    onPress={onPress}
-    activeOpacity={0.7}
-  >
-    <View style={styles.avatarContainer}>
-      <Image source={{ uri: item.avatar }} style={styles.avatar} />
-      {item.online && <View style={styles.onlineBadge} />}
-    </View>
+const ChatItem = ({ item, onPress }: { item: ChatItem; onPress: () => void }) => {
+  const isUnread = item.unread_count > 0;
 
-    <View style={styles.chatContent}>
-      <View style={styles.chatHeader}>
-        <Text style={[
-          styles.chatName,
-          item.unread && styles.chatNameUnread
-        ]}>
-          {item.name}
-        </Text>
-        <Text style={[
-          styles.chatTime,
-          item.unread && styles.chatTimeUnread
-        ]}>
-          {item.time}
-        </Text>
+  // Get the other participant's name (for DMs)
+  const getDisplayName = () => {
+    if (item.name) return item.name;
+    const otherParticipant = item.participants[0];
+    return `${otherParticipant.first_name} ${otherParticipant.last_name}`;
+  };
+
+  // Get the last message time
+  const getMessageTime = () => {
+    if (!item.latest_message) return '';
+    const messageDate = new Date(item.latest_message.created_at);
+    const now = new Date();
+    const diffMs = now.getTime() - messageDate.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Agora';
+    if (diffMins < 60) return `${diffMins}m`;
+    if (diffHours < 24) return `${diffHours}h`;
+    if (diffDays < 7) return `${diffDays}d`;
+    return messageDate.toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' });
+  };
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.chatItem,
+        isUnread && styles.chatItemUnread
+      ]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <View style={styles.avatarContainer}>
+        <Image
+          source={{
+            uri: item.participants[0]?.profile_photo ||
+              `https://i.pravatar.cc/150?u=${item.participants[0]?.id}`
+          }}
+          style={styles.avatar}
+        />
       </View>
 
-      <View style={styles.chatFooter}>
-        <Text
-          style={[
-            styles.chatMessage,
-            item.unread && styles.chatMessageUnread
-          ]}
-          numberOfLines={2}
-        >
-          {item.message}
-        </Text>
+      <View style={styles.chatContent}>
+        <View style={styles.chatHeader}>
+          <Text style={[
+            styles.chatName,
+            isUnread && styles.chatNameUnread
+          ]}>
+            {getDisplayName()}
+          </Text>
+          <Text style={[
+            styles.chatTime,
+            isUnread && styles.chatTimeUnread
+          ]}>
+            {getMessageTime()}
+          </Text>
+        </View>
 
-        {item.unread ? (
-          item.unreadCount ? (
+        <View style={styles.chatFooter}>
+          <Text
+            style={[
+              styles.chatMessage,
+              isUnread && styles.chatMessageUnread
+            ]}
+            numberOfLines={2}
+          >
+            {item.latest_message?.content || 'Sem mensagens'}
+          </Text>
+
+          {isUnread ? (
             <View style={styles.unreadBadge}>
-              <Text style={styles.unreadCount}>{item.unreadCount}</Text>
+              <Text style={styles.unreadCount}>{item.unread_count}</Text>
             </View>
           ) : (
-            <View style={styles.newBadge}>
-              <Text style={styles.newText}>Novo</Text>
-            </View>
-          )
-        ) : (
-          <CheckCheck size={16} color="#94a3b8" strokeWidth={2} />
-        )}
+            <CheckCheck size={16} color="#94a3b8" strokeWidth={2} />
+          )}
+        </View>
       </View>
-    </View>
-  </TouchableOpacity>
-);
+    </TouchableOpacity>
+  );
+};
 
 export default function MessagesScreen() {
   const [query, setQuery] = useState('');
