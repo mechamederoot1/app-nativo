@@ -1,7 +1,7 @@
-from socketio import AsyncServer
 from websocket.handlers import AuthHandler, ChatHandler, NotificationHandler
 from websocket.services import ConnectionService
 from websocket import sio
+from database.models import User
 
 # Initialize connection service
 connection_service = ConnectionService()
