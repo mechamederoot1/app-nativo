@@ -147,10 +147,16 @@ export default function ChatScreen() {
 
   // Get current user
   useEffect(() => {
-    const user = api.getCurrentUser?.();
-    if (user) {
-      setCurrentUserId(user.id);
-    }
+    (async () => {
+      try {
+        const user = await api.getCurrentUser();
+        if (user) {
+          setCurrentUserId(user.id);
+        }
+      } catch (error) {
+        console.error('Error getting current user:', error);
+      }
+    })();
   }, []);
 
   // Load conversation and messages
