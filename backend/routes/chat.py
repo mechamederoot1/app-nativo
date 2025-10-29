@@ -190,27 +190,30 @@ async def get_messages(
     conversation = chat_service.get_conversation(conversation_id)
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
-    
+
     # Check if user is a participant
     participant_ids = [p.id for p in conversation.participants]
     if current_user.id not in participant_ids:
         raise HTTPException(status_code=403, detail="Not a participant of this conversation")
-    
+
     # Mark messages as read
     chat_service.mark_conversation_messages_as_read(conversation_id, current_user.id)
-    
+
     messages = chat_service.get_messages(conversation_id, limit, offset)
-    
+
     result = []
     for msg in messages:
+        read_by_ids = [u.id for u in msg.read_by]
         result.append({
             "id": msg.id,
             "conversation_id": msg.conversation_id,
             "content": msg.content,
             "content_type": msg.content_type,
             "media_url": msg.media_url,
-            "is_read": msg.is_read,
+            "is_deleted": msg.is_deleted,
+            "edited_at": msg.edited_at.isoformat() if msg.edited_at else None,
             "created_at": msg.created_at.isoformat(),
+            "read_by": read_by_ids,
             "sender": {
                 "id": msg.sender.id,
                 "username": msg.sender.username,
@@ -219,8 +222,157 @@ async def get_messages(
                 "profile_photo": msg.sender.profile_photo,
             }
         })
-    
+
     return result
+
+
+@router.get("/conversations/{conversation_id}/messages/search")
+async def search_messages(
+    conversation_id: int,
+    q: str = Query(..., min_length=1),
+    current_user: User = Depends(get_current_user),
+    limit: int = 20,
+):
+    """Search messages in a conversation"""
+    conversation = chat_service.get_conversation(conversation_id)
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    # Check if user is a participant
+    participant_ids = [p.id for p in conversation.participants]
+    if current_user.id not in participant_ids:
+        raise HTTPException(status_code=403, detail="Not a participant of this conversation")
+
+    messages = chat_service.search_messages(conversation_id, q, limit)
+
+    result = []
+    for msg in messages:
+        read_by_ids = [u.id for u in msg.read_by]
+        result.append({
+            "id": msg.id,
+            "conversation_id": msg.conversation_id,
+            "content": msg.content,
+            "content_type": msg.content_type,
+            "media_url": msg.media_url,
+            "is_deleted": msg.is_deleted,
+            "edited_at": msg.edited_at.isoformat() if msg.edited_at else None,
+            "created_at": msg.created_at.isoformat(),
+            "read_by": read_by_ids,
+            "sender": {
+                "id": msg.sender.id,
+                "username": msg.sender.username,
+                "first_name": msg.sender.first_name,
+                "last_name": msg.sender.last_name,
+                "profile_photo": msg.sender.profile_photo,
+            }
+        })
+
+    return result
+
+
+@router.put("/messages/{message_id}")
+async def update_message(
+    message_id: int,
+    data: MessageUpdate,
+    current_user: User = Depends(get_current_user),
+):
+    """Edit a message"""
+    try:
+        from database.session import SessionLocal
+        db = SessionLocal()
+        message = db.query(Message).filter(Message.id == message_id).first()
+        db.close()
+
+        if not message:
+            raise HTTPException(status_code=404, detail="Message not found")
+
+        # Check if user is the sender
+        if message.sender_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Can only edit your own messages")
+
+        updated = chat_service.edit_message(message_id, data.content)
+
+        read_by_ids = [u.id for u in updated.read_by]
+        return {
+            "id": updated.id,
+            "conversation_id": updated.conversation_id,
+            "content": updated.content,
+            "content_type": updated.content_type,
+            "media_url": updated.media_url,
+            "is_deleted": updated.is_deleted,
+            "edited_at": updated.edited_at.isoformat() if updated.edited_at else None,
+            "created_at": updated.created_at.isoformat(),
+            "read_by": read_by_ids,
+            "sender": {
+                "id": updated.sender.id,
+                "username": updated.sender.username,
+                "first_name": updated.sender.first_name,
+                "last_name": updated.sender.last_name,
+                "profile_photo": updated.sender.profile_photo,
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/messages/{message_id}")
+async def delete_message(
+    message_id: int,
+    current_user: User = Depends(get_current_user),
+):
+    """Delete a message"""
+    try:
+        from database.session import SessionLocal
+        db = SessionLocal()
+        message = db.query(Message).filter(Message.id == message_id).first()
+        db.close()
+
+        if not message:
+            raise HTTPException(status_code=404, detail="Message not found")
+
+        # Check if user is the sender
+        if message.sender_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Can only delete your own messages")
+
+        chat_service.delete_message(message_id)
+
+        return {"message": "Message deleted"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/messages/{message_id}/read")
+async def mark_message_read(
+    message_id: int,
+    current_user: User = Depends(get_current_user),
+):
+    """Mark a message as read"""
+    try:
+        from database.session import SessionLocal
+        db = SessionLocal()
+        message = db.query(Message).filter(Message.id == message_id).first()
+        db.close()
+
+        if not message:
+            raise HTTPException(status_code=404, detail="Message not found")
+
+        # Check if user is a participant of the conversation
+        conversation = chat_service.get_conversation(message.conversation_id)
+        participant_ids = [p.id for p in conversation.participants]
+        if current_user.id not in participant_ids:
+            raise HTTPException(status_code=403, detail="Not a participant of this conversation")
+
+        chat_service.mark_message_as_read(message_id, current_user.id)
+
+        return {"message": "Message marked as read"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/conversations/{user_id}/dm")
