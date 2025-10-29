@@ -3,6 +3,7 @@ from .post import Post
 from .story import Story
 from .highlight import Highlight
 from .profile import UserProfile, UserPosition, UserEducation
+from .friend import FriendRequest, Friendship
 
 __all__ = [
     "User",
@@ -12,4 +13,6 @@ __all__ = [
     "UserProfile",
     "UserPosition",
     "UserEducation",
+    "FriendRequest",
+    "Friendship",
 ]

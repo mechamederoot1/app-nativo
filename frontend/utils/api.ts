@@ -285,11 +285,17 @@ export async function createStory(content?: string, file?: File | Blob) {
     form.append('file', file as any);
     return request('/stories/upload', { method: 'POST', body: form });
   }
-  return request('/stories', { method: 'POST', body: JSON.stringify({ content: content || '' }) });
+  return request('/stories', {
+    method: 'POST',
+    body: JSON.stringify({ content: content || '' }),
+  });
 }
 
 // React Native helper: upload image/video from local URI
-export async function createStoryWithImage(content: string, file: { uri: string; type: string; name?: string }) {
+export async function createStoryWithImage(
+  content: string,
+  file: { uri: string; type: string; name?: string },
+) {
   const form = new FormData();
   form.append('content', content);
   form.append('file', {
@@ -298,6 +304,38 @@ export async function createStoryWithImage(content: string, file: { uri: string;
     name: file.name || 'story.jpg',
   } as any);
   return request('/stories/upload', { method: 'POST', body: form });
+}
+
+// Friends APIs
+export type FriendStatus =
+  | 'none'
+  | 'outgoing_pending'
+  | 'incoming_pending'
+  | 'friends';
+export async function getFriendStatus(
+  userId: number | string,
+): Promise<{ status: FriendStatus; request_id?: number | null }> {
+  return request(`/friends/status/${userId}`);
+}
+export async function sendFriendRequest(userId: number | string) {
+  return request('/friends/requests', {
+    method: 'POST',
+    body: JSON.stringify({ user_id: Number(userId) }),
+  });
+}
+export async function cancelFriendRequest(requestId: number) {
+  return request(`/friends/requests/${requestId}`, { method: 'DELETE' });
+}
+export async function acceptFriendRequest(requestId: number) {
+  return request(`/friends/requests/${requestId}/accept`, { method: 'POST' });
+}
+export async function declineFriendRequest(requestId: number) {
+  return request(`/friends/requests/${requestId}/decline`, { method: 'POST' });
+}
+export async function getUserFriends(
+  userId: number | string,
+): Promise<{ id: number; name: string; avatar?: string | null }[]> {
+  return request(`/users/${userId}/friends`);
 }
 
 export function logout() {

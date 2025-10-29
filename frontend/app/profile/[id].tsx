@@ -8,6 +8,7 @@ import {
   getCurrentUser,
   ApiUser,
   ApiPost,
+  getUserFriends,
 } from '../../utils/api';
 import { profileData as defaultProfileData } from '../../screens/Profile/Data';
 import { getMyProfile, getProfileById } from '../../utils/api';
@@ -57,6 +58,11 @@ export default function UserProfilePage() {
 
         const user = await getUserById(userIdentifier);
         const posts = await getUserPosts(userIdentifier);
+        let friends: { id: number; name: string; avatar?: string | null }[] =
+          [];
+        try {
+          friends = await getUserFriends(userIdentifier);
+        } catch {}
 
         if (!mounted) return;
 
@@ -143,8 +149,12 @@ export default function UserProfilePage() {
               }))
             : [],
 
-          // keep placeholder arrays for UI sections that are not yet implemented server-side
-          recentFriends: defaultProfileData.recentFriends,
+          // lists depending on server data
+          recentFriends: friends.map((f) => ({
+            id: String(f.id),
+            name: f.name,
+            avatar: f.avatar || '',
+          })),
           testimonials: defaultProfileData.testimonials,
           highlights: defaultProfileData.highlights,
         };

@@ -355,3 +355,30 @@ async def get_user_profile(user_id: str, db: Session = Depends(get_db)):
         created_at=prof.created_at,
         updated_at=prof.updated_at,
     )
+
+@router.get("/{user_id}/friends")
+async def get_user_friends(user_id: str, db: Session = Depends(get_db)):
+    user = None
+    if user_id.isdigit():
+        user = db.query(User).filter(User.id == int(user_id)).first()
+    else:
+        user = db.query(User).filter(User.username == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    from database.models import Friendship
+
+    links = db.query(Friendship).filter(Friendship.user_id == user.id).all()
+    friend_ids = [l.friend_id for l in links]
+    if not friend_ids:
+        return []
+    friends = db.query(User).filter(User.id.in_(friend_ids)).all()
+    return [
+        {
+            "id": f.id,
+            "name": f"{f.first_name} {f.last_name}",
+            "avatar": f.profile_photo,
+        }
+        for f in friends
+    ]
