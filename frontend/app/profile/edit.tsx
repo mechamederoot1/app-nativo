@@ -159,275 +159,280 @@ export default function EditProfilePage() {
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 16 }}>
         <Text style={styles.title}>Editar perfil</Text>
 
-        {/* SEÇÃO: INFORMAÇÕES PESSOAIS */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Informações Pessoais</Text>
+        {/* Responsive columns: left (details) and right (privacy) */}
+        <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
+          <View style={{ flex: 2, minWidth: 300 }}>
+            {/* SEÇÃO: INFORMAÇÕES PESSOAIS */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Informações Pessoais</Text>
 
-          <Text style={styles.label}>Biografia</Text>
-          <TextInput
-            style={styles.inputMultiline}
-            multiline
-            value={bio}
-            onChangeText={setBio}
-            placeholder="Fale sobre você"
-          />
+              <Text style={styles.label}>Biografia</Text>
+              <TextInput
+                style={styles.inputMultiline}
+                multiline
+                value={bio}
+                onChangeText={setBio}
+                placeholder="Fale sobre você"
+              />
 
-          <Text style={styles.label}>Cidade natal</Text>
-          <TextInput
-            style={styles.input}
-            value={hometown}
-            onChangeText={setHometown}
-            placeholder="Cidade natal"
-          />
+              <Text style={styles.label}>Cidade natal</Text>
+              <TextInput
+                style={styles.input}
+                value={hometown}
+                onChangeText={setHometown}
+                placeholder="Cidade natal"
+              />
 
-          <Text style={styles.label}>Cidade atual</Text>
-          <TextInput
-            style={styles.input}
-            value={currentCity}
-            onChangeText={setCurrentCity}
-            placeholder="Cidade atual"
-          />
+              <Text style={styles.label}>Cidade atual</Text>
+              <TextInput
+                style={styles.input}
+                value={currentCity}
+                onChangeText={setCurrentCity}
+                placeholder="Cidade atual"
+              />
 
-          <Text style={styles.label}>Estado civil</Text>
-          <TextInput
-            style={styles.input}
-            value={relationshipStatus}
-            onChangeText={setRelationshipStatus}
-            placeholder="Estado civil"
-          />
-        </View>
+              <Text style={styles.label}>Estado civil</Text>
+              <TextInput
+                style={styles.input}
+                value={relationshipStatus}
+                onChangeText={setRelationshipStatus}
+                placeholder="Estado civil"
+              />
+            </View>
 
-        {/* SEÇÃO: CONTATO */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Informações de Contato</Text>
+            {/* SEÇÃO: CONTATO */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Informações de Contato</Text>
 
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            value={contactEmail}
-            onChangeText={setContactEmail}
-            placeholder="email@exemplo.com"
-            keyboardType="email-address"
-          />
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={styles.input}
+                value={contactEmail}
+                onChangeText={setContactEmail}
+                placeholder="email@exemplo.com"
+                keyboardType="email-address"
+              />
 
-          <Text style={styles.label}>Telefone</Text>
-          <TextInput
-            style={styles.input}
-            value={contactPhone}
-            onChangeText={setContactPhone}
-            placeholder="(99) 9 9999-9999"
-            keyboardType="phone-pad"
-          />
-        </View>
+              <Text style={styles.label}>Telefone</Text>
+              <TextInput
+                style={styles.input}
+                value={contactPhone}
+                onChangeText={setContactPhone}
+                placeholder="(99) 9 9999-9999"
+                keyboardType="phone-pad"
+              />
+            </View>
 
-        {/* SEÇÃO: TRABALHO */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Informações Profissionais</Text>
+            {/* SEÇÃO: TRABALHO */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Informações Profissionais</Text>
 
-          <Text style={styles.label}>Empresa atual</Text>
-          <TextInput
-            style={styles.input}
-            value={workplaceCompany}
-            onChangeText={setWorkplaceCompany}
-            placeholder="Empresa"
-          />
+              <Text style={styles.label}>Empresa atual</Text>
+              <TextInput
+                style={styles.input}
+                value={workplaceCompany}
+                onChangeText={setWorkplaceCompany}
+                placeholder="Empresa"
+              />
 
-          <Text style={styles.label}>Cargo atual</Text>
-          <TextInput
-            style={styles.input}
-            value={workplaceTitle}
-            onChangeText={setWorkplaceTitle}
-            placeholder="Cargo"
-          />
+              <Text style={styles.label}>Cargo atual</Text>
+              <TextInput
+                style={styles.input}
+                value={workplaceTitle}
+                onChangeText={setWorkplaceTitle}
+                placeholder="Cargo"
+              />
 
-          <View style={{ marginTop: 12 }}>
-            <Text style={[styles.label, { fontWeight: '800' }]}>
-              Histórico de cargos e empregos
-            </Text>
-            {positions.map((pos, i) => (
-              <View key={`pos_${i}`} style={styles.rowItem}>
-                <TextInput
-                  placeholder="Empresa"
-                  style={styles.rowInput}
-                  value={pos.company}
-                  onChangeText={(v) => handlePositionChange(i, 'company', v)}
-                />
-                <TextInput
-                  placeholder="Cargo"
-                  style={styles.rowInput}
-                  value={pos.title}
-                  onChangeText={(v) => handlePositionChange(i, 'title', v)}
-                />
-                <View style={styles.dateRow}>
-                  <TextInput
-                    placeholder="Início"
-                    style={styles.rowInputSmall}
-                    value={pos.start}
-                    onChangeText={(v) => handlePositionChange(i, 'start', v)}
-                  />
-                  <TextInput
-                    placeholder="Fim"
-                    style={styles.rowInputSmall}
-                    value={pos.end}
-                    onChangeText={(v) => handlePositionChange(i, 'end', v)}
-                  />
-                </View>
-                <TouchableOpacity
-                  onPress={() => handleRemovePosition(i)}
-                  style={styles.removeBtn}
-                >
-                  <Text style={styles.removeBtnText}>Remover</Text>
+              <View style={{ marginTop: 12 }}>
+                <Text style={[styles.label, { fontWeight: '800' }]}>
+                  Histórico de cargos e empregos
+                </Text>
+                {positions.map((pos, i) => (
+                  <View key={`pos_${i}`} style={styles.rowItem}>
+                    <TextInput
+                      placeholder="Empresa"
+                      style={styles.rowInput}
+                      value={pos.company}
+                      onChangeText={(v) => handlePositionChange(i, 'company', v)}
+                    />
+                    <TextInput
+                      placeholder="Cargo"
+                      style={styles.rowInput}
+                      value={pos.title}
+                      onChangeText={(v) => handlePositionChange(i, 'title', v)}
+                    />
+                    <View style={styles.dateRow}>
+                      <TextInput
+                        placeholder="Início"
+                        style={styles.rowInputSmall}
+                        value={pos.start}
+                        onChangeText={(v) => handlePositionChange(i, 'start', v)}
+                      />
+                      <TextInput
+                        placeholder="Fim"
+                        style={styles.rowInputSmall}
+                        value={pos.end}
+                        onChangeText={(v) => handlePositionChange(i, 'end', v)}
+                      />
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => handleRemovePosition(i)}
+                      style={styles.removeBtn}
+                    >
+                      <Text style={styles.removeBtnText}>Remover</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                <TouchableOpacity onPress={handleAddPosition} style={styles.addBtn}>
+                  <Text style={styles.addBtnText}>+ Adicionar cargo anterior</Text>
                 </TouchableOpacity>
               </View>
-            ))}
-            <TouchableOpacity onPress={handleAddPosition} style={styles.addBtn}>
-              <Text style={styles.addBtnText}>+ Adicionar cargo anterior</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+            </View>
 
-        {/* SEÇÃO: EDUCAÇÃO */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Formação Acadêmica</Text>
+            {/* SEÇÃO: EDUCAÇÃO */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Formação Acadêmica</Text>
 
-          {education.map((edu, i) => (
-            <View key={`edu_${i}`} style={styles.rowItem}>
-              <TextInput
-                placeholder="Instituição"
-                style={styles.rowInput}
-                value={edu.institution}
-                onChangeText={(v) => handleEducationChange(i, 'institution', v)}
-              />
-              <TextInput
-                placeholder="Grau de instrução"
-                style={styles.rowInput}
-                value={edu.degree}
-                onChangeText={(v) => handleEducationChange(i, 'degree', v)}
-              />
-              <View style={styles.dateRow}>
-                <TextInput
-                  placeholder="Início"
-                  style={styles.rowInputSmall}
-                  value={edu.start}
-                  onChangeText={(v) => handleEducationChange(i, 'start', v)}
-                />
-                <TextInput
-                  placeholder="Fim"
-                  style={styles.rowInputSmall}
-                  value={edu.end}
-                  onChangeText={(v) => handleEducationChange(i, 'end', v)}
-                />
-              </View>
-              <TouchableOpacity
-                onPress={() => handleRemoveEducation(i)}
-                style={styles.removeBtn}
-              >
-                <Text style={styles.removeBtnText}>Remover</Text>
+              {education.map((edu, i) => (
+                <View key={`edu_${i}`} style={styles.rowItem}>
+                  <TextInput
+                    placeholder="Instituição"
+                    style={styles.rowInput}
+                    value={edu.institution}
+                    onChangeText={(v) => handleEducationChange(i, 'institution', v)}
+                  />
+                  <TextInput
+                    placeholder="Grau de instrução"
+                    style={styles.rowInput}
+                    value={edu.degree}
+                    onChangeText={(v) => handleEducationChange(i, 'degree', v)}
+                  />
+                  <View style={styles.dateRow}>
+                    <TextInput
+                      placeholder="Início"
+                      style={styles.rowInputSmall}
+                      value={edu.start}
+                      onChangeText={(v) => handleEducationChange(i, 'start', v)}
+                    />
+                    <TextInput
+                      placeholder="Fim"
+                      style={styles.rowInputSmall}
+                      value={edu.end}
+                      onChangeText={(v) => handleEducationChange(i, 'end', v)}
+                    />
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => handleRemoveEducation(i)}
+                    style={styles.removeBtn}
+                  >
+                    <Text style={styles.removeBtnText}>Remover</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+              <TouchableOpacity onPress={handleAddEducation} style={styles.addBtn}>
+                <Text style={styles.addBtnText}>+ Adicionar formação</Text>
               </TouchableOpacity>
             </View>
-          ))}
-          <TouchableOpacity onPress={handleAddEducation} style={styles.addBtn}>
-            <Text style={styles.addBtnText}>+ Adicionar formação</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* SEÇÃO: PRIVACIDADE */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Controle de Privacidade</Text>
-          <Text style={styles.privacyDescription}>
-            Escolha quais informações deseja mostrar no seu perfil
-          </Text>
-
-          <View style={styles.visibilityItem}>
-            <View style={styles.visibilityContent}>
-              <Text style={styles.visibilityLabel}>Cidade natal</Text>
-              <Text style={styles.visibilityDescription}>
-                {showHometown ? 'Visível para todos' : 'Oculta'}
-              </Text>
-            </View>
-            <Switch
-              value={showHometown}
-              onValueChange={setShowHometown}
-              trackColor={{ false: '#cbd5e1', true: '#86efac' }}
-              thumbColor={showHometown ? '#22c55e' : '#e2e8f0'}
-            />
           </View>
 
-          <View style={styles.visibilityItem}>
-            <View style={styles.visibilityContent}>
-              <Text style={styles.visibilityLabel}>Cidade atual</Text>
-              <Text style={styles.visibilityDescription}>
-                {showCurrentCity ? 'Visível para todos' : 'Oculta'}
+          {/* Right column: Privacy controls */}
+          <View style={{ flex: 1, minWidth: 240 }}>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Controle de Privacidade</Text>
+              <Text style={styles.privacyDescription}>
+                Escolha quais informações deseja mostrar no seu perfil
               </Text>
-            </View>
-            <Switch
-              value={showCurrentCity}
-              onValueChange={setShowCurrentCity}
-              trackColor={{ false: '#cbd5e1', true: '#86efac' }}
-              thumbColor={showCurrentCity ? '#22c55e' : '#e2e8f0'}
-            />
-          </View>
 
-          <View style={styles.visibilityItem}>
-            <View style={styles.visibilityContent}>
-              <Text style={styles.visibilityLabel}>Estado civil</Text>
-              <Text style={styles.visibilityDescription}>
-                {showRelationshipStatus ? 'Visível para todos' : 'Oculto'}
-              </Text>
-            </View>
-            <Switch
-              value={showRelationshipStatus}
-              onValueChange={setShowRelationshipStatus}
-              trackColor={{ false: '#cbd5e1', true: '#86efac' }}
-              thumbColor={showRelationshipStatus ? '#22c55e' : '#e2e8f0'}
-            />
-          </View>
+              <View style={styles.visibilityItem}>
+                <View style={styles.visibilityContent}>
+                  <Text style={styles.visibilityLabel}>Cidade natal</Text>
+                  <Text style={styles.visibilityDescription}>
+                    {showHometown ? 'Visível para todos' : 'Oculta'}
+                  </Text>
+                </View>
+                <Switch
+                  value={showHometown}
+                  onValueChange={setShowHometown}
+                  trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+                  thumbColor={showHometown ? '#22c55e' : '#e2e8f0'}
+                />
+              </View>
 
-          <View style={styles.visibilityItem}>
-            <View style={styles.visibilityContent}>
-              <Text style={styles.visibilityLabel}>Email para contato</Text>
-              <Text style={styles.visibilityDescription}>
-                {showContactEmail ? 'Visível para todos' : 'Oculto'}
-              </Text>
-            </View>
-            <Switch
-              value={showContactEmail}
-              onValueChange={setShowContactEmail}
-              trackColor={{ false: '#cbd5e1', true: '#86efac' }}
-              thumbColor={showContactEmail ? '#22c55e' : '#e2e8f0'}
-            />
-          </View>
+              <View style={styles.visibilityItem}>
+                <View style={styles.visibilityContent}>
+                  <Text style={styles.visibilityLabel}>Cidade atual</Text>
+                  <Text style={styles.visibilityDescription}>
+                    {showCurrentCity ? 'Visível para todos' : 'Oculta'}
+                  </Text>
+                </View>
+                <Switch
+                  value={showCurrentCity}
+                  onValueChange={setShowCurrentCity}
+                  trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+                  thumbColor={showCurrentCity ? '#22c55e' : '#e2e8f0'}
+                />
+              </View>
 
-          <View style={styles.visibilityItem}>
-            <View style={styles.visibilityContent}>
-              <Text style={styles.visibilityLabel}>Telefone para contato</Text>
-              <Text style={styles.visibilityDescription}>
-                {showContactPhone ? 'Visível para todos' : 'Oculto'}
-              </Text>
-            </View>
-            <Switch
-              value={showContactPhone}
-              onValueChange={setShowContactPhone}
-              trackColor={{ false: '#cbd5e1', true: '#86efac' }}
-              thumbColor={showContactPhone ? '#22c55e' : '#e2e8f0'}
-            />
-          </View>
+              <View style={styles.visibilityItem}>
+                <View style={styles.visibilityContent}>
+                  <Text style={styles.visibilityLabel}>Estado civil</Text>
+                  <Text style={styles.visibilityDescription}>
+                    {showRelationshipStatus ? 'Visível para todos' : 'Oculto'}
+                  </Text>
+                </View>
+                <Switch
+                  value={showRelationshipStatus}
+                  onValueChange={setShowRelationshipStatus}
+                  trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+                  thumbColor={showRelationshipStatus ? '#22c55e' : '#e2e8f0'}
+                />
+              </View>
 
-          <View style={styles.visibilityItem}>
-            <View style={styles.visibilityContent}>
-              <Text style={styles.visibilityLabel}>
-                Informações profissionais
-              </Text>
-              <Text style={styles.visibilityDescription}>
-                {showWorkplace ? 'Visível para todos' : 'Ocultas'}
-              </Text>
+              <View style={styles.visibilityItem}>
+                <View style={styles.visibilityContent}>
+                  <Text style={styles.visibilityLabel}>Email para contato</Text>
+                  <Text style={styles.visibilityDescription}>
+                    {showContactEmail ? 'Visível para todos' : 'Oculto'}
+                  </Text>
+                </View>
+                <Switch
+                  value={showContactEmail}
+                  onValueChange={setShowContactEmail}
+                  trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+                  thumbColor={showContactEmail ? '#22c55e' : '#e2e8f0'}
+                />
+              </View>
+
+              <View style={styles.visibilityItem}>
+                <View style={styles.visibilityContent}>
+                  <Text style={styles.visibilityLabel}>Telefone para contato</Text>
+                  <Text style={styles.visibilityDescription}>
+                    {showContactPhone ? 'Visível para todos' : 'Oculto'}
+                  </Text>
+                </View>
+                <Switch
+                  value={showContactPhone}
+                  onValueChange={setShowContactPhone}
+                  trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+                  thumbColor={showContactPhone ? '#22c55e' : '#e2e8f0'}
+                />
+              </View>
+
+              <View style={styles.visibilityItem}>
+                <View style={styles.visibilityContent}>
+                  <Text style={styles.visibilityLabel}>Informações profissionais</Text>
+                  <Text style={styles.visibilityDescription}>
+                    {showWorkplace ? 'Visível para todos' : 'Ocultas'}
+                  </Text>
+                </View>
+                <Switch
+                  value={showWorkplace}
+                  onValueChange={setShowWorkplace}
+                  trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+                  thumbColor={showWorkplace ? '#22c55e' : '#e2e8f0'}
+                />
+              </View>
             </View>
-            <Switch
-              value={showWorkplace}
-              onValueChange={setShowWorkplace}
-              trackColor={{ false: '#cbd5e1', true: '#86efac' }}
-              thumbColor={showWorkplace ? '#22c55e' : '#e2e8f0'}
-            />
           </View>
         </View>
       </ScrollView>
