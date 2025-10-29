@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getUnreadVisitCount } from '../utils/api';
 
 type UnreadContextType = {
   unreadMessages: number;
@@ -15,11 +16,27 @@ type UnreadContextType = {
 const UnreadContext = createContext<UnreadContextType | undefined>(undefined);
 
 export function UnreadProvider({ children }: { children: React.ReactNode }) {
-  // mock initial counts
-  const [unreadMessages, setUnreadMessagesState] = useState<number>(2);
-  const [unreadVisits, setUnreadVisitsState] = useState<number>(1);
-  const [unreadNotifications, setUnreadNotificationsState] =
-    useState<number>(3);
+  // mock initial counts for messages and notifications
+  const [unreadMessages, setUnreadMessagesState] = useState<number>(0);
+  const [unreadVisits, setUnreadVisitsState] = useState<number>(0);
+  const [unreadNotifications, setUnreadNotificationsState] = useState<number>(0);
+
+  // Load unread visits count on mount
+  useEffect(() => {
+    const loadVisitCount = async () => {
+      try {
+        const result = await getUnreadVisitCount();
+        setUnreadVisitsState(result.unread_visits);
+      } catch (error) {
+        console.error('Error loading unread visits count:', error);
+      }
+    };
+
+    loadVisitCount();
+    // Refresh visit count every 30 seconds
+    const interval = setInterval(loadVisitCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const markMessagesRead = () => setUnreadMessagesState(0);
   const markVisitsRead = () => setUnreadVisitsState(0);
