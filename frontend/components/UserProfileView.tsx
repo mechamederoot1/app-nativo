@@ -46,7 +46,14 @@ import {
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { getPosts, subscribe, toggleLike } from '../store/posts';
-import { getFriendStatus, sendFriendRequest, cancelFriendRequest, acceptFriendRequest, declineFriendRequest, getUserFriends } from '../utils/api';
+import {
+  getFriendStatus,
+  sendFriendRequest,
+  cancelFriendRequest,
+  acceptFriendRequest,
+  declineFriendRequest,
+  getUserFriends,
+} from '../utils/api';
 import type { UserProfile } from '../screens/Profile/Data';
 
 const getDimensions = () => {
@@ -118,12 +125,19 @@ export default function UserProfileView({
       if (!friendStatus.requestId || !userId) return;
       await acceptFriendRequest(friendStatus.requestId);
       setFriendStatus({ status: 'friends', requestId: null });
-      setUserData((prev) => ({ ...prev, connectionsCount: (prev.connectionsCount || 0) + 1 }));
+      setUserData((prev) => ({
+        ...prev,
+        connectionsCount: (prev.connectionsCount || 0) + 1,
+      }));
       try {
         const friends = await getUserFriends(userId);
         setUserData((prev) => ({
           ...prev,
-          recentFriends: friends.map((f) => ({ id: String(f.id), name: f.name, avatar: f.avatar || '' })),
+          recentFriends: friends.map((f) => ({
+            id: String(f.id),
+            name: f.name,
+            avatar: f.avatar || '',
+          })),
         }));
       } catch {}
     } catch (e: any) {
@@ -141,7 +155,10 @@ export default function UserProfileView({
     }
   };
 
-  const [friendStatus, setFriendStatus] = useState<{ status: 'none' | 'outgoing_pending' | 'incoming_pending' | 'friends'; requestId?: number | null }>({ status: 'none', requestId: null });
+  const [friendStatus, setFriendStatus] = useState<{
+    status: 'none' | 'outgoing_pending' | 'incoming_pending' | 'friends';
+    requestId?: number | null;
+  }>({ status: 'none', requestId: null });
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -150,10 +167,15 @@ export default function UserProfileView({
         if (!userId) return;
         const data = await getFriendStatus(userId);
         if (!mounted) return;
-        setFriendStatus({ status: data.status, requestId: (data as any).request_id ?? null });
+        setFriendStatus({
+          status: data.status,
+          requestId: (data as any).request_id ?? null,
+        });
       } catch {}
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [editable, userId]);
 
   const AvatarPlaceholder = () => (
@@ -815,40 +837,77 @@ export default function UserProfileView({
                     <Edit3 size={16} color="#ffffff" strokeWidth={2.5} />
                     <Text style={styles.primaryBtnText}>Editar perfil</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.85}>
+                  <TouchableOpacity
+                    style={styles.secondaryBtn}
+                    activeOpacity={0.85}
+                  >
                     <Plus size={18} color="#3b82f6" strokeWidth={2.5} />
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.85}>
+                  <TouchableOpacity
+                    style={styles.secondaryBtn}
+                    activeOpacity={0.85}
+                  >
                     <MoreVertical size={18} color="#3b82f6" strokeWidth={2.5} />
                   </TouchableOpacity>
                 </>
               ) : (
                 <>
                   {friendStatus.status === 'none' && (
-                    <TouchableOpacity style={styles.primaryBtn} activeOpacity={0.85} onPress={handleSendInvite}>
+                    <TouchableOpacity
+                      style={styles.primaryBtn}
+                      activeOpacity={0.85}
+                      onPress={handleSendInvite}
+                    >
                       <UserPlus size={16} color="#ffffff" strokeWidth={2.5} />
                       <Text style={styles.primaryBtnText}>Adicionar</Text>
                     </TouchableOpacity>
                   )}
                   {friendStatus.status === 'outgoing_pending' && (
-                    <TouchableOpacity style={styles.primaryBtn} activeOpacity={0.85} onPress={handleCancelInvite}>
+                    <TouchableOpacity
+                      style={styles.primaryBtn}
+                      activeOpacity={0.85}
+                      onPress={handleCancelInvite}
+                    >
                       <UserPlus size={16} color="#ffffff" strokeWidth={2.5} />
-                      <Text style={styles.primaryBtnText}>Cancelar convite</Text>
+                      <Text style={styles.primaryBtnText}>
+                        Cancelar convite
+                      </Text>
                     </TouchableOpacity>
                   )}
                   {friendStatus.status === 'incoming_pending' && (
                     <>
-                      <TouchableOpacity style={styles.primaryBtn} activeOpacity={0.85} onPress={handleAcceptInvite}>
-                        <UserCheck size={16} color="#ffffff" strokeWidth={2.5} />
+                      <TouchableOpacity
+                        style={styles.primaryBtn}
+                        activeOpacity={0.85}
+                        onPress={handleAcceptInvite}
+                      >
+                        <UserCheck
+                          size={16}
+                          color="#ffffff"
+                          strokeWidth={2.5}
+                        />
                         <Text style={styles.primaryBtnText}>Aceitar</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity activeOpacity={0.85} onPress={handleDeclineInvite} style={{ paddingHorizontal: 12, height: 42, justifyContent: 'center' }}>
-                        <Text style={{ color: '#ef4444', fontWeight: '600' }}>Recusar</Text>
+                      <TouchableOpacity
+                        activeOpacity={0.85}
+                        onPress={handleDeclineInvite}
+                        style={{
+                          paddingHorizontal: 12,
+                          height: 42,
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text style={{ color: '#ef4444', fontWeight: '600' }}>
+                          Recusar
+                        </Text>
                       </TouchableOpacity>
                     </>
                   )}
                   {friendStatus.status === 'friends' && (
-                    <TouchableOpacity style={styles.primaryBtn} activeOpacity={1}>
+                    <TouchableOpacity
+                      style={styles.primaryBtn}
+                      activeOpacity={1}
+                    >
                       <UserCheck size={16} color="#ffffff" strokeWidth={2.5} />
                       <Text style={styles.primaryBtnText}>Amigos</Text>
                     </TouchableOpacity>
@@ -859,9 +918,16 @@ export default function UserProfileView({
                     activeOpacity={0.85}
                     onPress={() => router.push('/messages')}
                   >
-                    <MessageCircle size={18} color="#3b82f6" strokeWidth={2.5} />
+                    <MessageCircle
+                      size={18}
+                      color="#3b82f6"
+                      strokeWidth={2.5}
+                    />
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.85}>
+                  <TouchableOpacity
+                    style={styles.secondaryBtn}
+                    activeOpacity={0.85}
+                  >
                     <MoreVertical size={18} color="#3b82f6" strokeWidth={2.5} />
                   </TouchableOpacity>
                 </>

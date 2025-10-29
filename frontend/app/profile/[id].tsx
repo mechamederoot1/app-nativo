@@ -58,7 +58,8 @@ export default function UserProfilePage() {
 
         const user = await getUserById(userIdentifier);
         const posts = await getUserPosts(userIdentifier);
-        let friends: { id: number; name: string; avatar?: string | null }[] = [];
+        let friends: { id: number; name: string; avatar?: string | null }[] =
+          [];
         try {
           friends = await getUserFriends(userIdentifier);
         } catch {}
@@ -149,7 +150,11 @@ export default function UserProfilePage() {
             : [],
 
           // lists depending on server data
-          recentFriends: friends.map((f) => ({ id: String(f.id), name: f.name, avatar: f.avatar || '' })),
+          recentFriends: friends.map((f) => ({
+            id: String(f.id),
+            name: f.name,
+            avatar: f.avatar || '',
+          })),
           testimonials: defaultProfileData.testimonials,
           highlights: defaultProfileData.highlights,
         };
