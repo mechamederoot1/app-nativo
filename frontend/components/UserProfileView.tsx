@@ -676,7 +676,7 @@ export default function UserProfileView({
                 activeOpacity={userVotes.legal ? 1 : 0.7}
                 onPress={() => handleRating('legal')}
               >
-                <Text style={styles.ratingEmoji}>���</Text>
+                <Text style={styles.ratingEmoji}>😎</Text>
                 <View style={styles.ratingInfo}>
                   <Text
                     style={[
