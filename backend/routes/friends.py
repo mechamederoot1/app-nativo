@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime
+import asyncio
 
 from database.session import get_db
 from dependencies import get_current_user
 from database.models import User, FriendRequest, Friendship, UserProfile
 from schemas.friend import FriendRequestCreate, FriendRequestOut, FriendStatusOut, IncomingFriendRequestOut
+from core.websocket import emit_friend_request_notification, emit_friend_request_accepted
 
 router = APIRouter()
 
