@@ -1,7 +1,7 @@
 from websocket.handlers import AuthHandler, ChatHandler, NotificationHandler
 from websocket.services import ConnectionService
 from websocket import sio
-from database.models import User
+from database.models import User, Message
 
 # Initialize connection service
 connection_service = ConnectionService()
