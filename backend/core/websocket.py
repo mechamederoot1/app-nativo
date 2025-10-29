@@ -4,7 +4,7 @@ from jose import JWTError, jwt
 from typing import Optional
 from core.config import settings
 from database.session import SessionLocal
-from database.models import User, Visit, FriendRequest, Notification, Post, Comment
+from database.models import User, Visit, FriendRequest, Notification, Post
 from websocket_manager import manager, create_notification_data
 from datetime import datetime
 
