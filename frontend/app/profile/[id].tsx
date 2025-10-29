@@ -71,6 +71,15 @@ export default function UserProfilePage() {
         setEditable(isOwnProfile);
         setUserId(user.id);
 
+        // Record visit if viewing someone else's profile
+        if (!isOwnProfile && currentUserId) {
+          try {
+            await recordProfileVisit(user.id);
+          } catch (error) {
+            console.error('Error recording visit:', error);
+          }
+        }
+
         const fullName = `${user.first_name} ${user.last_name}`;
         const username =
           user.username ||
