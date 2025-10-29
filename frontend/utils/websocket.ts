@@ -77,7 +77,7 @@ const notificationHandlers: Map<string, Set<NotificationHandler>> = new Map();
 
 export function onNotification(
   eventType: string,
-  handler: NotificationHandler
+  handler: NotificationHandler,
 ) {
   if (!socket) return;
 
@@ -104,7 +104,7 @@ export function onNotification(
 
 export function offNotification(
   eventType: string,
-  handler?: NotificationHandler
+  handler?: NotificationHandler,
 ) {
   if (!notificationHandlers.has(eventType)) return;
 

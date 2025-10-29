@@ -14,11 +14,7 @@ import {
 import { useRouter } from 'expo-router';
 import TopBar from '../components/TopBar';
 import BottomNav from '../components/BottomNav';
-import {
-  ChevronRight,
-  UserPlus,
-  Clock,
-} from 'lucide-react-native';
+import { ChevronRight, UserPlus, Clock } from 'lucide-react-native';
 import {
   getProfileVisits,
   getCurrentUser,
@@ -37,7 +33,9 @@ const { width } = getDimensions();
 
 export default function VisitsScreen() {
   const router = useRouter();
-  const [timeFilter, setTimeFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
+  const [timeFilter, setTimeFilter] = useState<
+    'all' | 'today' | 'week' | 'month'
+  >('all');
   const [visits, setVisits] = useState<VisitorInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<number | null>(null);
@@ -64,11 +62,13 @@ export default function VisitsScreen() {
     try {
       setProcessingId(visitorId);
       await sendFriendRequest(visitorId);
-      setVisits(visits.map(v => 
-        v.visitor_id === visitorId 
-          ? { ...v, has_sent_friend_request: true }
-          : v
-      ));
+      setVisits(
+        visits.map((v) =>
+          v.visitor_id === visitorId
+            ? { ...v, has_sent_friend_request: true }
+            : v,
+        ),
+      );
     } catch (error) {
       console.error('Error sending friend request:', error);
     } finally {
@@ -118,7 +118,9 @@ export default function VisitsScreen() {
               item.has_sent_friend_request && styles.addFriendBtnDisabled,
             ]}
             onPress={() => handleSendFriendRequest(item.visitor_id)}
-            disabled={processingId === item.visitor_id || item.has_sent_friend_request}
+            disabled={
+              processingId === item.visitor_id || item.has_sent_friend_request
+            }
           >
             {processingId === item.visitor_id ? (
               <ActivityIndicator size="small" color="#0856d6" />
@@ -132,7 +134,8 @@ export default function VisitsScreen() {
                 <Text
                   style={[
                     styles.addFriendText,
-                    item.has_sent_friend_request && styles.addFriendTextDisabled,
+                    item.has_sent_friend_request &&
+                      styles.addFriendTextDisabled,
                   ]}
                 >
                   {item.has_sent_friend_request ? 'Enviado' : 'Adicionar'}
@@ -155,37 +158,69 @@ export default function VisitsScreen() {
         {/* Filtros de Tempo */}
         <View style={styles.filters}>
           <TouchableOpacity
-            style={[styles.filterBtn, timeFilter === 'all' && styles.filterActive]}
+            style={[
+              styles.filterBtn,
+              timeFilter === 'all' && styles.filterActive,
+            ]}
             onPress={() => setTimeFilter('all')}
           >
-            <Text style={[styles.filterText, timeFilter === 'all' && styles.filterTextActive]}>
+            <Text
+              style={[
+                styles.filterText,
+                timeFilter === 'all' && styles.filterTextActive,
+              ]}
+            >
               Todas
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.filterBtn, timeFilter === 'today' && styles.filterActive]}
+            style={[
+              styles.filterBtn,
+              timeFilter === 'today' && styles.filterActive,
+            ]}
             onPress={() => setTimeFilter('today')}
           >
-            <Text style={[styles.filterText, timeFilter === 'today' && styles.filterTextActive]}>
+            <Text
+              style={[
+                styles.filterText,
+                timeFilter === 'today' && styles.filterTextActive,
+              ]}
+            >
               Hoje
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.filterBtn, timeFilter === 'week' && styles.filterActive]}
+            style={[
+              styles.filterBtn,
+              timeFilter === 'week' && styles.filterActive,
+            ]}
             onPress={() => setTimeFilter('week')}
           >
-            <Text style={[styles.filterText, timeFilter === 'week' && styles.filterTextActive]}>
+            <Text
+              style={[
+                styles.filterText,
+                timeFilter === 'week' && styles.filterTextActive,
+              ]}
+            >
               Essa semana
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.filterBtn, timeFilter === 'month' && styles.filterActive]}
+            style={[
+              styles.filterBtn,
+              timeFilter === 'month' && styles.filterActive,
+            ]}
             onPress={() => setTimeFilter('month')}
           >
-            <Text style={[styles.filterText, timeFilter === 'month' && styles.filterTextActive]}>
+            <Text
+              style={[
+                styles.filterText,
+                timeFilter === 'month' && styles.filterTextActive,
+              ]}
+            >
               Esse mês
             </Text>
           </TouchableOpacity>

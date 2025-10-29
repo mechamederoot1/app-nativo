@@ -15,7 +15,7 @@ import { absoluteUrl } from '../utils/api';
 export default function NotificationToast() {
   const { notifications, removeNotification } = useNotification();
   const [displayedNotifications, setDisplayedNotifications] = useState<
-    Array<{ id: string; notification: typeof notifications[0] }>
+    Array<{ id: string; notification: (typeof notifications)[0] }>
   >([]);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function NotificationToast() {
       notifications.slice(0, 3).map((n, i) => ({
         id: `${n.timestamp}-${i}`,
         notification: n,
-      }))
+      })),
     );
   }, [notifications]);
 
@@ -51,7 +51,7 @@ function NotificationItem({
   index,
   onClose,
 }: {
-  notification: typeof notifications[0];
+  notification: (typeof notifications)[0];
   index: number;
   onClose: () => void;
 }) {
@@ -163,7 +163,10 @@ function NotificationItem({
             </Text>
           </View>
 
-          <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <TouchableOpacity
+            onPress={onClose}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <X size={16} color="#94a3b8" strokeWidth={2} />
           </TouchableOpacity>
         </View>

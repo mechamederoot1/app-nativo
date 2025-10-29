@@ -20,7 +20,8 @@ export function UnreadProvider({ children }: { children: React.ReactNode }) {
   // mock initial counts for messages
   const [unreadMessages, setUnreadMessagesState] = useState<number>(0);
   const [unreadVisits, setUnreadVisitsState] = useState<number>(0);
-  const [unreadNotifications, setUnreadNotificationsState] = useState<number>(0);
+  const [unreadNotifications, setUnreadNotificationsState] =
+    useState<number>(0);
 
   // Load unread counts on mount
   useEffect(() => {

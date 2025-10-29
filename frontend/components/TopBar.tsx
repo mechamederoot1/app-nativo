@@ -49,7 +49,10 @@ export default function TopBar() {
           { paddingTop, paddingBottom: Platform.OS === 'ios' ? 8 : 6 },
         ]}
       >
-        <TouchableOpacity onPress={() => router.push('/feed')} activeOpacity={0.7}>
+        <TouchableOpacity
+          onPress={() => router.push('/feed')}
+          activeOpacity={0.7}
+        >
           <Text style={styles.logo}>Vibe</Text>
         </TouchableOpacity>
 

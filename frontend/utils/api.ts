@@ -321,7 +321,9 @@ export type IncomingFriendRequest = {
   created_at: string;
 };
 
-export async function getIncomingFriendRequests(): Promise<IncomingFriendRequest[]> {
+export async function getIncomingFriendRequests(): Promise<
+  IncomingFriendRequest[]
+> {
   return request('/friends/requests/incoming');
 }
 
@@ -362,7 +364,9 @@ export type VisitorInfo = {
   has_sent_friend_request: boolean;
 };
 
-export async function recordProfileVisit(visited_user_id: number): Promise<any> {
+export async function recordProfileVisit(
+  visited_user_id: number,
+): Promise<any> {
   return request('/visits', {
     method: 'POST',
     body: JSON.stringify({ visited_user_id }),
@@ -376,11 +380,15 @@ export async function getProfileVisits(
   return request(`/visits/profile/${userId}?time_filter=${timeFilter}`);
 }
 
-export async function getVisitCount(userId: number | string): Promise<{ total_visits: number; today_visits: number }> {
+export async function getVisitCount(
+  userId: number | string,
+): Promise<{ total_visits: number; today_visits: number }> {
   return request(`/visits/count/${userId}`);
 }
 
-export async function getUnreadVisitCount(): Promise<{ unread_visits: number }> {
+export async function getUnreadVisitCount(): Promise<{
+  unread_visits: number;
+}> {
   return request('/visits/unread-count');
 }
 
@@ -395,15 +403,21 @@ export type NotificationData = {
   created_at: string;
 };
 
-export async function getNotifications(limit: number = 50): Promise<NotificationData[]> {
+export async function getNotifications(
+  limit: number = 50,
+): Promise<NotificationData[]> {
   return request(`/notifications?limit=${limit}`);
 }
 
-export async function getUnreadNotificationsCount(): Promise<{ unread_count: number }> {
+export async function getUnreadNotificationsCount(): Promise<{
+  unread_count: number;
+}> {
   return request('/notifications/unread-count');
 }
 
-export async function markNotificationAsRead(notificationId: number): Promise<any> {
+export async function markNotificationAsRead(
+  notificationId: number,
+): Promise<any> {
   return request(`/notifications/${notificationId}/read`, { method: 'POST' });
 }
 

@@ -92,9 +92,7 @@ export default function FriendRequests({
         )}
         <View style={styles.info}>
           <Text style={styles.nameText}>{item.sender_name}</Text>
-          <Text style={styles.timeText}>
-            {formatTime(item.created_at)}
-          </Text>
+          <Text style={styles.timeText}>{formatTime(item.created_at)}</Text>
         </View>
       </View>
       <View style={styles.actions}>
@@ -134,7 +132,10 @@ export default function FriendRequests({
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Solicitações de Amizade</Text>
-          <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <TouchableOpacity
+            onPress={onClose}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
             <X size={24} color="#1f2937" strokeWidth={2} />
           </TouchableOpacity>
         </View>

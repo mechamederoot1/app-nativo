@@ -58,9 +58,7 @@ export default function NotificationsScreen() {
       setProcessingId(notificationId);
       await markNotificationAsRead(notificationId);
       setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === notificationId ? { ...n, read: true } : n
-        )
+        prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n)),
       );
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -84,9 +82,7 @@ export default function NotificationsScreen() {
   const handleMarkAllAsRead = async () => {
     try {
       await markAllNotificationsAsRead();
-      setNotifications((prev) =>
-        prev.map((n) => ({ ...n, read: true }))
-      );
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     } catch (error) {
       console.error('Error marking all as read:', error);
     }

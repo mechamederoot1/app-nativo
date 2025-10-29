@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react';
 import {
   initializeSocket,
   onNotification,
@@ -16,7 +22,7 @@ type NotificationContextType = {
 };
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export function NotificationProvider({
@@ -51,24 +57,21 @@ export function NotificationProvider({
     }
   }, []);
 
-  const addNotificationToList = useCallback(
-    (notification: Notification) => {
-      setNotifications((prev) => [notification, ...prev]);
-      // Auto-remove after 10 seconds
-      setTimeout(() => {
-        setNotifications((prev) =>
-          prev.filter((n) => n.timestamp !== notification.timestamp)
-        );
-      }, 10000);
-    },
-    []
-  );
+  const addNotificationToList = useCallback((notification: Notification) => {
+    setNotifications((prev) => [notification, ...prev]);
+    // Auto-remove after 10 seconds
+    setTimeout(() => {
+      setNotifications((prev) =>
+        prev.filter((n) => n.timestamp !== notification.timestamp),
+      );
+    }, 10000);
+  }, []);
 
   const addNotification = useCallback(
     (notification: Notification) => {
       addNotificationToList(notification);
     },
-    [addNotificationToList]
+    [addNotificationToList],
   );
 
   const clearNotifications = useCallback(() => {
@@ -97,9 +100,7 @@ export function NotificationProvider({
 export function useNotification() {
   const ctx = useContext(NotificationContext);
   if (!ctx) {
-    throw new Error(
-      'useNotification must be used within NotificationProvider'
-    );
+    throw new Error('useNotification must be used within NotificationProvider');
   }
   return ctx;
 }
