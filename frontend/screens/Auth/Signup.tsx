@@ -10,7 +10,10 @@ import {
   StyleSheet,
   Modal,
   ActivityIndicator,
+  Pressable,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AuthButton from '../../components/AuthButton';
