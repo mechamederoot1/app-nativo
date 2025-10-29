@@ -9,6 +9,7 @@ import {
   ApiUser,
   ApiPost,
   getUserFriends,
+  recordProfileVisit,
 } from '../../utils/api';
 import { profileData as defaultProfileData } from '../../screens/Profile/Data';
 import { getMyProfile, getProfileById } from '../../utils/api';
