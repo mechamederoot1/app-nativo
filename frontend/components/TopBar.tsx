@@ -156,19 +156,4 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
   },
-  avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#eff6ff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#dbeafe',
-  },
-  avatarText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#0856d6',
-  },
 });
