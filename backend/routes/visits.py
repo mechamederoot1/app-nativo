@@ -25,6 +25,17 @@ def record_visit(visited_user_id: int, current: User = Depends(get_current_user)
     db.add(visit)
     db.commit()
     db.refresh(visit)
+
+    # Emit websocket notification
+    asyncio.create_task(
+        emit_visit_notification(
+            visited_user_id=visited_user_id,
+            visitor_id=current.id,
+            visitor_name=f"{current.first_name} {current.last_name}".strip() or current.username,
+            visitor_avatar=current.profile_photo
+        )
+    )
+
     return visit
 
 @router.get("/profile/{user_id}", response_model=List[VisitorInfo])
