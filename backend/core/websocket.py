@@ -136,68 +136,22 @@ async def emit_visit_notification(visited_user_id: int, visitor_id: int, visitor
 
 async def emit_friend_request_notification(receiver_id: int, sender_id: int, sender_name: str, sender_avatar: str = None):
     """Emit friend request notification"""
-    db = SessionLocal()
-    try:
-        notification_data = create_notification_data(
-            event_type="friend_request",
-            user_id=receiver_id,
-            actor_id=sender_id,
-            actor_name=sender_name,
-            actor_avatar=sender_avatar,
-            message=f"{sender_name} enviou uma solicitação de amizade"
-        )
-        
-        # Save notification
-        notification = Notification(
-            user_id=receiver_id,
-            type="friend_request",
-            actor_id=sender_id,
-            data=notification_data
-        )
-        db.add(notification)
-        db.commit()
-        
-        # Emit to user if online
-        if manager.is_user_online(receiver_id):
-            await sio.emit('friend_request', notification_data, to=[
-                sid for uid, sids in manager.active_connections.items()
-                if uid == receiver_id
-                for sid in sids
-            ])
-    finally:
-        db.close()
+    await notification_handler.emit_friend_request(
+        receiver_id=receiver_id,
+        sender_id=sender_id,
+        sender_name=sender_name,
+        sender_avatar=sender_avatar,
+    )
 
 
 async def emit_friend_request_accepted(requester_id: int, accepter_id: int, accepter_name: str, accepter_avatar: str = None):
     """Emit friend request accepted notification"""
-    db = SessionLocal()
-    try:
-        notification_data = create_notification_data(
-            event_type="friend_request_accepted",
-            user_id=requester_id,
-            actor_id=accepter_id,
-            actor_name=accepter_name,
-            actor_avatar=accepter_avatar,
-            message=f"{accepter_name} aceitou sua solicitação de amizade"
-        )
-        
-        notification = Notification(
-            user_id=requester_id,
-            type="friend_request_accepted",
-            actor_id=accepter_id,
-            data=notification_data
-        )
-        db.add(notification)
-        db.commit()
-        
-        if manager.is_user_online(requester_id):
-            await sio.emit('friend_request_accepted', notification_data, to=[
-                sid for uid, sids in manager.active_connections.items()
-                if uid == requester_id
-                for sid in sids
-            ])
-    finally:
-        db.close()
+    await notification_handler.emit_friend_request_accepted(
+        requester_id=requester_id,
+        accepter_id=accepter_id,
+        accepter_name=accepter_name,
+        accepter_avatar=accepter_avatar,
+    )
 
 
 # ============= POST EVENTS (Comments, Likes, Shares) =============
