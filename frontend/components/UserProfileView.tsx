@@ -68,6 +68,7 @@ export default function UserProfileView({
   profile,
   editable,
   posts: externalPosts,
+  userId,
 }: Props) {
   const router = useRouter();
   const [userData, setUserData] = useState(profile);
