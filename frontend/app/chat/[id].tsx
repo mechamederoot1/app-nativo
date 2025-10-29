@@ -16,12 +16,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, Send, Plus, Smile, Mic, X } from 'lucide-react-native';
 import { api } from '../../utils/api';
-import {
-  getSocket,
-  onNotification,
-  offNotification,
-  NotificationEvents,
-} from '../../utils/websocket';
+import { getSocket } from '../../utils/websocket';
 
 const getDimensions = () => {
   if (Platform.OS === 'web') {
