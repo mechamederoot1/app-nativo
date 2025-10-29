@@ -16,17 +16,17 @@ export function initializeSocket() {
     return null;
   }
 
-  // Convert HTTP URL to WS URL
-  const wsUrl = API_BASE_URL.replace(/^http/, 'ws');
-
-  socket = io(wsUrl, {
+  socket = io(API_BASE_URL, {
+    path: '/socket.io/',
     reconnection: true,
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
     reconnectionAttempts: 5,
+    reconnectionDelayJitter: true,
     auth: {
       token: token,
     },
+    transports: ['websocket', 'polling'],
   });
 
   socket.on('connect', () => {
