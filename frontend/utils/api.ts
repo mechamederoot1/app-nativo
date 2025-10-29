@@ -384,6 +384,37 @@ export async function getUnreadVisitCount(): Promise<{ unread_visits: number }> 
   return request('/visits/unread-count');
 }
 
+// Notifications API
+export type NotificationData = {
+  id: number;
+  type: string;
+  actor_id?: number;
+  related_id?: number;
+  data?: any;
+  read: boolean;
+  created_at: string;
+};
+
+export async function getNotifications(limit: number = 50): Promise<NotificationData[]> {
+  return request(`/notifications?limit=${limit}`);
+}
+
+export async function getUnreadNotificationsCount(): Promise<{ unread_count: number }> {
+  return request('/notifications/unread-count');
+}
+
+export async function markNotificationAsRead(notificationId: number): Promise<any> {
+  return request(`/notifications/${notificationId}/read`, { method: 'POST' });
+}
+
+export async function markAllNotificationsAsRead(): Promise<any> {
+  return request('/notifications/read-all', { method: 'POST' });
+}
+
+export async function deleteNotification(notificationId: number): Promise<any> {
+  return request(`/notifications/${notificationId}`, { method: 'DELETE' });
+}
+
 export function logout() {
   setToken(null);
 }
