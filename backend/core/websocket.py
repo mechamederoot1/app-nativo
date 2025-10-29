@@ -158,107 +158,31 @@ async def emit_friend_request_accepted(requester_id: int, accepter_id: int, acce
 
 async def emit_post_comment(post_id: int, post_author_id: int, commenter_id: int, commenter_name: str, commenter_avatar: str = None, comment_text: str = ""):
     """Emit post comment notification"""
-    db = SessionLocal()
-    try:
-        notification_data = create_notification_data(
-            event_type="post_comment",
-            user_id=post_author_id,
-            actor_id=commenter_id,
-            actor_name=commenter_name,
-            actor_avatar=commenter_avatar,
-            message=comment_text[:100],
-            related_id=post_id,
-            related_type="post"
-        )
-        
-        notification = Notification(
-            user_id=post_author_id,
-            type="post_comment",
-            actor_id=commenter_id,
-            related_id=post_id,
-            data=notification_data
-        )
-        db.add(notification)
-        db.commit()
-        
-        if manager.is_user_online(post_author_id):
-            await sio.emit('post_comment', notification_data, to=[
-                sid for uid, sids in manager.active_connections.items()
-                if uid == post_author_id
-                for sid in sids
-            ])
-    finally:
-        db.close()
+    await notification_handler.emit_post_comment(
+        post_id=post_id,
+        post_author_id=post_author_id,
+        commenter_id=commenter_id,
+        commenter_name=commenter_name,
+        commenter_avatar=commenter_avatar,
+        comment_text=comment_text,
+    )
 
 
 async def emit_post_like(post_id: int, post_author_id: int, liker_id: int, liker_name: str, liker_avatar: str = None):
     """Emit post like notification"""
-    db = SessionLocal()
-    try:
-        notification_data = create_notification_data(
-            event_type="post_like",
-            user_id=post_author_id,
-            actor_id=liker_id,
-            actor_name=liker_name,
-            actor_avatar=liker_avatar,
-            message=f"{liker_name} curtiu seu post",
-            related_id=post_id,
-            related_type="post"
-        )
-        
-        notification = Notification(
-            user_id=post_author_id,
-            type="post_like",
-            actor_id=liker_id,
-            related_id=post_id,
-            data=notification_data
-        )
-        db.add(notification)
-        db.commit()
-        
-        if manager.is_user_online(post_author_id):
-            await sio.emit('post_like', notification_data, to=[
-                sid for uid, sids in manager.active_connections.items()
-                if uid == post_author_id
-                for sid in sids
-            ])
-    finally:
-        db.close()
+    await notification_handler.emit_post_like(
+        post_id=post_id,
+        post_author_id=post_author_id,
+        liker_id=liker_id,
+        liker_name=liker_name,
+        liker_avatar=liker_avatar,
+    )
 
 
 async def emit_post_share(post_id: int, post_author_id: int, sharer_id: int, sharer_name: str, sharer_avatar: str = None):
     """Emit post share notification"""
-    db = SessionLocal()
-    try:
-        notification_data = create_notification_data(
-            event_type="post_share",
-            user_id=post_author_id,
-            actor_id=sharer_id,
-            actor_name=sharer_name,
-            actor_avatar=sharer_avatar,
-            message=f"{sharer_name} compartilhou seu post",
-            related_id=post_id,
-            related_type="post"
-        )
-        
-        notification = Notification(
-            user_id=post_author_id,
-            type="post_share",
-            actor_id=sharer_id,
-            related_id=post_id,
-            data=notification_data
-        )
-        db.add(notification)
-        db.commit()
-        
-        if manager.is_user_online(post_author_id):
-            await sio.emit('post_share', notification_data, to=[
-                sid for uid, sids in manager.active_connections.items()
-                if uid == post_author_id
-                for sid in sids
-            ])
-    finally:
-        db.close()
+    # TODO: Implementar emit_post_share no NotificationHandler
+    pass
 
 
 # ============= MESSAGE EVENTS =============
