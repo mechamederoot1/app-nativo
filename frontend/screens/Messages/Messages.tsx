@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,9 @@ import {
   Dimensions,
   Platform,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import {
   Search,
   Plus,
@@ -20,6 +22,8 @@ import {
 } from 'lucide-react-native';
 import BottomNav from '../../components/BottomNav';
 import TopBar from '../../components/TopBar';
+import { api } from '../../utils/api';
+import { initializeSocket, getSocket } from '../../utils/websocket';
 
 const getDimensions = () => {
   if (Platform.OS === 'web') {
