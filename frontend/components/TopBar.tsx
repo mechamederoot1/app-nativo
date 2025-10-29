@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,15 +7,34 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Bell, Search } from 'lucide-react-native';
+import { Bell, Search, Users } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useUnread } from '../contexts/UnreadContext';
+import FriendRequests from './FriendRequests';
+import { getIncomingFriendRequests } from '../utils/api';
 
 export default function TopBar() {
   const router = useRouter();
   const { unreadNotifications } = useUnread();
   const insets = useSafeAreaInsets();
+  const [showFriendRequests, setShowFriendRequests] = useState(false);
+  const [unreadFriendRequests, setUnreadFriendRequests] = useState(0);
+
+  useEffect(() => {
+    loadFriendRequestCount();
+    const interval = setInterval(loadFriendRequestCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadFriendRequestCount = async () => {
+    try {
+      const requests = await getIncomingFriendRequests();
+      setUnreadFriendRequests(requests.length);
+    } catch (error) {
+      console.error('Error loading friend request count:', error);
+    }
+  };
 
   const paddingTop = Math.max(
     insets.top + 2,
