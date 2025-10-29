@@ -1,15 +1,72 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from database.session import get_db
 from database.models import User, Conversation, Message
-from schemas.conversation import ConversationCreate, ConversationWithLatestMessage, ConversationDetail
-from schemas.message import MessageBase, MessageCreate
+from schemas.conversation import (
+    ConversationCreate, ConversationUpdate, ConversationWithLatestMessage,
+    ConversationDetail, ConversationSearch
+)
+from schemas.message import MessageBase, MessageCreate, MessageUpdate
 from websocket.services import ChatService
 from dependencies import get_current_user
 
 router = APIRouter()
 
 chat_service = ChatService()
+
+
+def format_conversation(conv: Conversation, current_user_id: int):
+    """Format conversation object for API response"""
+    unread_count = chat_service.get_unread_count(
+        conversation_id=conv.id,
+        user_id=current_user_id
+    )
+    latest_message = None
+    if conv.messages:
+        latest_msg = conv.messages[-1]
+        read_by_ids = [u.id for u in latest_msg.read_by]
+        latest_message = {
+            "id": latest_msg.id,
+            "content": latest_msg.content,
+            "content_type": latest_msg.content_type,
+            "media_url": latest_msg.media_url,
+            "is_deleted": latest_msg.is_deleted,
+            "edited_at": latest_msg.edited_at.isoformat() if latest_msg.edited_at else None,
+            "created_at": latest_msg.created_at.isoformat(),
+            "read_by": read_by_ids,
+            "sender": {
+                "id": latest_msg.sender.id,
+                "username": latest_msg.sender.username,
+                "first_name": latest_msg.sender.first_name,
+                "last_name": latest_msg.sender.last_name,
+                "profile_photo": latest_msg.sender.profile_photo,
+            }
+        }
+
+    participants = [
+        {
+            "id": p.id,
+            "username": p.username,
+            "first_name": p.first_name,
+            "last_name": p.last_name,
+            "profile_photo": p.profile_photo,
+        }
+        for p in conv.participants
+    ]
+
+    return {
+        "id": conv.id,
+        "name": conv.name,
+        "description": conv.description,
+        "is_group": conv.is_group,
+        "avatar_url": conv.avatar_url,
+        "participants": participants,
+        "latest_message": latest_message,
+        "unread_count": unread_count,
+        "created_at": conv.created_at.isoformat(),
+        "updated_at": conv.updated_at.isoformat(),
+    }
+
 
 @router.get("/conversations")
 async def get_conversations(
@@ -23,55 +80,24 @@ async def get_conversations(
         limit=limit,
         offset=offset
     )
-    
-    result = []
-    for conv in conversations:
-        unread_count = chat_service.get_unread_count(
-            conversation_id=conv.id,
-            user_id=current_user.id
-        )
-        latest_message = None
-        if conv.messages:
-            latest_msg = conv.messages[-1]
-            latest_message = {
-                "id": latest_msg.id,
-                "content": latest_msg.content,
-                "content_type": latest_msg.content_type,
-                "media_url": latest_msg.media_url,
-                "is_read": latest_msg.is_read,
-                "created_at": latest_msg.created_at.isoformat(),
-                "sender": {
-                    "id": latest_msg.sender.id,
-                    "username": latest_msg.sender.username,
-                    "first_name": latest_msg.sender.first_name,
-                    "last_name": latest_msg.sender.last_name,
-                    "profile_photo": latest_msg.sender.profile_photo,
-                }
-            }
-        
-        participants = [
-            {
-                "id": p.id,
-                "username": p.username,
-                "first_name": p.first_name,
-                "last_name": p.last_name,
-                "profile_photo": p.profile_photo,
-            }
-            for p in conv.participants
-        ]
-        
-        result.append({
-            "id": conv.id,
-            "name": conv.name,
-            "is_group": conv.is_group,
-            "participants": participants,
-            "latest_message": latest_message,
-            "unread_count": unread_count,
-            "created_at": conv.created_at.isoformat(),
-            "updated_at": conv.updated_at.isoformat(),
-        })
-    
-    return result
+
+    return [format_conversation(conv, current_user.id) for conv in conversations]
+
+
+@router.get("/conversations/search")
+async def search_conversations(
+    q: str = Query(..., min_length=1),
+    current_user: User = Depends(get_current_user),
+    limit: int = 20,
+):
+    """Search conversations by name"""
+    conversations = chat_service.search_conversations(
+        user_id=current_user.id,
+        query=q,
+        limit=limit
+    )
+
+    return [format_conversation(conv, current_user.id) for conv in conversations]
 
 
 @router.post("/conversations")
