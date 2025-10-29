@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from socketio import ASGIApp
+import logging
 
 from database.session import Base, engine
 from websocket import sio
@@ -23,6 +24,9 @@ if cors_origins == "*":
     allow_origins = ["*"]
 else:
     allow_origins = [o.strip() for o in cors_origins.split(",") if o.strip()]
+
+# Setup logging for debugging
+logging.basicConfig(level=logging.INFO)
 
 app.add_middleware(
     CORSMiddleware,
