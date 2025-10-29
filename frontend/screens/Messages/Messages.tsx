@@ -310,7 +310,11 @@ export default function MessagesScreen() {
           data={filteredChats}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <ChatItem item={item} onPress={() => handleChatPress(item.id)} />
+            <ChatItem
+              item={item}
+              onPress={() => handleChatPress(item.id)}
+              onDelete={handleDeleteConversation}
+            />
           )}
           contentContainerStyle={styles.chatList}
           showsVerticalScrollIndicator={false}
