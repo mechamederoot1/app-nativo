@@ -312,6 +312,19 @@ export type FriendStatus =
   | 'outgoing_pending'
   | 'incoming_pending'
   | 'friends';
+
+export type IncomingFriendRequest = {
+  id: number;
+  sender_id: number;
+  sender_name: string;
+  sender_profile_photo?: string | null;
+  created_at: string;
+};
+
+export async function getIncomingFriendRequests(): Promise<IncomingFriendRequest[]> {
+  return request('/friends/requests/incoming');
+}
+
 export async function getFriendStatus(
   userId: number | string,
 ): Promise<{ status: FriendStatus; request_id?: number | null }> {
