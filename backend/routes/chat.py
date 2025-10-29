@@ -105,33 +105,76 @@ async def create_conversation(
     data: ConversationCreate,
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new conversation"""
+    """Create a new conversation or group"""
     try:
+        # Ensure current user is included in participants
+        user_ids = data.participant_ids
+        if current_user.id not in user_ids:
+            user_ids.insert(0, current_user.id)
+
         conversation = chat_service.create_conversation(
-            user_ids=data.participant_ids,
+            user_ids=user_ids,
             name=data.name,
+            description=data.description,
             created_by_id=current_user.id
         )
-        
-        participants = [
-            {
-                "id": p.id,
-                "username": p.username,
-                "first_name": p.first_name,
-                "last_name": p.last_name,
-                "profile_photo": p.profile_photo,
-            }
-            for p in conversation.participants
-        ]
-        
-        return {
-            "id": conversation.id,
-            "name": conversation.name,
-            "is_group": conversation.is_group,
-            "participants": participants,
-            "created_at": conversation.created_at.isoformat(),
-            "updated_at": conversation.updated_at.isoformat(),
-        }
+
+        return format_conversation(conversation, current_user.id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/conversations/{conversation_id}")
+async def update_conversation(
+    conversation_id: int,
+    data: ConversationUpdate,
+    current_user: User = Depends(get_current_user),
+):
+    """Update conversation details"""
+    try:
+        conversation = chat_service.get_conversation(conversation_id)
+        if not conversation:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        # Check if user is the creator
+        if conversation.created_by_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Only creator can update conversation")
+
+        updated = chat_service.update_conversation(
+            conversation_id=conversation_id,
+            name=data.name,
+            description=data.description,
+            avatar_url=data.avatar_url
+        )
+
+        return format_conversation(updated, current_user.id)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/conversations/{conversation_id}")
+async def delete_conversation(
+    conversation_id: int,
+    current_user: User = Depends(get_current_user),
+):
+    """Delete (soft delete) a conversation"""
+    try:
+        conversation = chat_service.get_conversation(conversation_id)
+        if not conversation:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        # Check if user is a participant
+        participant_ids = [p.id for p in conversation.participants]
+        if current_user.id not in participant_ids:
+            raise HTTPException(status_code=403, detail="Not a participant of this conversation")
+
+        chat_service.delete_conversation(conversation_id)
+
+        return {"message": "Conversation deleted"}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
