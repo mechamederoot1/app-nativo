@@ -31,40 +31,105 @@ async def disconnect(sid):
     print(f"Client {sid} disconnected")
 
 
+# ============= CHAT EVENTS =============
+
+@sio.event
+async def chat_message(sid, data):
+    """Handle incoming chat message"""
+    try:
+        user_id = connection_service.user_by_session.get(sid)
+        if not user_id:
+            return
+
+        from database.session import SessionLocal
+        db = SessionLocal()
+        user = db.query(User).filter(User.id == user_id).first()
+        db.close()
+
+        if not user:
+            return
+
+        conversation_id = data.get("conversation_id")
+        content = data.get("content")
+        content_type = data.get("content_type", "text")
+        media_url = data.get("media_url")
+
+        message_payload = await chat_handler.handle_send_message(
+            user=user,
+            conversation_id=conversation_id,
+            content=content,
+            content_type=content_type,
+            media_url=media_url,
+        )
+
+        await chat_handler.emit_message_to_conversation(
+            conversation_id=conversation_id,
+            message_data=message_payload,
+            exclude_sid=sid
+        )
+
+        await sio.emit('message_sent', {**message_payload, 'confirmed': True}, to=sid)
+    except Exception as e:
+        print(f"Error handling chat message: {e}")
+        await sio.emit('error', {'message': str(e)}, to=sid)
+
+
+@sio.event
+async def message_read(sid, data):
+    """Handle message read confirmation"""
+    try:
+        message_id = data.get("message_id")
+        await chat_handler.handle_message_read(message_id)
+
+        await sio.emit('message_read_confirmed', {'message_id': message_id}, to=sid)
+    except Exception as e:
+        print(f"Error handling message read: {e}")
+
+
+@sio.event
+async def typing(sid, data):
+    """Handle typing indicator"""
+    try:
+        user_id = connection_service.user_by_session.get(sid)
+        if not user_id:
+            return
+
+        from database.session import SessionLocal
+        db = SessionLocal()
+        user = db.query(User).filter(User.id == user_id).first()
+        db.close()
+
+        if not user:
+            return
+
+        conversation_id = data.get("conversation_id")
+        is_typing = data.get("typing", True)
+
+        typing_payload = await chat_handler.handle_typing(
+            user=user,
+            conversation_id=conversation_id,
+            is_typing=is_typing,
+        )
+
+        await chat_handler.emit_typing_to_conversation(
+            conversation_id=conversation_id,
+            typing_data=typing_payload,
+            exclude_sid=sid
+        )
+    except Exception as e:
+        print(f"Error handling typing: {e}")
+
+
 # ============= PROFILE VISIT EVENTS =============
 
 async def emit_visit_notification(visited_user_id: int, visitor_id: int, visitor_name: str, visitor_avatar: str = None):
     """Emit profile visit notification to the visited user"""
-    db = SessionLocal()
-    try:
-        notification_data = create_notification_data(
-            event_type="profile_visit",
-            user_id=visited_user_id,
-            actor_id=visitor_id,
-            actor_name=visitor_name,
-            actor_avatar=visitor_avatar,
-            message=f"{visitor_name} visitou seu perfil"
-        )
-        
-        # Save notification to database
-        notification = Notification(
-            user_id=visited_user_id,
-            type="profile_visit",
-            actor_id=visitor_id,
-            data=notification_data
-        )
-        db.add(notification)
-        db.commit()
-        
-        # Emit to user if online
-        if manager.is_user_online(visited_user_id):
-            await sio.emit('profile_visit', notification_data, to=[
-                sid for uid, sids in manager.active_connections.items()
-                if uid == visited_user_id
-                for sid in sids
-            ])
-    finally:
-        db.close()
+    await notification_handler.emit_profile_visit(
+        visited_user_id=visited_user_id,
+        visitor_id=visitor_id,
+        visitor_name=visitor_name,
+        visitor_avatar=visitor_avatar,
+    )
 
 
 # ============= FRIEND REQUEST EVENTS =============
