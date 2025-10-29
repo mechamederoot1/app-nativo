@@ -178,7 +178,7 @@ const ChatItem = ({
         {showActions ? (
           <X size={18} color="#64748b" strokeWidth={2} />
         ) : (
-          <Text style={styles.actionButtonText}>•••</Text>
+          <Text style={styles.actionButtonText}>••���</Text>
         )}
       </TouchableOpacity>
     </View>
@@ -244,9 +244,20 @@ export default function MessagesScreen() {
     router.push(`/chat/${chatId}`);
   };
 
+  const handleDeleteConversation = async (conversationId: number) => {
+    try {
+      await deleteConversation(conversationId);
+      setConversations((prev) =>
+        prev.filter((conv) => conv.id !== conversationId)
+      );
+    } catch (error) {
+      Alert.alert('Erro', 'Falha ao deletar conversa');
+      console.error(error);
+    }
+  };
+
   const handleNewChat = () => {
-    // TODO: Implementar tela de novo chat
-    console.log('New chat');
+    router.push('/chat/new');
   };
 
   if (isLoading) {
