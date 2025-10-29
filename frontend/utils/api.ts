@@ -453,6 +453,91 @@ export async function deleteNotification(notificationId: number): Promise<any> {
   return request(`/notifications/${notificationId}`, { method: 'DELETE' });
 }
 
+// Chat API
+export type ChatConversation = {
+  id: number;
+  name?: string | null;
+  is_group: boolean;
+  participants: Array<{
+    id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+    profile_photo?: string | null;
+  }>;
+  latest_message?: {
+    id: number;
+    content: string;
+    content_type?: string;
+    media_url?: string | null;
+    is_read: boolean;
+    created_at: string;
+    sender: {
+      id: number;
+      username: string;
+      first_name: string;
+      last_name: string;
+      profile_photo?: string | null;
+    };
+  };
+  unread_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ChatMessage = {
+  id: number;
+  conversation_id: number;
+  content: string;
+  content_type?: string;
+  media_url?: string | null;
+  is_read: boolean;
+  created_at: string;
+  sender: {
+    id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+    profile_photo?: string | null;
+  };
+};
+
+export async function getConversations(
+  limit: number = 50,
+  offset: number = 0,
+): Promise<ChatConversation[]> {
+  return request(`/chat/conversations?limit=${limit}&offset=${offset}`);
+}
+
+export async function createConversation(
+  participantIds: number[],
+  name?: string,
+): Promise<ChatConversation> {
+  return request('/chat/conversations', {
+    method: 'POST',
+    body: JSON.stringify({
+      participant_ids: participantIds,
+      name: name || null,
+    }),
+  });
+}
+
+export async function getConversationMessages(
+  conversationId: number,
+  limit: number = 50,
+  offset: number = 0,
+): Promise<ChatMessage[]> {
+  return request(
+    `/chat/conversations/${conversationId}/messages?limit=${limit}&offset=${offset}`,
+  );
+}
+
+export async function getOrCreateDMConversation(
+  userId: number,
+): Promise<ChatConversation> {
+  return request(`/chat/conversations/${userId}/dm`);
+}
+
 export function logout() {
   setToken(null);
 }
