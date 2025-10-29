@@ -17,7 +17,7 @@ import { useRouter } from 'expo-router';
 import { Search, Plus, MessageCircle, CheckCheck } from 'lucide-react-native';
 import BottomNav from '../../components/BottomNav';
 import TopBar from '../../components/TopBar';
-import { api } from '../../utils/api';
+import { getConversations } from '../../utils/api';
 import { initializeSocket, getSocket } from '../../utils/websocket';
 
 const getDimensions = () => {
