@@ -231,7 +231,10 @@ export default function SignupScreen() {
 
               {step === 2 && (
                 <>
-                  <Pressable onPress={() => setShowDatePicker(true)} style={[styles.input, { justifyContent: 'center' }]}>
+                  <Pressable
+                    onPress={() => setShowDatePicker(true)}
+                    style={[styles.input, { justifyContent: 'center' }]}
+                  >
                     <Text style={{ color: dob ? '#0f172a' : '#9aa0a6' }}>
                       {dob || 'Data de nascimento (DD/MM/AAAA)'}
                     </Text>
@@ -246,8 +249,13 @@ export default function SignupScreen() {
                         setShowDatePicker(false);
                         if (selectedDate) {
                           setDobDate(selectedDate);
-                          const dd = String(selectedDate.getDate()).padStart(2, '0');
-                          const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                          const dd = String(selectedDate.getDate()).padStart(
+                            2,
+                            '0',
+                          );
+                          const mm = String(
+                            selectedDate.getMonth() + 1,
+                          ).padStart(2, '0');
                           const yyyy = selectedDate.getFullYear();
                           setDob(`${dd}/${mm}/${yyyy}`);
                         }
@@ -258,7 +266,15 @@ export default function SignupScreen() {
                     <Text style={styles.error}>{errors.dob}</Text>
                   ) : null}
 
-                  <View style={{ borderWidth: 1, borderColor: '#e6eef8', borderRadius: 8, overflow: 'hidden', marginTop: 10 }}>
+                  <View
+                    style={{
+                      borderWidth: 1,
+                      borderColor: '#e6eef8',
+                      borderRadius: 8,
+                      overflow: 'hidden',
+                      marginTop: 10,
+                    }}
+                  >
                     <Picker
                       selectedValue={gender}
                       onValueChange={(val) => setGender(String(val))}
