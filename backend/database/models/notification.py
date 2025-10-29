@@ -7,9 +7,9 @@ class Notification(Base):
     __tablename__ = "notifications"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("user.id"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     type = Column(String(50), nullable=False, index=True)
-    actor_id = Column(Integer, ForeignKey("user.id"), nullable=True)
+    actor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     related_id = Column(Integer, nullable=True)
     data = Column(JSON, nullable=True)
     read = Column(Boolean, default=False, index=True)

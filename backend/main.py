@@ -6,9 +6,10 @@ from dotenv import load_dotenv
 from socketio import ASGIApp
 
 from database.session import Base, engine
-from core.websocket import sio
-from routes import auth as _auth, users as _users, posts as _posts, highlights as _highlights, stories as _stories, friends as _friends, visits as _visits, notifications as _notifications
+from websocket import sio
+from routes import auth as _auth, users as _users, posts as _posts, highlights as _highlights, stories as _stories, friends as _friends, visits as _visits, notifications as _notifications, chat as _chat
 import database.models as _models  # ensure models are registered
+import core.websocket as _websocket  # register websocket handlers
 
 # Load env from backend/.env
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
@@ -44,6 +45,7 @@ app.include_router(_stories.router, prefix="/stories", tags=["stories"])
 app.include_router(_friends.router, prefix="/friends", tags=["friends"])
 app.include_router(_visits.router, prefix="/visits", tags=["visits"])
 app.include_router(_notifications.router, prefix="/notifications", tags=["notifications"])
+app.include_router(_chat.router, prefix="/chat", tags=["chat"])
 
 @app.get("/")
 def root():
