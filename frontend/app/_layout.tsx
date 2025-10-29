@@ -19,6 +19,7 @@ export default function RootLayout() {
             <Stack.Screen name="signup" />
             <Stack.Screen name="feed" />
             <Stack.Screen name="messages" />
+            <Stack.Screen name="chat/[id]" />
             <Stack.Screen name="visits" />
             <Stack.Screen name="profile" />
             <Stack.Screen name="profile/[id]" />
