@@ -86,10 +86,23 @@ def get_visit_count(
         raise HTTPException(status_code=403, detail="Você só pode contar visitantes do seu próprio perfil")
 
     count = db.query(Visit).filter(Visit.visited_user_id == current.id).count()
-    
+
     today_count = db.query(Visit).filter(
         Visit.visited_user_id == current.id,
         Visit.visited_at >= datetime.combine(datetime.utcnow().date(), datetime.min.time())
     ).count()
 
     return {"total_visits": count, "today_visits": today_count}
+
+@router.get("/unread-count", response_model=dict)
+def get_unread_visits_count(
+    current: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    one_day_ago = datetime.utcnow() - timedelta(days=1)
+    count = db.query(Visit).filter(
+        Visit.visited_user_id == current.id,
+        Visit.visited_at >= one_day_ago
+    ).count()
+
+    return {"unread_visits": count}
