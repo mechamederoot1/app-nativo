@@ -38,7 +38,10 @@ async function request(path: string, init: RequestInit = {}) {
       try {
         const data = await res.json();
         if (data?.detail) {
-          msg = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail);
+          msg =
+            typeof data.detail === 'string'
+              ? data.detail
+              : JSON.stringify(data.detail);
         } else if (data?.message) {
           msg = data.message;
         } else if (typeof data === 'string') {

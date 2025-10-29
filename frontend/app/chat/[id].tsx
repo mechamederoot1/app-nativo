@@ -14,16 +14,14 @@ import {
   Dimensions,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import {
-  ChevronLeft,
-  Send,
-  Plus,
-  Smile,
-  Mic,
-  X,
-} from 'lucide-react-native';
+import { ChevronLeft, Send, Plus, Smile, Mic, X } from 'lucide-react-native';
 import { api } from '../../utils/api';
-import { getSocket, onNotification, offNotification, NotificationEvents } from '../../utils/websocket';
+import {
+  getSocket,
+  onNotification,
+  offNotification,
+  NotificationEvents,
+} from '../../utils/websocket';
 
 const getDimensions = () => {
   if (Platform.OS === 'web') {
@@ -61,15 +59,33 @@ interface Conversation {
   updated_at: string;
 }
 
-const MessageBubble = ({ message, isOwn }: { message: Message; isOwn: boolean }) => {
+const MessageBubble = ({
+  message,
+  isOwn,
+}: {
+  message: Message;
+  isOwn: boolean;
+}) => {
   const messageTime = new Date(message.created_at);
-  const timeStr = messageTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const timeStr = messageTime.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   return (
-    <View style={[styles.messageBubbleContainer, isOwn && styles.messageBubbleContainerOwn]}>
+    <View
+      style={[
+        styles.messageBubbleContainer,
+        isOwn && styles.messageBubbleContainerOwn,
+      ]}
+    >
       {!isOwn && (
         <Image
-          source={{ uri: message.sender.profile_photo || `https://i.pravatar.cc/150?u=${message.sender.id}` }}
+          source={{
+            uri:
+              message.sender.profile_photo ||
+              `https://i.pravatar.cc/150?u=${message.sender.id}`,
+          }}
           style={styles.messageSenderAvatar}
         />
       )}
@@ -143,7 +159,7 @@ export default function ChatScreen() {
       try {
         setIsLoading(true);
         const response = await api.get(`/chat/conversations/${id}/messages`);
-        
+
         // Create a mock conversation object (in production this would come from API)
         setConversation({
           id: parseInt(id as string),
@@ -152,7 +168,7 @@ export default function ChatScreen() {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         });
-        
+
         setMessages(response);
       } catch (error) {
         console.error('Error loading messages:', error);
@@ -170,21 +186,24 @@ export default function ChatScreen() {
   useEffect(() => {
     if (!socket) return;
 
-    const unsubscribeMessage = onNotification('chat_message', (data: Message) => {
-      if (data.conversation_id === parseInt(id as string)) {
-        setMessages(prev => [...prev, data]);
-      }
-    });
+    const unsubscribeMessage = onNotification(
+      'chat_message',
+      (data: Message) => {
+        if (data.conversation_id === parseInt(id as string)) {
+          setMessages((prev) => [...prev, data]);
+        }
+      },
+    );
 
     const unsubscribeTyping = onNotification('typing_start', (data) => {
       if (data.conversation_id === parseInt(id as string)) {
-        setTypingUsers(prev => [...prev, data.user]);
+        setTypingUsers((prev) => [...prev, data.user]);
       }
     });
 
     const unsubscribeTypingStop = onNotification('typing_stop', (data) => {
       if (data.conversation_id === parseInt(id as string)) {
-        setTypingUsers(prev => prev.filter(u => u.id !== data.user.id));
+        setTypingUsers((prev) => prev.filter((u) => u.id !== data.user.id));
       }
     });
 
@@ -266,12 +285,14 @@ export default function ChatScreen() {
   const getConversationTitle = useMemo(() => {
     if (!conversation) return 'Carregando...';
     if (conversation.name) return conversation.name;
-    
-    const otherParticipants = conversation.participants.filter(p => p.id !== currentUserId);
+
+    const otherParticipants = conversation.participants.filter(
+      (p) => p.id !== currentUserId,
+    );
     if (otherParticipants.length === 1) {
       return `${otherParticipants[0].first_name} ${otherParticipants[0].last_name}`;
     }
-    
+
     return `${otherParticipants.length} participantes`;
   }, [conversation, currentUserId]);
 
@@ -344,7 +365,8 @@ export default function ChatScreen() {
         {typingUsers.length > 0 && (
           <View style={styles.typingContainer}>
             <Text style={styles.typingText}>
-              {typingUsers.map(u => u.first_name).join(', ')} {'está digitando...'}
+              {typingUsers.map((u) => u.first_name).join(', ')}{' '}
+              {'está digitando...'}
             </Text>
           </View>
         )}
@@ -373,7 +395,10 @@ export default function ChatScreen() {
             {inputText.trim().length > 0 ? (
               <TouchableOpacity
                 onPress={handleSendMessage}
-                style={[styles.sendButton, isSending && styles.sendButtonDisabled]}
+                style={[
+                  styles.sendButton,
+                  isSending && styles.sendButtonDisabled,
+                ]}
                 activeOpacity={0.7}
                 disabled={isSending}
               >

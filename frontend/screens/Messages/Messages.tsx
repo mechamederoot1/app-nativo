@@ -14,12 +14,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import {
-  Search,
-  Plus,
-  MessageCircle,
-  CheckCheck
-} from 'lucide-react-native';
+import { Search, Plus, MessageCircle, CheckCheck } from 'lucide-react-native';
 import BottomNav from '../../components/BottomNav';
 import TopBar from '../../components/TopBar';
 import { api } from '../../utils/api';
@@ -57,7 +52,13 @@ interface ChatItem {
   is_group: boolean;
 }
 
-const ChatItem = ({ item, onPress }: { item: ChatItem; onPress: () => void }) => {
+const ChatItem = ({
+  item,
+  onPress,
+}: {
+  item: ChatItem;
+  onPress: () => void;
+}) => {
   const isUnread = item.unread_count > 0;
 
   // Get the other participant's name (for DMs)
@@ -81,23 +82,24 @@ const ChatItem = ({ item, onPress }: { item: ChatItem; onPress: () => void }) =>
     if (diffMins < 60) return `${diffMins}m`;
     if (diffHours < 24) return `${diffHours}h`;
     if (diffDays < 7) return `${diffDays}d`;
-    return messageDate.toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' });
+    return messageDate.toLocaleDateString('pt-BR', {
+      month: 'short',
+      day: 'numeric',
+    });
   };
 
   return (
     <TouchableOpacity
-      style={[
-        styles.chatItem,
-        isUnread && styles.chatItemUnread
-      ]}
+      style={[styles.chatItem, isUnread && styles.chatItemUnread]}
       onPress={onPress}
       activeOpacity={0.7}
     >
       <View style={styles.avatarContainer}>
         <Image
           source={{
-            uri: item.participants[0]?.profile_photo ||
-              `https://i.pravatar.cc/150?u=${item.participants[0]?.id}`
+            uri:
+              item.participants[0]?.profile_photo ||
+              `https://i.pravatar.cc/150?u=${item.participants[0]?.id}`,
           }}
           style={styles.avatar}
         />
@@ -105,26 +107,17 @@ const ChatItem = ({ item, onPress }: { item: ChatItem; onPress: () => void }) =>
 
       <View style={styles.chatContent}>
         <View style={styles.chatHeader}>
-          <Text style={[
-            styles.chatName,
-            isUnread && styles.chatNameUnread
-          ]}>
+          <Text style={[styles.chatName, isUnread && styles.chatNameUnread]}>
             {getDisplayName()}
           </Text>
-          <Text style={[
-            styles.chatTime,
-            isUnread && styles.chatTimeUnread
-          ]}>
+          <Text style={[styles.chatTime, isUnread && styles.chatTimeUnread]}>
             {getMessageTime()}
           </Text>
         </View>
 
         <View style={styles.chatFooter}>
           <Text
-            style={[
-              styles.chatMessage,
-              isUnread && styles.chatMessageUnread
-            ]}
+            style={[styles.chatMessage, isUnread && styles.chatMessageUnread]}
             numberOfLines={2}
           >
             {item.latest_message?.content || 'Sem mensagens'}
@@ -167,7 +160,10 @@ export default function MessagesScreen() {
       const response = await api.get('/chat/conversations');
       setConversations(response);
 
-      const total = response.reduce((sum: number, conv: ChatItem) => sum + conv.unread_count, 0);
+      const total = response.reduce(
+        (sum: number, conv: ChatItem) => sum + conv.unread_count,
+        0,
+      );
       setUnreadTotal(total);
     } catch (error) {
       console.error('Error loading conversations:', error);
@@ -183,11 +179,15 @@ export default function MessagesScreen() {
 
   const filteredChats = useMemo(() => {
     if (!query.trim()) return conversations;
-    return conversations.filter(chat => {
-      const displayName = chat.name || `${chat.participants[0]?.first_name} ${chat.participants[0]?.last_name}`;
+    return conversations.filter((chat) => {
+      const displayName =
+        chat.name ||
+        `${chat.participants[0]?.first_name} ${chat.participants[0]?.last_name}`;
       const lastMessage = chat.latest_message?.content || '';
-      return displayName.toLowerCase().includes(query.toLowerCase()) ||
-        lastMessage.toLowerCase().includes(query.toLowerCase());
+      return (
+        displayName.toLowerCase().includes(query.toLowerCase()) ||
+        lastMessage.toLowerCase().includes(query.toLowerCase())
+      );
     });
   }, [query, conversations]);
 
@@ -221,7 +221,8 @@ export default function MessagesScreen() {
           <View>
             <Text style={styles.title}>Bate-papo</Text>
             <Text style={styles.subtitle}>
-              {unreadTotal} {unreadTotal === 1 ? 'mensagem não lida' : 'mensagens não lidas'}
+              {unreadTotal}{' '}
+              {unreadTotal === 1 ? 'mensagem não lida' : 'mensagens não lidas'}
             </Text>
           </View>
 
@@ -247,12 +248,9 @@ export default function MessagesScreen() {
 
         <FlatList
           data={filteredChats}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <ChatItem
-              item={item}
-              onPress={() => handleChatPress(item.id)}
-            />
+            <ChatItem item={item} onPress={() => handleChatPress(item.id)} />
           )}
           contentContainerStyle={styles.chatList}
           showsVerticalScrollIndicator={false}
@@ -264,7 +262,9 @@ export default function MessagesScreen() {
               <MessageCircle size={48} color="#cbd5e1" strokeWidth={1.5} />
               <Text style={styles.emptyTitle}>Nenhuma conversa encontrada</Text>
               <Text style={styles.emptyText}>
-                {query ? 'Tente buscar por outro nome ou mensagem' : 'Comece uma nova conversa!'}
+                {query
+                  ? 'Tente buscar por outro nome ou mensagem'
+                  : 'Comece uma nova conversa!'}
               </Text>
             </View>
           }
