@@ -380,6 +380,10 @@ export async function getVisitCount(userId: number | string): Promise<{ total_vi
   return request(`/visits/count/${userId}`);
 }
 
+export async function getUnreadVisitCount(): Promise<{ unread_visits: number }> {
+  return request('/visits/unread-count');
+}
+
 export function logout() {
   setToken(null);
 }
