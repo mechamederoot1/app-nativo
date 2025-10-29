@@ -7,13 +7,14 @@ import asyncio
 from database.session import get_db
 from dependencies import get_current_user
 from database.models import User, Visit, FriendRequest, Friendship
-from schemas.visit import VisitOut, VisitorInfo
+from schemas.visit import VisitOut, VisitorInfo, VisitCreate
 from core.websocket import emit_visit_notification
 
 router = APIRouter()
 
 @router.post("/", response_model=VisitOut)
-def record_visit(visited_user_id: int, current: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def record_visit(payload: VisitCreate, current: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    visited_user_id = payload.visited_user_id
     if visited_user_id == current.id:
         raise HTTPException(status_code=400, detail="Não é possível visitar seu próprio perfil")
 
