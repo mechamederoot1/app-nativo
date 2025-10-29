@@ -12,12 +12,14 @@ import {
   Platform,
   RefreshControl,
   ActivityIndicator,
+  Alert,
+  Pressable,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Search, Plus, MessageCircle, CheckCheck } from 'lucide-react-native';
+import { Search, Plus, MessageCircle, CheckCheck, Trash2, X } from 'lucide-react-native';
 import BottomNav from '../../components/BottomNav';
 import TopBar from '../../components/TopBar';
-import { getConversations } from '../../utils/api';
+import { getConversations, deleteConversation } from '../../utils/api';
 import { initializeSocket, getSocket } from '../../utils/websocket';
 
 const getDimensions = () => {
