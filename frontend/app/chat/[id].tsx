@@ -192,31 +192,60 @@ export default function ChatScreen() {
   useEffect(() => {
     if (!socket) return;
 
-    const unsubscribeMessage = onNotification(
-      'chat_message',
-      (data: Message) => {
-        if (data.conversation_id === parseInt(id as string)) {
-          setMessages((prev) => [...prev, data]);
-        }
-      },
-    );
-
-    const unsubscribeTyping = onNotification('typing_start', (data) => {
+    const handleNewMessage = (data: any) => {
       if (data.conversation_id === parseInt(id as string)) {
-        setTypingUsers((prev) => [...prev, data.user]);
+        // Map the data to Message format
+        const message: Message = {
+          id: data.id,
+          conversation_id: data.conversation_id,
+          content: data.content,
+          content_type: data.content_type || 'text',
+          media_url: data.media_url,
+          is_read: data.is_read || false,
+          created_at: data.created_at,
+          sender: {
+            id: data.sender?.id || 0,
+            username: data.sender?.name || '',
+            first_name: data.sender?.name?.split(' ')[0] || '',
+            last_name: data.sender?.name?.split(' ')[1] || '',
+            profile_photo: data.sender?.avatar,
+          },
+        };
+        setMessages((prev) => [...prev, message]);
       }
-    });
+    };
 
-    const unsubscribeTypingStop = onNotification('typing_stop', (data) => {
+    const handleTypingStart = (data: any) => {
       if (data.conversation_id === parseInt(id as string)) {
-        setTypingUsers((prev) => prev.filter((u) => u.id !== data.user.id));
+        const typingUser: User = {
+          id: data.user_id,
+          username: data.user_name,
+          first_name: data.user_name?.split(' ')[0] || '',
+          last_name: data.user_name?.split(' ')[1] || '',
+        };
+        setTypingUsers((prev) => {
+          if (!prev.find((u) => u.id === data.user_id)) {
+            return [...prev, typingUser];
+          }
+          return prev;
+        });
       }
-    });
+    };
+
+    const handleTypingStop = (data: any) => {
+      if (data.conversation_id === parseInt(id as string)) {
+        setTypingUsers((prev) => prev.filter((u) => u.id !== data.user_id));
+      }
+    };
+
+    socket.on('chat_message', handleNewMessage);
+    socket.on('typing_start', handleTypingStart);
+    socket.on('typing_stop', handleTypingStop);
 
     return () => {
-      unsubscribeMessage?.();
-      unsubscribeTyping?.();
-      unsubscribeTypingStop?.();
+      socket.off('chat_message', handleNewMessage);
+      socket.off('typing_start', handleTypingStart);
+      socket.off('typing_stop', handleTypingStop);
     };
   }, [socket, id]);
 
