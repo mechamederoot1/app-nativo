@@ -56,5 +56,12 @@ def root():
     return {"status": "ok", "message": "Backend running"}
 
 
+# Health check endpoint for WebSocket debugging
+@app.get("/health")
+def health():
+    return {"status": "ok", "message": "Backend running", "socketio": "enabled"}
+
+
 # Wrap FastAPI with Socket.IO
-socket_app = ASGIApp(sio, app)
+# The path parameter tells Socket.IO where to mount its endpoints
+socket_app = ASGIApp(sio, app, socketio_path="/socket.io/")
