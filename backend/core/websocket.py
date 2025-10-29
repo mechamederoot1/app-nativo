@@ -16,8 +16,8 @@ notification_handler = NotificationHandler(sio, connection_service)
 async def connect(sid, environ, auth):
     """Handle new socket connection"""
     try:
-        user = await authenticate_socket(auth)
-        await manager.connect(user.id, sid)
+        user = await auth_handler.authenticate_socket(auth)
+        await connection_service.connect(user.id, sid)
         print(f"User {user.id} connected with sid {sid}")
     except Exception as e:
         print(f"Connection error: {e}")
@@ -27,7 +27,7 @@ async def connect(sid, environ, auth):
 @sio.event
 async def disconnect(sid):
     """Handle socket disconnection"""
-    await manager.disconnect(sid)
+    await connection_service.disconnect(sid)
     print(f"Client {sid} disconnected")
 
 
