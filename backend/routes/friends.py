@@ -134,6 +134,21 @@ def accept_request(request_id: int, current: User = Depends(get_current_user), d
 
     db.commit()
     db.refresh(req)
+
+    # Get sender info for notification
+    sender = db.query(User).filter(User.id == req.sender_id).first()
+
+    # Emit websocket notification to the request sender
+    if sender:
+        asyncio.create_task(
+            emit_friend_request_accepted(
+                requester_id=req.sender_id,
+                accepter_id=current.id,
+                accepter_name=f"{current.first_name} {current.last_name}".strip() or current.username,
+                accepter_avatar=current.profile_photo
+            )
+        )
+
     return req
 
 @router.post("/requests/{request_id}/decline", response_model=FriendRequestOut)
