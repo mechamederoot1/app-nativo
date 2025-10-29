@@ -43,7 +43,12 @@ app.include_router(_highlights.router, prefix="/highlights", tags=["highlights"]
 app.include_router(_stories.router, prefix="/stories", tags=["stories"])
 app.include_router(_friends.router, prefix="/friends", tags=["friends"])
 app.include_router(_visits.router, prefix="/visits", tags=["visits"])
+app.include_router(_notifications.router, prefix="/notifications", tags=["notifications"])
 
 @app.get("/")
 def root():
     return {"status": "ok", "message": "Backend running"}
+
+
+# Wrap FastAPI with Socket.IO
+socket_app = ASGIApp(sio, app)
