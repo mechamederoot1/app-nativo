@@ -231,23 +231,47 @@ export default function SignupScreen() {
 
               {step === 2 && (
                 <>
-                  <TextInput
-                    placeholder="Data de nascimento (DD/MM/AAAA)"
-                    placeholderTextColor="#9aa0a6"
-                    value={dob}
-                    onChangeText={setDob}
-                    style={styles.input}
-                  />
+                  <Pressable onPress={() => setShowDatePicker(true)} style={[styles.input, { justifyContent: 'center' }]}>
+                    <Text style={{ color: dob ? '#0f172a' : '#9aa0a6' }}>
+                      {dob || 'Data de nascimento (DD/MM/AAAA)'}
+                    </Text>
+                  </Pressable>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={dobDate || new Date(1990, 0, 1)}
+                      mode="date"
+                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      maximumDate={new Date()}
+                      onChange={(e: any, selectedDate?: Date) => {
+                        setShowDatePicker(false);
+                        if (selectedDate) {
+                          setDobDate(selectedDate);
+                          const dd = String(selectedDate.getDate()).padStart(2, '0');
+                          const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                          const yyyy = selectedDate.getFullYear();
+                          setDob(`${dd}/${mm}/${yyyy}`);
+                        }
+                      }}
+                    />
+                  )}
                   {errors.dob ? (
                     <Text style={styles.error}>{errors.dob}</Text>
                   ) : null}
-                  <TextInput
-                    placeholder="Gênero"
-                    placeholderTextColor="#9aa0a6"
-                    value={gender}
-                    onChangeText={setGender}
-                    style={styles.input}
-                  />
+
+                  <View style={{ borderWidth: 1, borderColor: '#e6eef8', borderRadius: 8, overflow: 'hidden', marginTop: 10 }}>
+                    <Picker
+                      selectedValue={gender}
+                      onValueChange={(val) => setGender(String(val))}
+                    >
+                      <Picker.Item label="Selecione o gênero" value="" />
+                      <Picker.Item label="Masculino" value="male" />
+                      <Picker.Item label="Feminino" value="female" />
+                      <Picker.Item label="Não-binário" value="nonbinary" />
+                      <Picker.Item label="Prefiro não dizer" value="private" />
+                      <Picker.Item label="Outro" value="other" />
+                    </Picker>
+                  </View>
+
                   {errors.gender ? (
                     <Text style={styles.error}>{errors.gender}</Text>
                   ) : null}
