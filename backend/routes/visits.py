@@ -13,8 +13,7 @@ from core.websocket import emit_visit_notification
 router = APIRouter()
 
 @router.post("/", response_model=VisitOut)
-def record_visit(payload: VisitCreate, current: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    visited_user_id = payload.visited_user_id
+def record_visit(visited_user_id: int = Query(...), current: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if visited_user_id == current.id:
         raise HTTPException(status_code=400, detail="Não é possível visitar seu próprio perfil")
 
