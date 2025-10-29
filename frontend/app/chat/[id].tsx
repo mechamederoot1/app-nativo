@@ -210,6 +210,13 @@ export default function ChatScreen() {
       }
     };
 
+    const handleMessageSent = (data: any) => {
+      if (data.conversation_id === parseInt(id as string)) {
+        // Message was successfully sent and confirmed by server
+        console.log('Message sent confirmation:', data);
+      }
+    };
+
     const handleTypingStart = (data: any) => {
       if (data.conversation_id === parseInt(id as string)) {
         const typingUser: User = {
@@ -234,11 +241,13 @@ export default function ChatScreen() {
     };
 
     socket.on('chat_message', handleNewMessage);
+    socket.on('message_sent', handleMessageSent);
     socket.on('typing_start', handleTypingStart);
     socket.on('typing_stop', handleTypingStop);
 
     return () => {
       socket.off('chat_message', handleNewMessage);
+      socket.off('message_sent', handleMessageSent);
       socket.off('typing_start', handleTypingStart);
       socket.off('typing_stop', handleTypingStop);
     };
