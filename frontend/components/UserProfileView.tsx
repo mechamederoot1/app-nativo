@@ -156,6 +156,16 @@ export default function UserProfileView({
     }
   };
 
+  const handleMessage = async () => {
+    try {
+      if (!userId) return;
+      const conversation = await getOrCreateDMConversation(userId);
+      router.push(`/chat/${conversation.id}`);
+    } catch (e: any) {
+      Alert.alert('Erro', e?.message || 'Falha ao abrir conversa');
+    }
+  };
+
   const [friendStatus, setFriendStatus] = useState<{
     status: 'none' | 'outgoing_pending' | 'incoming_pending' | 'friends';
     requestId?: number | null;
