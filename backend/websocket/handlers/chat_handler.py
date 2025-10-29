@@ -1,4 +1,3 @@
-from websocket import WebSocket
 from websocket.services import ChatService, NotificationService, ConnectionService
 from websocket.events import SocketEvents
 from database.models import User
