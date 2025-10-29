@@ -159,7 +159,7 @@ export default function ChatScreen() {
     const loadConversation = async () => {
       try {
         setIsLoading(true);
-        const response = await api.get(`/chat/conversations/${id}/messages`);
+        const messages = await getConversationMessages(parseInt(id as string));
 
         // Create a mock conversation object (in production this would come from API)
         setConversation({
@@ -170,7 +170,7 @@ export default function ChatScreen() {
           updated_at: new Date().toISOString(),
         });
 
-        setMessages(response);
+        setMessages(messages);
       } catch (error) {
         console.error('Error loading messages:', error);
       } finally {
