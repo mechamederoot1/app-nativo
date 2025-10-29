@@ -31,18 +31,39 @@ async function request(path: string, init: RequestInit = {}) {
   if (!headers.has('Content-Type') && !(init.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
   }
-  const res = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
-  if (!res.ok) {
-    let msg = 'Request failed';
-    try {
-      const data = await res.json();
-      msg = data?.detail || JSON.stringify(data);
-    } catch {}
-    throw new Error(msg);
+  try {
+    const res = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
+    if (!res.ok) {
+      let msg = `HTTP ${res.status}: Request failed`;
+      try {
+        const data = await res.json();
+        if (data?.detail) {
+          msg = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail);
+        } else if (data?.message) {
+          msg = data.message;
+        } else if (typeof data === 'string') {
+          msg = data;
+        } else {
+          msg = JSON.stringify(data);
+        }
+      } catch (e) {
+        try {
+          msg = await res.text();
+        } catch {}
+      }
+      const error = new Error(msg);
+      (error as any).status = res.status;
+      throw error;
+    }
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('application/json')) return res.json();
+    return res.text();
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`API request failed: ${String(error)}`);
   }
-  const ct = res.headers.get('content-type') || '';
-  if (ct.includes('application/json')) return res.json();
-  return res.text();
 }
 
 export async function login(email: string, password: string) {
