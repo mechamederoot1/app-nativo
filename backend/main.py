@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from socketio import ASGIApp
+import logging
 
 from database.session import Base, engine
 from websocket import sio
@@ -23,6 +24,9 @@ if cors_origins == "*":
     allow_origins = ["*"]
 else:
     allow_origins = [o.strip() for o in cors_origins.split(",") if o.strip()]
+
+# Setup logging for debugging
+logging.basicConfig(level=logging.INFO)
 
 app.add_middleware(
     CORSMiddleware,
@@ -52,5 +56,12 @@ def root():
     return {"status": "ok", "message": "Backend running"}
 
 
+# Health check endpoint for WebSocket debugging
+@app.get("/health")
+def health():
+    return {"status": "ok", "message": "Backend running", "socketio": "enabled"}
+
+
 # Wrap FastAPI with Socket.IO
-socket_app = ASGIApp(sio, app)
+# The path parameter tells Socket.IO where to mount its endpoints
+socket_app = ASGIApp(sio, app, socketio_path="/socket.io/")

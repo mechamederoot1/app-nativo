@@ -53,6 +53,7 @@ import {
   acceptFriendRequest,
   declineFriendRequest,
   getUserFriends,
+  getOrCreateDMConversation,
 } from '../utils/api';
 import type { UserProfile } from '../screens/Profile/Data';
 
@@ -152,6 +153,16 @@ export default function UserProfileView({
       setFriendStatus({ status: 'none', requestId: null });
     } catch (e: any) {
       Alert.alert('Erro', e?.message || 'Falha ao recusar convite');
+    }
+  };
+
+  const handleMessage = async () => {
+    try {
+      if (!userId) return;
+      const conversation = await getOrCreateDMConversation(userId);
+      router.push(`/chat/${conversation.id}`);
+    } catch (e: any) {
+      Alert.alert('Erro', e?.message || 'Falha ao abrir conversa');
     }
   };
 
@@ -916,7 +927,7 @@ export default function UserProfileView({
                   <TouchableOpacity
                     style={styles.secondaryBtn}
                     activeOpacity={0.85}
-                    onPress={() => router.push('/messages')}
+                    onPress={handleMessage}
                   >
                     <MessageCircle
                       size={18}

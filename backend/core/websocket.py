@@ -1,7 +1,7 @@
 from websocket.handlers import AuthHandler, ChatHandler, NotificationHandler
 from websocket.services import ConnectionService
 from websocket import sio
-from database.models import User
+from database.models import User, Message
 
 # Initialize connection service
 connection_service = ConnectionService()
@@ -78,12 +78,89 @@ async def chat_message(sid, data):
 async def message_read(sid, data):
     """Handle message read confirmation"""
     try:
-        message_id = data.get("message_id")
-        await chat_handler.handle_message_read(message_id)
+        user_id = connection_service.user_by_session.get(sid)
+        if not user_id:
+            return
 
-        await sio.emit('message_read_confirmed', {'message_id': message_id}, to=sid)
+        message_id = data.get("message_id")
+        conversation_id = data.get("conversation_id")
+
+        read_data = await chat_handler.handle_message_read(message_id, user_id)
+
+        await chat_handler.emit_message_read_to_conversation(
+            conversation_id=conversation_id,
+            read_data=read_data,
+            exclude_sid=sid
+        )
+
+        await sio.emit('message_read_confirmed', read_data, to=sid)
     except Exception as e:
         print(f"Error handling message read: {e}")
+
+
+@sio.event
+async def message_delete(sid, data):
+    """Handle message deletion"""
+    try:
+        user_id = connection_service.user_by_session.get(sid)
+        if not user_id:
+            return
+
+        from database.session import SessionLocal
+        db = SessionLocal()
+        message = db.query(Message).filter(Message.id == data.get("message_id")).first()
+        db.close()
+
+        if not message or message.sender_id != user_id:
+            await sio.emit('error', {'message': 'Not authorized'}, to=sid)
+            return
+
+        delete_data = await chat_handler.handle_delete_message(data.get("message_id"))
+
+        await chat_handler.emit_message_deleted_to_conversation(
+            conversation_id=delete_data['conversation_id'],
+            delete_data=delete_data,
+            exclude_sid=sid
+        )
+
+        await sio.emit('message_deleted_confirmed', delete_data, to=sid)
+    except Exception as e:
+        print(f"Error handling message delete: {e}")
+        await sio.emit('error', {'message': str(e)}, to=sid)
+
+
+@sio.event
+async def message_edit(sid, data):
+    """Handle message editing"""
+    try:
+        user_id = connection_service.user_by_session.get(sid)
+        if not user_id:
+            return
+
+        from database.session import SessionLocal
+        db = SessionLocal()
+        message = db.query(Message).filter(Message.id == data.get("message_id")).first()
+        db.close()
+
+        if not message or message.sender_id != user_id:
+            await sio.emit('error', {'message': 'Not authorized'}, to=sid)
+            return
+
+        edit_data = await chat_handler.handle_edit_message(
+            data.get("message_id"),
+            data.get("content")
+        )
+
+        await chat_handler.emit_message_edited_to_conversation(
+            conversation_id=edit_data['conversation_id'],
+            edit_data=edit_data,
+            exclude_sid=sid
+        )
+
+        await sio.emit('message_edited_confirmed', edit_data, to=sid)
+    except Exception as e:
+        print(f"Error handling message edit: {e}")
+        await sio.emit('error', {'message': str(e)}, to=sid)
 
 
 @sio.event

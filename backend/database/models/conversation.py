@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Integer, String, DateTime, ForeignKey, Table, Column
+from sqlalchemy import Integer, String, DateTime, ForeignKey, Table, Column, Boolean, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..session import Base
 
@@ -9,6 +9,8 @@ conversation_participants = Table(
     Base.metadata,
     Column('conversation_id', Integer, ForeignKey('conversations.id'), primary_key=True),
     Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
+    Column('muted', Boolean, default=False),
+    Column('deleted_at', DateTime, nullable=True),
 )
 
 class Conversation(Base):
@@ -16,10 +18,13 @@ class Conversation(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     name: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    is_group: Mapped[bool] = mapped_column(default=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_group: Mapped[bool] = mapped_column(default=False, index=True)
+    avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_by_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, index=True)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, index=True)
 
     participants: Mapped[list["User"]] = relationship(
         "User",

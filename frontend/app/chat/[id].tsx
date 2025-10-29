@@ -15,13 +15,8 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, Send, Plus, Smile, Mic, X } from 'lucide-react-native';
-import { api } from '../../utils/api';
-import {
-  getSocket,
-  onNotification,
-  offNotification,
-  NotificationEvents,
-} from '../../utils/websocket';
+import { getCurrentUser, getConversationMessages } from '../../utils/api';
+import { getSocket } from '../../utils/websocket';
 
 const getDimensions = () => {
   if (Platform.OS === 'web') {
@@ -147,10 +142,16 @@ export default function ChatScreen() {
 
   // Get current user
   useEffect(() => {
-    const user = api.getCurrentUser?.();
-    if (user) {
-      setCurrentUserId(user.id);
-    }
+    (async () => {
+      try {
+        const user = await api.getCurrentUser();
+        if (user) {
+          setCurrentUserId(user.id);
+        }
+      } catch (error) {
+        console.error('Error getting current user:', error);
+      }
+    })();
   }, []);
 
   // Load conversation and messages
@@ -158,7 +159,7 @@ export default function ChatScreen() {
     const loadConversation = async () => {
       try {
         setIsLoading(true);
-        const response = await api.get(`/chat/conversations/${id}/messages`);
+        const messages = await getConversationMessages(parseInt(id as string));
 
         // Create a mock conversation object (in production this would come from API)
         setConversation({
@@ -169,7 +170,7 @@ export default function ChatScreen() {
           updated_at: new Date().toISOString(),
         });
 
-        setMessages(response);
+        setMessages(messages);
       } catch (error) {
         console.error('Error loading messages:', error);
       } finally {
@@ -186,31 +187,69 @@ export default function ChatScreen() {
   useEffect(() => {
     if (!socket) return;
 
-    const unsubscribeMessage = onNotification(
-      'chat_message',
-      (data: Message) => {
-        if (data.conversation_id === parseInt(id as string)) {
-          setMessages((prev) => [...prev, data]);
-        }
-      },
-    );
-
-    const unsubscribeTyping = onNotification('typing_start', (data) => {
+    const handleNewMessage = (data: any) => {
       if (data.conversation_id === parseInt(id as string)) {
-        setTypingUsers((prev) => [...prev, data.user]);
+        // Map the data to Message format
+        const message: Message = {
+          id: data.id,
+          conversation_id: data.conversation_id,
+          content: data.content,
+          content_type: data.content_type || 'text',
+          media_url: data.media_url,
+          is_read: data.is_read || false,
+          created_at: data.created_at,
+          sender: {
+            id: data.sender?.id || 0,
+            username: data.sender?.name || '',
+            first_name: data.sender?.name?.split(' ')[0] || '',
+            last_name: data.sender?.name?.split(' ')[1] || '',
+            profile_photo: data.sender?.avatar,
+          },
+        };
+        setMessages((prev) => [...prev, message]);
       }
-    });
+    };
 
-    const unsubscribeTypingStop = onNotification('typing_stop', (data) => {
+    const handleMessageSent = (data: any) => {
       if (data.conversation_id === parseInt(id as string)) {
-        setTypingUsers((prev) => prev.filter((u) => u.id !== data.user.id));
+        // Message was successfully sent and confirmed by server
+        console.log('Message sent confirmation:', data);
       }
-    });
+    };
+
+    const handleTypingStart = (data: any) => {
+      if (data.conversation_id === parseInt(id as string)) {
+        const typingUser: User = {
+          id: data.user_id,
+          username: data.user_name,
+          first_name: data.user_name?.split(' ')[0] || '',
+          last_name: data.user_name?.split(' ')[1] || '',
+        };
+        setTypingUsers((prev) => {
+          if (!prev.find((u) => u.id === data.user_id)) {
+            return [...prev, typingUser];
+          }
+          return prev;
+        });
+      }
+    };
+
+    const handleTypingStop = (data: any) => {
+      if (data.conversation_id === parseInt(id as string)) {
+        setTypingUsers((prev) => prev.filter((u) => u.id !== data.user_id));
+      }
+    };
+
+    socket.on('chat_message', handleNewMessage);
+    socket.on('message_sent', handleMessageSent);
+    socket.on('typing_start', handleTypingStart);
+    socket.on('typing_stop', handleTypingStop);
 
     return () => {
-      unsubscribeMessage?.();
-      unsubscribeTyping?.();
-      unsubscribeTypingStop?.();
+      socket.off('chat_message', handleNewMessage);
+      socket.off('message_sent', handleMessageSent);
+      socket.off('typing_start', handleTypingStart);
+      socket.off('typing_stop', handleTypingStop);
     };
   }, [socket, id]);
 
