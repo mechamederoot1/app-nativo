@@ -39,6 +39,17 @@ def send_request(payload: FriendRequestCreate, current: User = Depends(get_curre
     db.add(fr)
     db.commit()
     db.refresh(fr)
+
+    # Emit websocket notification
+    asyncio.create_task(
+        emit_friend_request_notification(
+            receiver_id=target.id,
+            sender_id=current.id,
+            sender_name=f"{current.first_name} {current.last_name}".strip() or current.username,
+            sender_avatar=current.profile_photo
+        )
+    )
+
     return fr
 
 @router.get("/requests/incoming", response_model=List[IncomingFriendRequestOut])
