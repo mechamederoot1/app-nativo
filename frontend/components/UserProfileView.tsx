@@ -53,6 +53,7 @@ import {
   acceptFriendRequest,
   declineFriendRequest,
   getUserFriends,
+  getOrCreateDMConversation,
 } from '../utils/api';
 import type { UserProfile } from '../screens/Profile/Data';
 
