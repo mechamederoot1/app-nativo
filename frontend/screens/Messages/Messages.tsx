@@ -33,45 +33,29 @@ const getDimensions = () => {
 };
 const { width } = getDimensions();
 
-const MOCK = [
-  {
-    id: '1',
-    name: 'Jaque Santos',
-    avatar: 'https://i.pravatar.cc/150?img=10',
-    message: 'Oi! Como você está?',
-    time: '18:16',
-    unread: false,
-    online: true,
-  },
-  {
-    id: '2',
-    name: 'Bruno Almeida',
-    avatar: 'https://i.pravatar.cc/150?img=12',
-    message: 'Vamos marcar aquele café? Estava pensando em irmos naquele lugar novo que abriu no centro',
-    time: '12:02',
-    unread: true,
-    online: false,
-    unreadCount: 3
-  },
-  {
-    id: '3',
-    name: 'Carla Mendes',
-    avatar: 'https://i.pravatar.cc/150?img=5',
-    message: 'Adorei a foto do evento! Ficou incrível',
-    time: 'ontem',
-    unread: false,
-    online: true,
-  },
-  {
-    id: '4',
-    name: 'Pedro Silva',
-    avatar: 'https://i.pravatar.cc/150?img=8',
-    message: 'Fechado! Nos vemos amanhã então',
-    time: '2d',
-    unread: false,
-    online: false,
-  },
-];
+interface ChatItem {
+  id: number;
+  name?: string;
+  participants: Array<{
+    id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+    profile_photo?: string;
+  }>;
+  latest_message?: {
+    id: number;
+    content: string;
+    created_at: string;
+    sender: {
+      id: number;
+      first_name: string;
+      last_name: string;
+    };
+  };
+  unread_count: number;
+  is_group: boolean;
+}
 
 const ChatItem = ({ item, onPress }) => (
   <TouchableOpacity
