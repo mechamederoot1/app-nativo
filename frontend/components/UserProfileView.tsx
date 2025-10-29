@@ -93,6 +93,54 @@ export default function UserProfileView({
   const prevCoverTransformRef = useRef<CoverTransform>(coverTransform);
   const prevCoverPhotoRef = useRef<string>(coverPhoto);
 
+  const handleSendInvite = async () => {
+    try {
+      if (!userId) return;
+      const res = await sendFriendRequest(userId);
+      setFriendStatus({ status: 'outgoing_pending', requestId: res.id });
+    } catch (e: any) {
+      Alert.alert('Erro', e?.message || 'Falha ao enviar convite');
+    }
+  };
+
+  const handleCancelInvite = async () => {
+    try {
+      if (!friendStatus.requestId) return;
+      await cancelFriendRequest(friendStatus.requestId);
+      setFriendStatus({ status: 'none', requestId: null });
+    } catch (e: any) {
+      Alert.alert('Erro', e?.message || 'Falha ao cancelar convite');
+    }
+  };
+
+  const handleAcceptInvite = async () => {
+    try {
+      if (!friendStatus.requestId || !userId) return;
+      await acceptFriendRequest(friendStatus.requestId);
+      setFriendStatus({ status: 'friends', requestId: null });
+      setUserData((prev) => ({ ...prev, connectionsCount: (prev.connectionsCount || 0) + 1 }));
+      try {
+        const friends = await getUserFriends(userId);
+        setUserData((prev) => ({
+          ...prev,
+          recentFriends: friends.map((f) => ({ id: String(f.id), name: f.name, avatar: f.avatar || '' })),
+        }));
+      } catch {}
+    } catch (e: any) {
+      Alert.alert('Erro', e?.message || 'Falha ao aceitar convite');
+    }
+  };
+
+  const handleDeclineInvite = async () => {
+    try {
+      if (!friendStatus.requestId) return;
+      await declineFriendRequest(friendStatus.requestId);
+      setFriendStatus({ status: 'none', requestId: null });
+    } catch (e: any) {
+      Alert.alert('Erro', e?.message || 'Falha ao recusar convite');
+    }
+  };
+
   const [friendStatus, setFriendStatus] = useState<{ status: 'none' | 'outgoing_pending' | 'incoming_pending' | 'friends'; requestId?: number | null }>({ status: 'none', requestId: null });
   useEffect(() => {
     let mounted = true;
