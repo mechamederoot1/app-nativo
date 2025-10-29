@@ -157,10 +157,10 @@ export default function MessagesScreen() {
   const loadConversations = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get('/chat/conversations');
-      setConversations(response);
+      const conversations = await getConversations();
+      setConversations(conversations);
 
-      const total = response.reduce(
+      const total = conversations.reduce(
         (sum: number, conv: ChatItem) => sum + conv.unread_count,
         0,
       );
