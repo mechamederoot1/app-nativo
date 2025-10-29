@@ -391,9 +391,10 @@ export type VisitorInfo = {
 export async function recordProfileVisit(
   visited_user_id: number,
 ): Promise<any> {
-  return request('/visits', {
+  const params = new URLSearchParams();
+  params.append('visited_user_id', visited_user_id.toString());
+  return request(`/visits?${params.toString()}`, {
     method: 'POST',
-    body: JSON.stringify({ visited_user_id }),
   });
 }
 
