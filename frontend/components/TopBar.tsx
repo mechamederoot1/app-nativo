@@ -42,49 +42,69 @@ export default function TopBar() {
   );
 
   return (
-    <View
-      style={[
-        styles.container,
-        { paddingTop, paddingBottom: Platform.OS === 'ios' ? 8 : 6 },
-      ]}
-    >
-      <TouchableOpacity onPress={() => router.push('/feed')} activeOpacity={0.7}>
-        <Text style={styles.logo}>Vibe</Text>
-      </TouchableOpacity>
-
-      <View style={styles.rightRow}>
-        <TouchableOpacity
-          onPress={() => router.push('/search')}
-          style={styles.iconBtn}
-          activeOpacity={0.6}
-        >
-          <Search size={20} color="#64748b" strokeWidth={2} />
+    <>
+      <View
+        style={[
+          styles.container,
+          { paddingTop, paddingBottom: Platform.OS === 'ios' ? 8 : 6 },
+        ]}
+      >
+        <TouchableOpacity onPress={() => router.push('/feed')} activeOpacity={0.7}>
+          <Text style={styles.logo}>Vibe</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => router.push('/notifications')}
-          style={styles.iconBtn}
-          activeOpacity={0.6}
-        >
-          <Bell size={20} color="#64748b" strokeWidth={2} />
-          {unreadNotifications > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
-                {unreadNotifications > 99 ? '99+' : unreadNotifications}
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
+        <View style={styles.rightRow}>
+          <TouchableOpacity
+            onPress={() => router.push('/search')}
+            style={styles.iconBtn}
+            activeOpacity={0.6}
+          >
+            <Search size={20} color="#64748b" strokeWidth={2} />
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => router.push('/profile')}
-          style={styles.avatar}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.avatarText}>U</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push('/notifications')}
+            style={styles.iconBtn}
+            activeOpacity={0.6}
+          >
+            <Bell size={20} color="#64748b" strokeWidth={2} />
+            {unreadNotifications > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>
+                  {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              setShowFriendRequests(true);
+              loadFriendRequestCount();
+            }}
+            style={styles.iconBtn}
+            activeOpacity={0.6}
+          >
+            <Users size={20} color="#64748b" strokeWidth={2} />
+            {unreadFriendRequests > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>
+                  {unreadFriendRequests > 99 ? '99+' : unreadFriendRequests}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+
+      <FriendRequests
+        visible={showFriendRequests}
+        onClose={() => {
+          setShowFriendRequests(false);
+          loadFriendRequestCount();
+        }}
+      />
+    </>
   );
 }
 
