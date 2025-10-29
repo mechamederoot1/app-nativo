@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
 from database.session import Base, engine
-from routes import auth as _auth, users as _users, posts as _posts, highlights as _highlights, stories as _stories
+from routes import auth as _auth, users as _users, posts as _posts, highlights as _highlights, stories as _stories, friends as _friends
 import database.models as _models  # ensure models are registered
 
 # Load env from backend/.env
