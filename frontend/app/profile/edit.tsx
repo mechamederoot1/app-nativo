@@ -9,7 +9,12 @@ import {
   TouchableOpacity,
   Alert,
   Switch,
+  Modal,
+  Pressable,
+  useWindowDimensions,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import TagSearch from '../../components/story/TagSearch';
 import TopBar from '../../components/TopBar';
 import BottomNav from '../../components/BottomNav';
 import { getMyProfile, updateMyProfile, getCurrentUser } from '../../utils/api';
@@ -35,6 +40,10 @@ export default function EditProfilePage() {
   const [showContactEmail, setShowContactEmail] = useState(false);
   const [showContactPhone, setShowContactPhone] = useState(false);
   const [showWorkplace, setShowWorkplace] = useState(true);
+  const [activeTab, setActiveTab] = useState<'info' | 'privacy'>('info');
+  const [selectedRelationUser, setSelectedRelationUser] = useState<any>(null);
+  const [showTagModal, setShowTagModal] = useState(false);
+  const { width } = useWindowDimensions();
 
   useEffect(() => {
     let mounted = true;
@@ -160,7 +169,17 @@ export default function EditProfilePage() {
         <Text style={styles.title}>Editar perfil</Text>
 
         {/* Responsive columns: left (details) and right (privacy) */}
-        <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
+        <View>
+          <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+            <TouchableOpacity onPress={() => setActiveTab('info')} style={{ flex: 1, padding: 10, backgroundColor: activeTab === 'info' ? '#fff' : '#f1f5f9', borderTopLeftRadius: 8, borderBottomLeftRadius: 8, borderWidth:1, borderColor:'#e2e8f0', alignItems:'center' }}>
+              <Text style={{ fontWeight: '700', color: activeTab === 'info' ? '#0f172a' : '#64748b' }}>Informações Pessoais</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setActiveTab('privacy')} style={{ flex: 1, padding: 10, backgroundColor: activeTab === 'privacy' ? '#fff' : '#f1f5f9', borderTopRightRadius: 8, borderBottomRightRadius: 8, borderWidth:1, borderColor:'#e2e8f0', alignItems:'center' }}>
+              <Text style={{ fontWeight: '700', color: activeTab === 'privacy' ? '#0f172a' : '#64748b' }}>Controle de Privacidade</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
           <View style={{ flex: 2, minWidth: 300 }}>
             {/* SEÇÃO: INFORMAÇÕES PESSOAIS */}
             <View style={styles.section}>
@@ -192,12 +211,48 @@ export default function EditProfilePage() {
               />
 
               <Text style={styles.label}>Estado civil</Text>
-              <TextInput
-                style={styles.input}
-                value={relationshipStatus}
-                onChangeText={setRelationshipStatus}
-                placeholder="Estado civil"
-              />
+              <View style={{ borderWidth: 1, borderColor: '#e6eef8', borderRadius: 8, overflow: 'hidden' }}>
+                <Picker
+                  selectedValue={relationshipStatus}
+                  onValueChange={(val) => {
+                    setRelationshipStatus(String(val));
+                    if (String(val) !== 'casado') {
+                      setSelectedRelationUser(null);
+                    }
+                    if (String(val) === 'casado') {
+                      setShowTagModal(true);
+                    }
+                  }}
+                >
+                  <Picker.Item label="Selecione..." value="" />
+                  <Picker.Item label="Sério" value="sério" />
+                  <Picker.Item label="Morando com alguém" value="morando com alguém" />
+                  <Picker.Item label="Relação estável" value="relação estável" />
+                  <Picker.Item label="Ficando com alguém" value="ficando com alguém" />
+                  <Picker.Item label="Solteiro" value="solteiro" />
+                  <Picker.Item label="Divorciado" value="divorciado" />
+                  <Picker.Item label="Separado" value="separado" />
+                  <Picker.Item label="Casado" value="casado" />
+                </Picker>
+              </View>
+              {selectedRelationUser ? (
+                <View style={{ marginTop: 8, padding: 10, backgroundColor: '#f1f5f9', borderRadius: 8 }}>
+                  <Text style={{ fontWeight: '700' }}>Marcado: @{selectedRelationUser.username || selectedRelationUser.first_name}</Text>
+                  <TouchableOpacity onPress={() => setSelectedRelationUser(null)}><Text style={{ color: '#ef4444', marginTop: 6 }}>Remover marcação</Text></TouchableOpacity>
+                </View>
+              ) : null}
+
+              <Modal visible={showTagModal} animationType="slide" onRequestClose={() => setShowTagModal(false)}>
+                <SafeAreaView style={{ flex: 1 }}>
+                  <View style={{ padding: 16, flex: 1 }}>
+                    <Text style={{ fontWeight: '800', fontSize: 18, marginBottom: 12 }}>Marcar pessoa</Text>
+                    <TagSearch onSelect={(u: any) => { setSelectedRelationUser(u); setShowTagModal(false); }} />
+                    <TouchableOpacity onPress={() => setShowTagModal(false)} style={{ marginTop: 12 }}>
+                      <Text style={{ color: '#64748b' }}>Fechar</Text>
+                    </TouchableOpacity>
+                  </View>
+                </SafeAreaView>
+              </Modal>
             </View>
 
             {/* SEÇÃO: CONTATO */}
@@ -434,6 +489,7 @@ export default function EditProfilePage() {
               </View>
             </View>
           </View>
+        </View>
         </View>
       </ScrollView>
 
