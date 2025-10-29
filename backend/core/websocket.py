@@ -1,47 +1,15 @@
-from socketio import AsyncServer, ASGIApp
-from fastapi import HTTPException, status
-from jose import JWTError, jwt
-from typing import Optional
-from core.config import settings
-from database.session import SessionLocal
-from database.models import User, Visit, FriendRequest, Notification, Post
-from websocket_manager import manager, create_notification_data
-from datetime import datetime
+from socketio import AsyncServer
+from websocket.handlers import AuthHandler, ChatHandler, NotificationHandler
+from websocket.services import ConnectionService
+from websocket import sio
 
-# Initialize async socketio server
-sio = AsyncServer(
-    async_mode='asgi',
-    cors_allowed_origins='*',
-    ping_timeout=60,
-    ping_interval=25,
-)
+# Initialize connection service
+connection_service = ConnectionService()
 
-
-async def authenticate_socket(auth):
-    """Authenticate socket connection using JWT token"""
-    if not auth or 'token' not in auth:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing authentication token"
-        )
-    
-    token = auth['token']
-    try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        email: str | None = payload.get("sub")
-        if email is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-        
-        db = SessionLocal()
-        user = db.query(User).filter(User.email == email).first()
-        db.close()
-        
-        if user is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-        
-        return user
-    except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+# Initialize handlers
+auth_handler = AuthHandler()
+chat_handler = ChatHandler(sio, connection_service)
+notification_handler = NotificationHandler(sio, connection_service)
 
 
 @sio.event
