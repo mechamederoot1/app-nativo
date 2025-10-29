@@ -39,6 +39,26 @@ def send_request(payload: FriendRequestCreate, current: User = Depends(get_curre
     db.refresh(fr)
     return fr
 
+@router.get("/requests/incoming", response_model=List[IncomingFriendRequestOut])
+def get_incoming_requests(current: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    requests = db.query(FriendRequest).filter(
+        FriendRequest.receiver_id == current.id,
+        FriendRequest.status == "pending",
+    ).order_by(FriendRequest.created_at.desc()).all()
+
+    result = []
+    for req in requests:
+        sender = db.query(User).filter(User.id == req.sender_id).first()
+        if sender:
+            result.append(IncomingFriendRequestOut(
+                id=req.id,
+                sender_id=sender.id,
+                sender_name=f"{sender.first_name} {sender.last_name}".strip() or sender.username,
+                sender_profile_photo=sender.profile_photo,
+                created_at=req.created_at,
+            ))
+    return result
+
 @router.get("/status/{user_id}", response_model=FriendStatusOut)
 def get_status(user_id: int, current: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if user_id == current.id:
