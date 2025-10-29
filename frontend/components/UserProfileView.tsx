@@ -93,6 +93,21 @@ export default function UserProfileView({
   const prevCoverTransformRef = useRef<CoverTransform>(coverTransform);
   const prevCoverPhotoRef = useRef<string>(coverPhoto);
 
+  const [friendStatus, setFriendStatus] = useState<{ status: 'none' | 'outgoing_pending' | 'incoming_pending' | 'friends'; requestId?: number | null }>({ status: 'none', requestId: null });
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        if (editable) return;
+        if (!userId) return;
+        const data = await getFriendStatus(userId);
+        if (!mounted) return;
+        setFriendStatus({ status: data.status, requestId: (data as any).request_id ?? null });
+      } catch {}
+    })();
+    return () => { mounted = false; };
+  }, [editable, userId]);
+
   const AvatarPlaceholder = () => (
     <View
       style={{
