@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   View,
@@ -9,15 +9,23 @@ import {
   TouchableOpacity,
   Dimensions,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import TopBar from '../components/TopBar';
 import BottomNav from '../components/BottomNav';
 import {
   ChevronRight,
-  Shield,
-  Star,
-  Clock
+  UserPlus,
+  Clock,
 } from 'lucide-react-native';
+import {
+  getProfileVisits,
+  getCurrentUser,
+  sendFriendRequest,
+  type VisitorInfo,
+  absoluteUrl,
+} from '../utils/api';
 
 const getDimensions = () => {
   if (Platform.OS === 'web') {
@@ -27,54 +35,62 @@ const getDimensions = () => {
 };
 const { width } = getDimensions();
 
-const MOCK_VISITS = [
-  {
-    id: 'v1',
-    name: 'Marina Silva',
-    time: '14:30',
-    avatar: 'https://i.pravatar.cc/100?img=11',
-    isPremium: true,
-    isVerified: true,
-    hasInvite: true,
-    timeAgo: 'Hoje'
-  },
-  {
-    id: 'v2',
-    name: 'Ricardo Santos',
-    time: '11:20',
-    avatar: 'https://i.pravatar.cc/100?img=22',
-    isPremium: false,
-    isVerified: true,
-    hasInvite: false,
-    timeAgo: 'Hoje'
-  },
-  {
-    id: 'v3',
-    name: 'Sara Costa',
-    time: 'Ontem às 18:45',
-    avatar: 'https://i.pravatar.cc/100?img=33',
-    isPremium: true,
-    hasInvite: true,
-    timeAgo: 'Essa semana'
-  },
-  {
-    id: 'v4',
-    name: 'João Pedro',
-    time: '15 Mai às 15:30',
-    avatar: 'https://i.pravatar.cc/100?img=44',
-    isPremium: false,
-    hasInvite: false,
-    timeAgo: 'Esse mês'
-  },
-];
-
 export default function VisitsScreen() {
-  const [timeFilter, setTimeFilter] = useState('all');
+  const router = useRouter();
+  const [timeFilter, setTimeFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
+  const [visits, setVisits] = useState<VisitorInfo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [processingId, setProcessingId] = useState<number | null>(null);
 
-  const filteredVisits = MOCK_VISITS.filter(visit => {
-    if (timeFilter === 'all') return true;
-    return visit.timeAgo.toLowerCase() === timeFilter;
-  });
+  useEffect(() => {
+    loadVisits();
+  }, [timeFilter]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const user = await getCurrentUser();
+        setCurrentUserId(user.id);
+      } catch (error) {
+        console.error('Error loading current user:', error);
+      }
+    })();
+  }, []);
+
+  const loadVisits = async () => {
+    try {
+      setLoading(true);
+      const user = await getCurrentUser();
+      const data = await getProfileVisits(user.id, timeFilter);
+      setVisits(data);
+    } catch (error) {
+      console.error('Error loading visits:', error);
+      setVisits([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendFriendRequest = async (visitorId: number) => {
+    try {
+      setProcessingId(visitorId);
+      await sendFriendRequest(visitorId);
+      setVisits(visits.map(v =>
+        v.visitor_id === visitorId
+          ? { ...v, has_sent_friend_request: true }
+          : v
+      ));
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const navigateToProfile = (userId: number) => {
+    router.push(`/profile/${userId}`);
+  };
 
   const navigateToProfile = (userId) => {
     // Navegação para o perfil
