@@ -927,7 +927,7 @@ export default function UserProfileView({
                   <TouchableOpacity
                     style={styles.secondaryBtn}
                     activeOpacity={0.85}
-                    onPress={() => router.push('/messages')}
+                    onPress={handleMessage}
                   >
                     <MessageCircle
                       size={18}
