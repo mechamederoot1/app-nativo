@@ -57,11 +57,14 @@ interface ChatItem {
 const ChatItem = ({
   item,
   onPress,
+  onDelete,
 }: {
   item: ChatItem;
   onPress: () => void;
+  onDelete: (id: number) => void;
 }) => {
   const isUnread = item.unread_count > 0;
+  const [showActions, setShowActions] = useState(false);
 
   // Get the other participant's name (for DMs)
   const getDisplayName = () => {
@@ -90,51 +93,95 @@ const ChatItem = ({
     });
   };
 
+  const handleDelete = () => {
+    Alert.alert(
+      'Deletar conversa',
+      'Tem certeza que deseja deletar esta conversa?',
+      [
+        { text: 'Cancelar', onPress: () => setShowActions(false), style: 'cancel' },
+        {
+          text: 'Deletar',
+          onPress: () => {
+            onDelete(item.id);
+            setShowActions(false);
+          },
+          style: 'destructive',
+        },
+      ]
+    );
+  };
+
   return (
-    <TouchableOpacity
+    <View
       style={[styles.chatItem, isUnread && styles.chatItemUnread]}
-      onPress={onPress}
-      activeOpacity={0.7}
     >
-      <View style={styles.avatarContainer}>
-        <Image
-          source={{
-            uri:
-              item.participants[0]?.profile_photo ||
-              `https://i.pravatar.cc/150?u=${item.participants[0]?.id}`,
-          }}
-          style={styles.avatar}
-        />
-      </View>
-
-      <View style={styles.chatContent}>
-        <View style={styles.chatHeader}>
-          <Text style={[styles.chatName, isUnread && styles.chatNameUnread]}>
-            {getDisplayName()}
-          </Text>
-          <Text style={[styles.chatTime, isUnread && styles.chatTimeUnread]}>
-            {getMessageTime()}
-          </Text>
+      <TouchableOpacity
+        style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
+        onPress={onPress}
+        activeOpacity={0.7}
+      >
+        <View style={styles.avatarContainer}>
+          <Image
+            source={{
+              uri:
+                item.participants[0]?.profile_photo ||
+                `https://i.pravatar.cc/150?u=${item.participants[0]?.id}`,
+            }}
+            style={styles.avatar}
+          />
         </View>
 
-        <View style={styles.chatFooter}>
-          <Text
-            style={[styles.chatMessage, isUnread && styles.chatMessageUnread]}
-            numberOfLines={2}
-          >
-            {item.latest_message?.content || 'Sem mensagens'}
-          </Text>
+        <View style={styles.chatContent}>
+          <View style={styles.chatHeader}>
+            <Text style={[styles.chatName, isUnread && styles.chatNameUnread]}>
+              {getDisplayName()}
+            </Text>
+            <Text style={[styles.chatTime, isUnread && styles.chatTimeUnread]}>
+              {getMessageTime()}
+            </Text>
+          </View>
 
-          {isUnread ? (
-            <View style={styles.unreadBadge}>
-              <Text style={styles.unreadCount}>{item.unread_count}</Text>
-            </View>
-          ) : (
-            <CheckCheck size={16} color="#94a3b8" strokeWidth={2} />
-          )}
+          <View style={styles.chatFooter}>
+            <Text
+              style={[styles.chatMessage, isUnread && styles.chatMessageUnread]}
+              numberOfLines={2}
+            >
+              {item.latest_message?.content || 'Sem mensagens'}
+            </Text>
+
+            {isUnread ? (
+              <View style={styles.unreadBadge}>
+                <Text style={styles.unreadCount}>{item.unread_count}</Text>
+              </View>
+            ) : (
+              <CheckCheck size={16} color="#94a3b8" strokeWidth={2} />
+            )}
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+
+      {showActions && (
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={handleDelete}
+          activeOpacity={0.7}
+        >
+          <Trash2 size={18} color="#ef4444" strokeWidth={2} />
+        </TouchableOpacity>
+      )}
+
+      <TouchableOpacity
+        style={styles.actionButton}
+        onPress={() => setShowActions(!showActions)}
+        activeOpacity={0.7}
+      >
+        {showActions ? (
+          <X size={18} color="#64748b" strokeWidth={2} />
+        ) : (
+          <Text style={styles.actionButtonText}>•••</Text>
+        )}
+      </TouchableOpacity>
+    </View>
   );
 };
 
