@@ -815,43 +815,53 @@ export default function UserProfileView({
                     <Edit3 size={16} color="#ffffff" strokeWidth={2.5} />
                     <Text style={styles.primaryBtnText}>Editar perfil</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.secondaryBtn}
-                    activeOpacity={0.85}
-                  >
+                  <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.85}>
                     <Plus size={18} color="#3b82f6" strokeWidth={2.5} />
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.secondaryBtn}
-                    activeOpacity={0.85}
-                  >
+                  <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.85}>
                     <MoreVertical size={18} color="#3b82f6" strokeWidth={2.5} />
                   </TouchableOpacity>
                 </>
               ) : (
                 <>
-                  <TouchableOpacity
-                    style={styles.primaryBtn}
-                    activeOpacity={0.85}
-                  >
-                    <UserPlus size={16} color="#ffffff" strokeWidth={2.5} />
-                    <Text style={styles.primaryBtnText}>Adicionar</Text>
-                  </TouchableOpacity>
+                  {friendStatus.status === 'none' && (
+                    <TouchableOpacity style={styles.primaryBtn} activeOpacity={0.85} onPress={handleSendInvite}>
+                      <UserPlus size={16} color="#ffffff" strokeWidth={2.5} />
+                      <Text style={styles.primaryBtnText}>Adicionar</Text>
+                    </TouchableOpacity>
+                  )}
+                  {friendStatus.status === 'outgoing_pending' && (
+                    <TouchableOpacity style={styles.primaryBtn} activeOpacity={0.85} onPress={handleCancelInvite}>
+                      <UserPlus size={16} color="#ffffff" strokeWidth={2.5} />
+                      <Text style={styles.primaryBtnText}>Cancelar convite</Text>
+                    </TouchableOpacity>
+                  )}
+                  {friendStatus.status === 'incoming_pending' && (
+                    <>
+                      <TouchableOpacity style={styles.primaryBtn} activeOpacity={0.85} onPress={handleAcceptInvite}>
+                        <UserCheck size={16} color="#ffffff" strokeWidth={2.5} />
+                        <Text style={styles.primaryBtnText}>Aceitar</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity activeOpacity={0.85} onPress={handleDeclineInvite} style={{ paddingHorizontal: 12, height: 42, justifyContent: 'center' }}>
+                        <Text style={{ color: '#ef4444', fontWeight: '600' }}>Recusar</Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+                  {friendStatus.status === 'friends' && (
+                    <TouchableOpacity style={styles.primaryBtn} activeOpacity={1}>
+                      <UserCheck size={16} color="#ffffff" strokeWidth={2.5} />
+                      <Text style={styles.primaryBtnText}>Amigos</Text>
+                    </TouchableOpacity>
+                  )}
+
                   <TouchableOpacity
                     style={styles.secondaryBtn}
                     activeOpacity={0.85}
                     onPress={() => router.push('/messages')}
                   >
-                    <MessageCircle
-                      size={18}
-                      color="#3b82f6"
-                      strokeWidth={2.5}
-                    />
+                    <MessageCircle size={18} color="#3b82f6" strokeWidth={2.5} />
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.secondaryBtn}
-                    activeOpacity={0.85}
-                  >
+                  <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.85}>
                     <MoreVertical size={18} color="#3b82f6" strokeWidth={2.5} />
                   </TouchableOpacity>
                 </>
