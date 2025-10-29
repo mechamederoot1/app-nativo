@@ -46,6 +46,7 @@ import {
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { getPosts, subscribe, toggleLike } from '../store/posts';
+import { getFriendStatus, sendFriendRequest, cancelFriendRequest, acceptFriendRequest, declineFriendRequest, getUserFriends } from '../utils/api';
 import type { UserProfile } from '../screens/Profile/Data';
 
 const getDimensions = () => {
