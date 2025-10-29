@@ -521,4 +521,21 @@ const styles = StyleSheet.create({
     color: '#64748b',
     textAlign: 'center',
   },
+  actionButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  actionButtonText: {
+    fontSize: 20,
+    color: '#64748b',
+    fontWeight: '600',
+  },
+  deleteButton: {
+    padding: 8,
+    marginRight: 8,
+  },
 });
