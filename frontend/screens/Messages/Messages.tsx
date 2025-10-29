@@ -144,23 +144,73 @@ const ChatItem = ({ item, onPress }: { item: ChatItem; onPress: () => void }) =>
 };
 
 export default function MessagesScreen() {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [conversations, setConversations] = useState<ChatItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [unreadTotal, setUnreadTotal] = useState(0);
+
+  // Initialize socket
+  useEffect(() => {
+    initializeSocket();
+  }, []);
+
+  // Load conversations
+  useEffect(() => {
+    loadConversations();
+  }, []);
+
+  const loadConversations = async () => {
+    try {
+      setIsLoading(true);
+      const response = await api.get('/chat/conversations');
+      setConversations(response);
+
+      const total = response.reduce((sum: number, conv: ChatItem) => sum + conv.unread_count, 0);
+      setUnreadTotal(total);
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 500);
+    loadConversations().finally(() => setRefreshing(false));
   }, []);
 
   const filteredChats = useMemo(() => {
-    if (!query.trim()) return MOCK;
-    return MOCK.filter(chat =>
-      chat.name.toLowerCase().includes(query.toLowerCase()) ||
-      chat.message.toLowerCase().includes(query.toLowerCase())
+    if (!query.trim()) return conversations;
+    return conversations.filter(chat => {
+      const displayName = chat.name || `${chat.participants[0]?.first_name} ${chat.participants[0]?.last_name}`;
+      const lastMessage = chat.latest_message?.content || '';
+      return displayName.toLowerCase().includes(query.toLowerCase()) ||
+        lastMessage.toLowerCase().includes(query.toLowerCase());
+    });
+  }, [query, conversations]);
+
+  const handleChatPress = (chatId: number) => {
+    router.push(`/chat/${chatId}`);
+  };
+
+  const handleNewChat = () => {
+    // TODO: Implementar tela de novo chat
+    console.log('New chat');
+  };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <TopBar />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#3b82f6" />
+        </View>
+        <BottomNav active="messages" />
+      </SafeAreaView>
     );
-  }, [query]);
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -170,10 +220,16 @@ export default function MessagesScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.title}>Bate-papo</Text>
-            <Text style={styles.subtitle}>3 mensagens não lidas</Text>
+            <Text style={styles.subtitle}>
+              {unreadTotal} {unreadTotal === 1 ? 'mensagem não lida' : 'mensagens não lidas'}
+            </Text>
           </View>
 
-          <TouchableOpacity style={styles.newChatBtn} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.newChatBtn}
+            activeOpacity={0.7}
+            onPress={handleNewChat}
+          >
             <Plus size={22} color="#fff" strokeWidth={2.5} />
           </TouchableOpacity>
         </View>
@@ -191,8 +247,13 @@ export default function MessagesScreen() {
 
         <FlatList
           data={filteredChats}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => <ChatItem item={item} onPress={() => { }} />}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({ item }) => (
+            <ChatItem
+              item={item}
+              onPress={() => handleChatPress(item.id)}
+            />
+          )}
           contentContainerStyle={styles.chatList}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -203,7 +264,7 @@ export default function MessagesScreen() {
               <MessageCircle size={48} color="#cbd5e1" strokeWidth={1.5} />
               <Text style={styles.emptyTitle}>Nenhuma conversa encontrada</Text>
               <Text style={styles.emptyText}>
-                Tente buscar por outro nome ou mensagem
+                {query ? 'Tente buscar por outro nome ou mensagem' : 'Comece uma nova conversa!'}
               </Text>
             </View>
           }
