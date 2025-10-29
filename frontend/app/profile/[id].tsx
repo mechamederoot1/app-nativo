@@ -9,6 +9,7 @@ import {
   ApiUser,
   ApiPost,
   getUserFriends,
+  recordProfileVisit,
 } from '../../utils/api';
 import { profileData as defaultProfileData } from '../../screens/Profile/Data';
 import { getMyProfile, getProfileById } from '../../utils/api';
@@ -69,6 +70,15 @@ export default function UserProfilePage() {
         const isOwnProfile = currentUserId === user.id;
         setEditable(isOwnProfile);
         setUserId(user.id);
+
+        // Record visit if viewing someone else's profile
+        if (!isOwnProfile && currentUserId) {
+          try {
+            await recordProfileVisit(user.id);
+          } catch (error) {
+            console.error('Error recording visit:', error);
+          }
+        }
 
         const fullName = `${user.first_name} ${user.last_name}`;
         const username =

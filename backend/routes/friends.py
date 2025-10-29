@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime
+import asyncio
 
 from database.session import get_db
 from dependencies import get_current_user
 from database.models import User, FriendRequest, Friendship, UserProfile
-from schemas.friend import FriendRequestCreate, FriendRequestOut, FriendStatusOut
+from schemas.friend import FriendRequestCreate, FriendRequestOut, FriendStatusOut, IncomingFriendRequestOut
+from core.websocket import emit_friend_request_notification, emit_friend_request_accepted
 
 router = APIRouter()
 
@@ -37,7 +39,38 @@ def send_request(payload: FriendRequestCreate, current: User = Depends(get_curre
     db.add(fr)
     db.commit()
     db.refresh(fr)
+
+    # Emit websocket notification
+    asyncio.create_task(
+        emit_friend_request_notification(
+            receiver_id=target.id,
+            sender_id=current.id,
+            sender_name=f"{current.first_name} {current.last_name}".strip() or current.username,
+            sender_avatar=current.profile_photo
+        )
+    )
+
     return fr
+
+@router.get("/requests/incoming", response_model=List[IncomingFriendRequestOut])
+def get_incoming_requests(current: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    requests = db.query(FriendRequest).filter(
+        FriendRequest.receiver_id == current.id,
+        FriendRequest.status == "pending",
+    ).order_by(FriendRequest.created_at.desc()).all()
+
+    result = []
+    for req in requests:
+        sender = db.query(User).filter(User.id == req.sender_id).first()
+        if sender:
+            result.append(IncomingFriendRequestOut(
+                id=req.id,
+                sender_id=sender.id,
+                sender_name=f"{sender.first_name} {sender.last_name}".strip() or sender.username,
+                sender_profile_photo=sender.profile_photo,
+                created_at=req.created_at,
+            ))
+    return result
 
 @router.get("/status/{user_id}", response_model=FriendStatusOut)
 def get_status(user_id: int, current: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -101,6 +134,21 @@ def accept_request(request_id: int, current: User = Depends(get_current_user), d
 
     db.commit()
     db.refresh(req)
+
+    # Get sender info for notification
+    sender = db.query(User).filter(User.id == req.sender_id).first()
+
+    # Emit websocket notification to the request sender
+    if sender:
+        asyncio.create_task(
+            emit_friend_request_accepted(
+                requester_id=req.sender_id,
+                accepter_id=current.id,
+                accepter_name=f"{current.first_name} {current.last_name}".strip() or current.username,
+                accepter_avatar=current.profile_photo
+            )
+        )
+
     return req
 
 @router.post("/requests/{request_id}/decline", response_model=FriendRequestOut)

@@ -312,6 +312,21 @@ export type FriendStatus =
   | 'outgoing_pending'
   | 'incoming_pending'
   | 'friends';
+
+export type IncomingFriendRequest = {
+  id: number;
+  sender_id: number;
+  sender_name: string;
+  sender_profile_photo?: string | null;
+  created_at: string;
+};
+
+export async function getIncomingFriendRequests(): Promise<
+  IncomingFriendRequest[]
+> {
+  return request('/friends/requests/incoming');
+}
+
 export async function getFriendStatus(
   userId: number | string,
 ): Promise<{ status: FriendStatus; request_id?: number | null }> {
@@ -336,6 +351,82 @@ export async function getUserFriends(
   userId: number | string,
 ): Promise<{ id: number; name: string; avatar?: string | null }[]> {
   return request(`/users/${userId}/friends`);
+}
+
+// Visits API
+export type VisitorInfo = {
+  id: number;
+  visitor_id: number;
+  visitor_name: string;
+  visitor_profile_photo?: string | null;
+  visited_at: string;
+  is_friend: boolean;
+  has_sent_friend_request: boolean;
+};
+
+export async function recordProfileVisit(
+  visited_user_id: number,
+): Promise<any> {
+  return request('/visits', {
+    method: 'POST',
+    body: JSON.stringify({ visited_user_id }),
+  });
+}
+
+export async function getProfileVisits(
+  userId: number | string,
+  timeFilter: 'all' | 'today' | 'week' | 'month' = 'all',
+): Promise<VisitorInfo[]> {
+  return request(`/visits/profile/${userId}?time_filter=${timeFilter}`);
+}
+
+export async function getVisitCount(
+  userId: number | string,
+): Promise<{ total_visits: number; today_visits: number }> {
+  return request(`/visits/count/${userId}`);
+}
+
+export async function getUnreadVisitCount(): Promise<{
+  unread_visits: number;
+}> {
+  return request('/visits/unread-count');
+}
+
+// Notifications API
+export type NotificationData = {
+  id: number;
+  type: string;
+  actor_id?: number;
+  related_id?: number;
+  data?: any;
+  read: boolean;
+  created_at: string;
+};
+
+export async function getNotifications(
+  limit: number = 50,
+): Promise<NotificationData[]> {
+  return request(`/notifications?limit=${limit}`);
+}
+
+export async function getUnreadNotificationsCount(): Promise<{
+  unread_count: number;
+}> {
+  return request('/notifications/unread-count');
+}
+
+export async function markNotificationAsRead(
+  notificationId: number,
+): Promise<any> {
+  return request(`/notifications/${notificationId}/read`, { method: 'POST' });
+}
+
+export async function markAllNotificationsAsRead(): Promise<any> {
+  return request('/notifications/read-all', { method: 'POST' });
+}
+
+export async function deleteNotification(notificationId: number): Promise<any> {
+  return request(`/notifications/${notificationId}`, { method: 'DELETE' });
 }
 
 export function logout() {

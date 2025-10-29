@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   View,
@@ -9,15 +9,19 @@ import {
   TouchableOpacity,
   Dimensions,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import TopBar from '../components/TopBar';
 import BottomNav from '../components/BottomNav';
+import { ChevronRight, UserPlus, Clock } from 'lucide-react-native';
 import {
-  ChevronRight,
-  Shield,
-  Star,
-  Clock
-} from 'lucide-react-native';
+  getProfileVisits,
+  getCurrentUser,
+  sendFriendRequest,
+  type VisitorInfo,
+  absoluteUrl,
+} from '../utils/api';
 
 const getDimensions = () => {
   if (Platform.OS === 'web') {
@@ -27,59 +31,122 @@ const getDimensions = () => {
 };
 const { width } = getDimensions();
 
-const MOCK_VISITS = [
-  {
-    id: 'v1',
-    name: 'Marina Silva',
-    time: '14:30',
-    avatar: 'https://i.pravatar.cc/100?img=11',
-    isPremium: true,
-    isVerified: true,
-    hasInvite: true,
-    timeAgo: 'Hoje'
-  },
-  {
-    id: 'v2',
-    name: 'Ricardo Santos',
-    time: '11:20',
-    avatar: 'https://i.pravatar.cc/100?img=22',
-    isPremium: false,
-    isVerified: true,
-    hasInvite: false,
-    timeAgo: 'Hoje'
-  },
-  {
-    id: 'v3',
-    name: 'Sara Costa',
-    time: 'Ontem às 18:45',
-    avatar: 'https://i.pravatar.cc/100?img=33',
-    isPremium: true,
-    hasInvite: true,
-    timeAgo: 'Essa semana'
-  },
-  {
-    id: 'v4',
-    name: 'João Pedro',
-    time: '15 Mai às 15:30',
-    avatar: 'https://i.pravatar.cc/100?img=44',
-    isPremium: false,
-    hasInvite: false,
-    timeAgo: 'Esse mês'
-  },
-];
-
 export default function VisitsScreen() {
-  const [timeFilter, setTimeFilter] = useState('all');
+  const router = useRouter();
+  const [timeFilter, setTimeFilter] = useState<
+    'all' | 'today' | 'week' | 'month'
+  >('all');
+  const [visits, setVisits] = useState<VisitorInfo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<number | null>(null);
 
-  const filteredVisits = MOCK_VISITS.filter(visit => {
-    if (timeFilter === 'all') return true;
-    return visit.timeAgo.toLowerCase() === timeFilter;
-  });
+  useEffect(() => {
+    loadVisits();
+  }, [timeFilter]);
 
-  const navigateToProfile = (userId) => {
-    // Navegação para o perfil
-    console.log('Navigate to profile:', userId);
+  const loadVisits = async () => {
+    try {
+      setLoading(true);
+      const user = await getCurrentUser();
+      const data = await getProfileVisits(user.id, timeFilter);
+      setVisits(data);
+    } catch (error) {
+      console.error('Error loading visits:', error);
+      setVisits([]);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleSendFriendRequest = async (visitorId: number) => {
+    try {
+      setProcessingId(visitorId);
+      await sendFriendRequest(visitorId);
+      setVisits(
+        visits.map((v) =>
+          v.visitor_id === visitorId
+            ? { ...v, has_sent_friend_request: true }
+            : v,
+        ),
+      );
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const navigateToProfile = (userId: number) => {
+    router.push(`/profile/${userId}`);
+  };
+
+  const renderVisitItem = ({ item }: { item: VisitorInfo }) => (
+    <View style={styles.visitCard}>
+      <View style={styles.visitInfo}>
+        {item.visitor_profile_photo ? (
+          <Image
+            source={{ uri: absoluteUrl(item.visitor_profile_photo) }}
+            style={styles.avatar}
+          />
+        ) : (
+          <View style={[styles.avatar, styles.avatarPlaceholder]}>
+            <Text style={styles.avatarText}>
+              {item.visitor_name.charAt(0).toUpperCase()}
+            </Text>
+          </View>
+        )}
+
+        <View style={styles.visitDetails}>
+          <Text style={styles.name}>{item.visitor_name}</Text>
+          <View style={styles.timeRow}>
+            <Clock size={12} color="#94a3b8" strokeWidth={2} />
+            <Text style={styles.time}>{formatTime(item.visited_at)}</Text>
+          </View>
+        </View>
+
+        {item.is_friend ? (
+          <TouchableOpacity
+            style={styles.profileBtn}
+            onPress={() => navigateToProfile(item.visitor_id)}
+          >
+            <ChevronRight size={20} color="#94a3b8" strokeWidth={2} />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={[
+              styles.addFriendBtn,
+              item.has_sent_friend_request && styles.addFriendBtnDisabled,
+            ]}
+            onPress={() => handleSendFriendRequest(item.visitor_id)}
+            disabled={
+              processingId === item.visitor_id || item.has_sent_friend_request
+            }
+          >
+            {processingId === item.visitor_id ? (
+              <ActivityIndicator size="small" color="#0856d6" />
+            ) : (
+              <>
+                <UserPlus
+                  size={16}
+                  color={item.has_sent_friend_request ? '#94a3b8' : '#0856d6'}
+                  strokeWidth={2}
+                />
+                <Text
+                  style={[
+                    styles.addFriendText,
+                    item.has_sent_friend_request &&
+                      styles.addFriendTextDisabled,
+                  ]}
+                >
+                  {item.has_sent_friend_request ? 'Enviado' : 'Adicionar'}
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -91,95 +158,112 @@ export default function VisitsScreen() {
         {/* Filtros de Tempo */}
         <View style={styles.filters}>
           <TouchableOpacity
-            style={[styles.filterBtn, timeFilter === 'all' && styles.filterActive]}
+            style={[
+              styles.filterBtn,
+              timeFilter === 'all' && styles.filterActive,
+            ]}
             onPress={() => setTimeFilter('all')}
           >
-            <Text style={[styles.filterText, timeFilter === 'all' && styles.filterTextActive]}>
+            <Text
+              style={[
+                styles.filterText,
+                timeFilter === 'all' && styles.filterTextActive,
+              ]}
+            >
               Todas
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.filterBtn, timeFilter === 'hoje' && styles.filterActive]}
-            onPress={() => setTimeFilter('hoje')}
+            style={[
+              styles.filterBtn,
+              timeFilter === 'today' && styles.filterActive,
+            ]}
+            onPress={() => setTimeFilter('today')}
           >
-            <Text style={[styles.filterText, timeFilter === 'hoje' && styles.filterTextActive]}>
+            <Text
+              style={[
+                styles.filterText,
+                timeFilter === 'today' && styles.filterTextActive,
+              ]}
+            >
               Hoje
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.filterBtn, timeFilter === 'essa semana' && styles.filterActive]}
-            onPress={() => setTimeFilter('essa semana')}
+            style={[
+              styles.filterBtn,
+              timeFilter === 'week' && styles.filterActive,
+            ]}
+            onPress={() => setTimeFilter('week')}
           >
-            <Text style={[styles.filterText, timeFilter === 'essa semana' && styles.filterTextActive]}>
+            <Text
+              style={[
+                styles.filterText,
+                timeFilter === 'week' && styles.filterTextActive,
+              ]}
+            >
               Essa semana
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.filterBtn, timeFilter === 'esse mês' && styles.filterActive]}
-            onPress={() => setTimeFilter('esse mês')}
+            style={[
+              styles.filterBtn,
+              timeFilter === 'month' && styles.filterActive,
+            ]}
+            onPress={() => setTimeFilter('month')}
           >
-            <Text style={[styles.filterText, timeFilter === 'esse mês' && styles.filterTextActive]}>
+            <Text
+              style={[
+                styles.filterText,
+                timeFilter === 'month' && styles.filterTextActive,
+              ]}
+            >
               Esse mês
             </Text>
           </TouchableOpacity>
         </View>
 
-        <FlatList
-          data={filteredVisits}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.visitCard}>
-              <View style={styles.visitInfo}>
-                <Image source={{ uri: item.avatar }} style={styles.avatar} />
-
-                <View style={styles.visitDetails}>
-                  <View style={styles.nameRow}>
-                    <Text style={styles.name}>{item.name}</Text>
-                    {item.isPremium && (
-                      <Star size={14} color="#eab308" fill="#eab308" strokeWidth={2} />
-                    )}
-                    {item.isVerified && (
-                      <Shield size={14} color="#3b82f6" fill="#3b82f6" strokeWidth={2} />
-                    )}
-                  </View>
-
-                  <View style={styles.timeRow}>
-                    <Clock size={12} color="#94a3b8" strokeWidth={2} />
-                    <Text style={styles.time}>{item.time}</Text>
-                  </View>
-                </View>
-
-                {item.hasInvite ? (
-                  <View style={styles.inviteActions}>
-                    <TouchableOpacity style={styles.acceptBtn}>
-                      <Text style={styles.acceptBtnText}>Aceitar</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.rejectBtn}>
-                      <Text style={styles.rejectBtnText}>Recusar</Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    style={styles.profileBtn}
-                    onPress={() => navigateToProfile(item.id)}
-                  >
-                    <ChevronRight size={20} color="#94a3b8" strokeWidth={2} />
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
-          )}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
-        />
+        {loading ? (
+          <View style={styles.centerContent}>
+            <ActivityIndicator size="large" color="#0856d6" />
+          </View>
+        ) : visits.length === 0 ? (
+          <View style={styles.centerContent}>
+            <Text style={styles.emptyText}>Nenhuma visita neste período</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={visits}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderVisitItem}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContent}
+          />
+        )}
       </View>
 
       <BottomNav active="visits" />
     </SafeAreaView>
   );
+}
+
+function formatTime(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'agora';
+  if (diffMins < 60) return `${diffMins}m atrás`;
+  if (diffHours < 24) return `${diffHours}h atrás`;
+  if (diffDays < 7) return `${diffDays}d atrás`;
+
+  return date.toLocaleDateString('pt-BR');
 }
 
 const styles = StyleSheet.create({
@@ -211,7 +295,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f1f5f9',
   },
   filterActive: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#0856d6',
   },
   filterText: {
     fontSize: 13,
@@ -220,6 +304,15 @@ const styles = StyleSheet.create({
   },
   filterTextActive: {
     color: '#ffffff',
+  },
+  centerContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#94a3b8',
   },
   listContent: {
     paddingHorizontal: 20,
@@ -243,54 +336,58 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     marginRight: 12,
   },
+  avatarPlaceholder: {
+    backgroundColor: '#eff6ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#dbeafe',
+  },
+  avatarText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0856d6',
+  },
   visitDetails: {
     flex: 1,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
   },
   name: {
     fontSize: 15,
     fontWeight: '600',
     color: '#0f172a',
+    marginBottom: 4,
   },
   timeRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginTop: 2,
   },
   time: {
     fontSize: 13,
     color: '#64748b',
   },
-  inviteActions: {
+  addFriendBtn: {
     flexDirection: 'row',
-    gap: 8,
-  },
-  acceptBtn: {
-    backgroundColor: '#22c55e',
+    alignItems: 'center',
+    gap: 6,
     paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: '#eff6ff',
+    borderWidth: 1,
+    borderColor: '#dbeafe',
   },
-  acceptBtnText: {
-    color: '#ffffff',
-    fontSize: 13,
+  addFriendBtnDisabled: {
+    backgroundColor: '#f1f5f9',
+    borderColor: '#e2e8f0',
+  },
+  addFriendText: {
+    fontSize: 12,
     fontWeight: '600',
+    color: '#0856d6',
   },
-  rejectBtn: {
-    backgroundColor: '#fee2e2',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-  },
-  rejectBtnText: {
-    color: '#ef4444',
-    fontSize: 13,
-    fontWeight: '600',
+  addFriendTextDisabled: {
+    color: '#94a3b8',
   },
   profileBtn: {
     padding: 8,

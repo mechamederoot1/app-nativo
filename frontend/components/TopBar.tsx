@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,15 +7,34 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Bell, Search } from 'lucide-react-native';
+import { Bell, Search, Users } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useUnread } from '../contexts/UnreadContext';
+import FriendRequests from './FriendRequests';
+import { getIncomingFriendRequests } from '../utils/api';
 
 export default function TopBar() {
   const router = useRouter();
   const { unreadNotifications } = useUnread();
   const insets = useSafeAreaInsets();
+  const [showFriendRequests, setShowFriendRequests] = useState(false);
+  const [unreadFriendRequests, setUnreadFriendRequests] = useState(0);
+
+  useEffect(() => {
+    loadFriendRequestCount();
+    const interval = setInterval(loadFriendRequestCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadFriendRequestCount = async () => {
+    try {
+      const requests = await getIncomingFriendRequests();
+      setUnreadFriendRequests(requests.length);
+    } catch (error) {
+      console.error('Error loading friend request count:', error);
+    }
+  };
 
   const paddingTop = Math.max(
     insets.top + 2,
@@ -23,49 +42,72 @@ export default function TopBar() {
   );
 
   return (
-    <View
-      style={[
-        styles.container,
-        { paddingTop, paddingBottom: Platform.OS === 'ios' ? 8 : 6 },
-      ]}
-    >
-      <TouchableOpacity onPress={() => router.push('/feed')} activeOpacity={0.7}>
-        <Text style={styles.logo}>Vibe</Text>
-      </TouchableOpacity>
-
-      <View style={styles.rightRow}>
+    <>
+      <View
+        style={[
+          styles.container,
+          { paddingTop, paddingBottom: Platform.OS === 'ios' ? 8 : 6 },
+        ]}
+      >
         <TouchableOpacity
-          onPress={() => router.push('/search')}
-          style={styles.iconBtn}
-          activeOpacity={0.6}
+          onPress={() => router.push('/feed')}
+          activeOpacity={0.7}
         >
-          <Search size={20} color="#64748b" strokeWidth={2} />
+          <Text style={styles.logo}>Vibe</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => router.push('/notifications')}
-          style={styles.iconBtn}
-          activeOpacity={0.6}
-        >
-          <Bell size={20} color="#64748b" strokeWidth={2} />
-          {unreadNotifications > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
-                {unreadNotifications > 99 ? '99+' : unreadNotifications}
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
+        <View style={styles.rightRow}>
+          <TouchableOpacity
+            onPress={() => router.push('/search')}
+            style={styles.iconBtn}
+            activeOpacity={0.6}
+          >
+            <Search size={20} color="#64748b" strokeWidth={2} />
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => router.push('/profile')}
-          style={styles.avatar}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.avatarText}>U</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push('/notifications')}
+            style={styles.iconBtn}
+            activeOpacity={0.6}
+          >
+            <Bell size={20} color="#64748b" strokeWidth={2} />
+            {unreadNotifications > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>
+                  {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              setShowFriendRequests(true);
+              loadFriendRequestCount();
+            }}
+            style={styles.iconBtn}
+            activeOpacity={0.6}
+          >
+            <Users size={20} color="#64748b" strokeWidth={2} />
+            {unreadFriendRequests > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>
+                  {unreadFriendRequests > 99 ? '99+' : unreadFriendRequests}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+
+      <FriendRequests
+        visible={showFriendRequests}
+        onClose={() => {
+          setShowFriendRequests(false);
+          loadFriendRequestCount();
+        }}
+      />
+    </>
   );
 }
 
@@ -116,20 +158,5 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 10,
     fontWeight: '700',
-  },
-  avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#eff6ff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#dbeafe',
-  },
-  avatarText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#0856d6',
   },
 });

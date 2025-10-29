@@ -3,9 +3,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
+from socketio import ASGIApp
 
 from database.session import Base, engine
-from routes import auth as _auth, users as _users, posts as _posts, highlights as _highlights, stories as _stories, friends as _friends
+from core.websocket import sio
+from routes import auth as _auth, users as _users, posts as _posts, highlights as _highlights, stories as _stories, friends as _friends, visits as _visits, notifications as _notifications
 import database.models as _models  # ensure models are registered
 
 # Load env from backend/.env
@@ -40,7 +42,13 @@ app.include_router(_posts.router, prefix="/posts", tags=["posts"])
 app.include_router(_highlights.router, prefix="/highlights", tags=["highlights"])
 app.include_router(_stories.router, prefix="/stories", tags=["stories"])
 app.include_router(_friends.router, prefix="/friends", tags=["friends"])
+app.include_router(_visits.router, prefix="/visits", tags=["visits"])
+app.include_router(_notifications.router, prefix="/notifications", tags=["notifications"])
 
 @app.get("/")
 def root():
     return {"status": "ok", "message": "Backend running"}
+
+
+# Wrap FastAPI with Socket.IO
+socket_app = ASGIApp(sio, app)
