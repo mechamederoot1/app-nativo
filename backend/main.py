@@ -39,6 +39,7 @@ app.include_router(_users.router, prefix="/users", tags=["users"])
 app.include_router(_posts.router, prefix="/posts", tags=["posts"])
 app.include_router(_highlights.router, prefix="/highlights", tags=["highlights"])
 app.include_router(_stories.router, prefix="/stories", tags=["stories"])
+app.include_router(_friends.router, prefix="/friends", tags=["friends"])
 
 @app.get("/")
 def root():
