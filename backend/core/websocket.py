@@ -1,6 +1,7 @@
 from socketio import AsyncServer, ASGIApp
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
+from typing import Optional
 from core.config import settings
 from database.session import SessionLocal
 from database.models import User, Visit, FriendRequest, Notification, Post, Comment
