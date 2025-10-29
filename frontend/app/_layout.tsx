@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '../hooks/useFrameworkReady';
+import { initializeSocket } from '../utils/websocket';
+import { getToken } from '../utils/api';
 import '../global.css';
 import { UnreadProvider } from '../contexts/UnreadContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
@@ -9,6 +11,14 @@ import NotificationToast from '../components/NotificationToast';
 
 export default function RootLayout() {
   useFrameworkReady();
+
+  useEffect(() => {
+    // Initialize WebSocket connection when user is logged in
+    const token = getToken();
+    if (token) {
+      initializeSocket();
+    }
+  }, []);
 
   return (
     <UnreadProvider>
