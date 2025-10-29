@@ -52,8 +52,12 @@ export default function SignupScreen() {
   };
 
   const validateDob = (value: string) => {
+    // accept DD/MM/YYYY or ISO dates
     const re = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(19|20)\d{2}$/;
-    return re.test(value);
+    if (re.test(value)) return true;
+    // try ISO
+    const d = Date.parse(value);
+    return !isNaN(d);
   };
 
   const validateStep1 = () => {
@@ -65,8 +69,8 @@ export default function SignupScreen() {
 
   const validateStep2 = () => {
     const e: Record<string, string> = {};
-    if (!dob.trim() || !validateDob(dob)) e.dob = 'Data inválida (DD/MM/AAAA)';
-    if (!gender.trim()) e.gender = 'Gênero obrigatório';
+    if (!dobDate && !validateDob(dob)) e.dob = 'Data inválida (DD/MM/AAAA)';
+    if (!gender || gender.length === 0) e.gender = 'Gênero obrigatório';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
