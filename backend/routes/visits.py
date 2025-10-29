@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime, timedelta
+import asyncio
 
 from database.session import get_db
 from dependencies import get_current_user
 from database.models import User, Visit, FriendRequest, Friendship
 from schemas.visit import VisitOut, VisitorInfo
+from core.websocket import emit_visit_notification
 
 router = APIRouter()
 
