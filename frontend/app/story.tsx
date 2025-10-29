@@ -381,16 +381,29 @@ export default function StoryScreen() {
   const [active, setActive] = useState<StoryItem | null>(null);
   const [filter, setFilter] = useState('all');
   const listRef = useRef<FlatList<StoryItem>>(null);
+  const router = require('expo-router').useRouter();
 
   const open = useCallback((s: StoryItem) => setActive(s), []);
   const close = useCallback(() => setActive(null), []);
 
+  const { subscribeStories, getStories } = require('../store/stories');
+  const [created, setCreated] = useState<any[]>(getStories());
+
+  React.useEffect(() => {
+    const unsub = subscribeStories((items: any[]) => setCreated(items));
+    return () => unsub();
+  }, []);
+
+  const allStories = useMemo(() => {
+    return [...created, ...STORIES];
+  }, [created]);
+
   const filteredStories = useMemo(() => {
     if (filter === 'recent') {
-      return STORIES.filter(story => story.postedAtHours <= 5);
+      return allStories.filter(story => story.postedAtHours <= 5);
     }
-    return STORIES;
-  }, [filter]);
+    return allStories;
+  }, [filter, allStories]);
 
   const renderItem = useCallback(
     ({ item }: { item: StoryItem }) => (
@@ -441,7 +454,7 @@ export default function StoryScreen() {
         {/* Card Criar Story */}
         <TouchableOpacity
           activeOpacity={0.85}
-          onPress={() => { }}
+          onPress={() => { router.push('/story/create'); }}
           style={styles.addCard}
         >
           <View style={styles.addCircle}>

@@ -10,7 +10,10 @@ import {
   StyleSheet,
   Modal,
   ActivityIndicator,
+  Pressable,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AuthButton from '../../components/AuthButton';
@@ -24,6 +27,8 @@ export default function SignupScreen() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [dob, setDob] = useState('');
+  const [dobDate, setDobDate] = useState<Date | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [gender, setGender] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -47,8 +52,12 @@ export default function SignupScreen() {
   };
 
   const validateDob = (value: string) => {
+    // accept DD/MM/YYYY or ISO dates
     const re = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(19|20)\d{2}$/;
-    return re.test(value);
+    if (re.test(value)) return true;
+    // try ISO
+    const d = Date.parse(value);
+    return !isNaN(d);
   };
 
   const validateStep1 = () => {
@@ -60,8 +69,8 @@ export default function SignupScreen() {
 
   const validateStep2 = () => {
     const e: Record<string, string> = {};
-    if (!dob.trim() || !validateDob(dob)) e.dob = 'Data inválida (DD/MM/AAAA)';
-    if (!gender.trim()) e.gender = 'Gênero obrigatório';
+    if (!dobDate && !validateDob(dob)) e.dob = 'Data inválida (DD/MM/AAAA)';
+    if (!gender || gender.length === 0) e.gender = 'Gênero obrigatório';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -222,23 +231,63 @@ export default function SignupScreen() {
 
               {step === 2 && (
                 <>
-                  <TextInput
-                    placeholder="Data de nascimento (DD/MM/AAAA)"
-                    placeholderTextColor="#9aa0a6"
-                    value={dob}
-                    onChangeText={setDob}
-                    style={styles.input}
-                  />
+                  <Pressable
+                    onPress={() => setShowDatePicker(true)}
+                    style={[styles.input, { justifyContent: 'center' }]}
+                  >
+                    <Text style={{ color: dob ? '#0f172a' : '#9aa0a6' }}>
+                      {dob || 'Data de nascimento (DD/MM/AAAA)'}
+                    </Text>
+                  </Pressable>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={dobDate || new Date(1990, 0, 1)}
+                      mode="date"
+                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      maximumDate={new Date()}
+                      onChange={(e: any, selectedDate?: Date) => {
+                        setShowDatePicker(false);
+                        if (selectedDate) {
+                          setDobDate(selectedDate);
+                          const dd = String(selectedDate.getDate()).padStart(
+                            2,
+                            '0',
+                          );
+                          const mm = String(
+                            selectedDate.getMonth() + 1,
+                          ).padStart(2, '0');
+                          const yyyy = selectedDate.getFullYear();
+                          setDob(`${dd}/${mm}/${yyyy}`);
+                        }
+                      }}
+                    />
+                  )}
                   {errors.dob ? (
                     <Text style={styles.error}>{errors.dob}</Text>
                   ) : null}
-                  <TextInput
-                    placeholder="Gênero"
-                    placeholderTextColor="#9aa0a6"
-                    value={gender}
-                    onChangeText={setGender}
-                    style={styles.input}
-                  />
+
+                  <View
+                    style={{
+                      borderWidth: 1,
+                      borderColor: '#e6eef8',
+                      borderRadius: 8,
+                      overflow: 'hidden',
+                      marginTop: 10,
+                    }}
+                  >
+                    <Picker
+                      selectedValue={gender}
+                      onValueChange={(val) => setGender(String(val))}
+                    >
+                      <Picker.Item label="Selecione o gênero" value="" />
+                      <Picker.Item label="Masculino" value="male" />
+                      <Picker.Item label="Feminino" value="female" />
+                      <Picker.Item label="Não-binário" value="nonbinary" />
+                      <Picker.Item label="Prefiro não dizer" value="private" />
+                      <Picker.Item label="Outro" value="other" />
+                    </Picker>
+                  </View>
+
                   {errors.gender ? (
                     <Text style={styles.error}>{errors.gender}</Text>
                   ) : null}

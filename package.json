@@ -1,10 +1,28 @@
 {
+  "name": "bolt-expo-nativewind",
+  "version": "1.0.0",
+  "private": true,
   "devDependencies": {
     "expo-cli": "^6.3.12"
   },
   "dependencies": {
-    "expo-router": "^6.0.13",
-    "react-native-safe-area-context": "^5.6.1",
-    "react-native-screens": "^4.18.0"
+    "@expo/webpack-config": "^18.0.1",
+    "@types/react": "~18.0.27",
+    "expo": "^48.0.0",
+    "expo-router": "^1.0.0",
+    "metro": "0.76.6",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-native": "0.71.14",
+    "react-native-safe-area-context": "4.5.0",
+    "react-native-screens": "~3.20.0",
+    "react-native-view-shot": "^4.0.3",
+    "react-native-web": "0.18.10",
+    "typescript": "^4.9.4",
+    "@react-native-community/datetimepicker": "6.7.3",
+    "@react-native-picker/picker": "2.4.8"
+  },
+  "overrides": {
+    "metro": "0.76.6"
   }
 }
