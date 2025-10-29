@@ -351,6 +351,35 @@ export async function getUserFriends(
   return request(`/users/${userId}/friends`);
 }
 
+// Visits API
+export type VisitorInfo = {
+  id: number;
+  visitor_id: number;
+  visitor_name: string;
+  visitor_profile_photo?: string | null;
+  visited_at: string;
+  is_friend: boolean;
+  has_sent_friend_request: boolean;
+};
+
+export async function recordProfileVisit(visited_user_id: number): Promise<any> {
+  return request('/visits', {
+    method: 'POST',
+    body: JSON.stringify({ visited_user_id }),
+  });
+}
+
+export async function getProfileVisits(
+  userId: number | string,
+  timeFilter: 'all' | 'today' | 'week' | 'month' = 'all',
+): Promise<VisitorInfo[]> {
+  return request(`/visits/profile/${userId}?time_filter=${timeFilter}`);
+}
+
+export async function getVisitCount(userId: number | string): Promise<{ total_visits: number; today_visits: number }> {
+  return request(`/visits/count/${userId}`);
+}
+
 export function logout() {
   setToken(null);
 }
