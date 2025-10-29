@@ -6,7 +6,7 @@ from datetime import datetime
 from database.session import get_db
 from dependencies import get_current_user
 from database.models import User, FriendRequest, Friendship, UserProfile
-from schemas.friend import FriendRequestCreate, FriendRequestOut, FriendStatusOut
+from schemas.friend import FriendRequestCreate, FriendRequestOut, FriendStatusOut, IncomingFriendRequestOut
 
 router = APIRouter()
 
