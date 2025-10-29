@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, Send, Plus, Smile, Mic, X } from 'lucide-react-native';
-import { api, getCurrentUser } from '../../utils/api';
+import { getCurrentUser } from '../../utils/api';
 import { getSocket } from '../../utils/websocket';
 
 const getDimensions = () => {
