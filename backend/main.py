@@ -45,6 +45,7 @@ app.include_router(_stories.router, prefix="/stories", tags=["stories"])
 app.include_router(_friends.router, prefix="/friends", tags=["friends"])
 app.include_router(_visits.router, prefix="/visits", tags=["visits"])
 app.include_router(_notifications.router, prefix="/notifications", tags=["notifications"])
+app.include_router(_chat.router, prefix="/chat", tags=["chat"])
 
 @app.get("/")
 def root():
