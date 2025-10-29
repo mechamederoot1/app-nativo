@@ -103,7 +103,7 @@ export default function NewChatScreen() {
     setSelectedUsers((prev) =>
       prev.includes(userId)
         ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
+        : [...prev, userId],
     );
   };
 
@@ -116,7 +116,7 @@ export default function NewChatScreen() {
       setIsLoading(true);
       const conversation = await createConversation(
         selectedUsers,
-        isGroup ? groupName || 'Grupo de chat' : undefined
+        isGroup ? groupName || 'Grupo de chat' : undefined,
       );
       router.push(`/chat/${conversation.id}`);
     } catch (error) {
@@ -209,7 +209,10 @@ export default function NewChatScreen() {
       {selectedUsers.length > 0 && (
         <View style={styles.footer}>
           <TouchableOpacity
-            style={[styles.createButton, !canCreate && styles.createButtonDisabled]}
+            style={[
+              styles.createButton,
+              !canCreate && styles.createButtonDisabled,
+            ]}
             onPress={handleCreateConversation}
             disabled={!canCreate || isLoading}
             activeOpacity={0.85}

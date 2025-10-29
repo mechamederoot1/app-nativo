@@ -16,7 +16,14 @@ import {
   Pressable,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Search, Plus, MessageCircle, CheckCheck, Trash2, X } from 'lucide-react-native';
+import {
+  Search,
+  Plus,
+  MessageCircle,
+  CheckCheck,
+  Trash2,
+  X,
+} from 'lucide-react-native';
 import BottomNav from '../../components/BottomNav';
 import TopBar from '../../components/TopBar';
 import { getConversations, deleteConversation } from '../../utils/api';
@@ -98,7 +105,11 @@ const ChatItem = ({
       'Deletar conversa',
       'Tem certeza que deseja deletar esta conversa?',
       [
-        { text: 'Cancelar', onPress: () => setShowActions(false), style: 'cancel' },
+        {
+          text: 'Cancelar',
+          onPress: () => setShowActions(false),
+          style: 'cancel',
+        },
         {
           text: 'Deletar',
           onPress: () => {
@@ -107,14 +118,12 @@ const ChatItem = ({
           },
           style: 'destructive',
         },
-      ]
+      ],
     );
   };
 
   return (
-    <View
-      style={[styles.chatItem, isUnread && styles.chatItemUnread]}
-    >
+    <View style={[styles.chatItem, isUnread && styles.chatItemUnread]}>
       <TouchableOpacity
         style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
         onPress={onPress}
@@ -248,7 +257,7 @@ export default function MessagesScreen() {
     try {
       await deleteConversation(conversationId);
       setConversations((prev) =>
-        prev.filter((conv) => conv.id !== conversationId)
+        prev.filter((conv) => conv.id !== conversationId),
       );
     } catch (error) {
       Alert.alert('Erro', 'Falha ao deletar conversa');

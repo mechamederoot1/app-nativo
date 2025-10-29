@@ -542,8 +542,13 @@ export async function deleteConversation(conversationId: number): Promise<any> {
   return request(`/chat/conversations/${conversationId}`, { method: 'DELETE' });
 }
 
-export async function searchConversations(query: string, limit: number = 20): Promise<ChatConversation[]> {
-  return request(`/chat/conversations/search?q=${encodeURIComponent(query)}&limit=${limit}`);
+export async function searchConversations(
+  query: string,
+  limit: number = 20,
+): Promise<ChatConversation[]> {
+  return request(
+    `/chat/conversations/search?q=${encodeURIComponent(query)}&limit=${limit}`,
+  );
 }
 
 export function logout() {
