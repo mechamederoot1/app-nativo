@@ -450,6 +450,22 @@ export default function ChatScreen() {
     }
   };
 
+  const handleEditMessage = (message: Message) => {
+    setEditingMessageId(message.id);
+    setEditingContent(message.content);
+    setInputText(message.content);
+  };
+
+  const handleDeleteMessage = async (messageId: number) => {
+    if (!socket) return;
+    try {
+      socket.emit('delete_message', { message_id: messageId });
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    } catch (error) {
+      console.error('Error deleting message:', error);
+    }
+  };
+
   const getConversationTitle = useMemo(() => {
     if (!conversation) return 'Carregando...';
     if (conversation.name) return conversation.name;
@@ -516,6 +532,10 @@ export default function ChatScreen() {
             <MessageBubble
               message={item}
               isOwn={item.sender.id === currentUserId}
+              onEdit={handleEditMessage}
+              onDelete={handleDeleteMessage}
+              isSelected={selectedMessageId === item.id}
+              onSelect={() => setSelectedMessageId(item.id)}
             />
           )}
           contentContainerStyle={styles.messagesList}
@@ -541,6 +561,20 @@ export default function ChatScreen() {
 
         {/* Input */}
         <View style={styles.inputContainer}>
+          {editingMessageId && (
+            <View style={styles.editingIndicator}>
+              <Text style={styles.editingText}>Editando mensagem...</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setEditingMessageId(null);
+                  setEditingContent('');
+                  setInputText('');
+                }}
+              >
+                <X size={20} color="#64748b" strokeWidth={2} />
+              </TouchableOpacity>
+            </View>
+          )}
           <View style={styles.inputRow}>
             <TouchableOpacity
               onPress={() => handleAddMedia('image')}
@@ -552,7 +586,7 @@ export default function ChatScreen() {
 
             <TextInput
               style={styles.input}
-              placeholder="Escreva uma mensagem..."
+              placeholder={editingMessageId ? 'Edite a mensagem...' : 'Escreva uma mensagem...'}
               placeholderTextColor="#94a3b8"
               value={inputText}
               onChangeText={handleTyping}
@@ -661,6 +695,51 @@ const styles = StyleSheet.create({
   },
   messageBubbleOwn: {
     backgroundColor: '#3b82f6',
+  },
+  messageBubbleSelected: {
+    backgroundColor: '#dbeafe',
+  },
+  messageActions: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.1)',
+  },
+  actionBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    borderRadius: 6,
+  },
+  actionBtnDelete: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+  },
+  actionBtnText: {
+    fontSize: 12,
+    color: '#3b82f6',
+    fontWeight: '600',
+  },
+  actionBtnTextDelete: {
+    fontSize: 12,
+    color: '#ef4444',
+    fontWeight: '600',
+  },
+  editingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#fef3c7',
+    borderBottomWidth: 1,
+    borderBottomColor: '#fcd34d',
+  },
+  editingText: {
+    fontSize: 12,
+    color: '#92400e',
+    fontWeight: '600',
   },
   messageText: {
     fontSize: 15,
