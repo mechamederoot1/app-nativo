@@ -1365,12 +1365,6 @@ export default function UserProfileView({
               setCoverTransform({ scale, offsetX, offsetY });
               setCoverEditorVisible(false);
               setEditingCoverPhoto(null);
-              try {
-                await postImageToFeed(
-                  coverPhotoUrl,
-                  'Atualizou a foto de capa',
-                );
-              } catch {}
               Alert.alert('Sucesso', 'Foto de capa atualizada!');
             } catch (error: any) {
               console.error('Erro ao salvar foto de capa:', error);
