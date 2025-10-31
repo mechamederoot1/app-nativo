@@ -554,8 +554,12 @@ export default function ChatScreen() {
               isOwn={item.sender.id === currentUserId}
               onEdit={handleEditMessage}
               onDelete={handleDeleteMessage}
+              onReact={handleAddReaction}
               isSelected={selectedMessageId === item.id}
               onSelect={() => setSelectedMessageId(item.id)}
+              showEmojiPicker={showEmojiPicker && reactionTargetId === item.id}
+              onShowEmojiPicker={setReactionTargetId}
+              emojis={emojis}
             />
           )}
           contentContainerStyle={styles.messagesList}
