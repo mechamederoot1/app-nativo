@@ -392,7 +392,7 @@ export default function UserProfileView({
         (typeof process !== 'undefined' &&
           (process as any).env &&
           (process as any).env.EXPO_PUBLIC_API_URL) ||
-        'http://localhost:5050';
+        'http://localhost:8000';
       const response = await fetch(`${BASE_URL}/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -508,7 +508,7 @@ export default function UserProfileView({
         (typeof process !== 'undefined' &&
           (process as any).env &&
           (process as any).env.EXPO_PUBLIC_API_URL) ||
-        'http://localhost:5050';
+        'http://localhost:8000';
       const profilePhotoUrl = response.profile_photo
         ? response.profile_photo.startsWith('http')
           ? response.profile_photo
@@ -1357,7 +1357,7 @@ export default function UserProfileView({
                 (typeof process !== 'undefined' &&
                   (process as any).env &&
                   (process as any).env.EXPO_PUBLIC_API_URL) ||
-                'http://localhost:5050';
+                'http://localhost:8000';
               const coverPhotoUrl = response.cover_photo
                 ? response.cover_photo.startsWith('http')
                   ? response.cover_photo
