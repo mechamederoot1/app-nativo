@@ -518,9 +518,6 @@ export default function UserProfileView({
       setUserData((prev) => ({ ...prev, avatar: profilePhotoUrl }));
       setEditorVisible(false);
       setSelectedImageUri(null);
-      try {
-        await postImageToFeed(profilePhotoUrl, 'Atualizou a foto de perfil');
-      } catch {}
       Alert.alert(
         'Sucesso',
         `Foto de perfil atualizada${caption ? ` com legenda: "${caption}"` : ''}!`,
