@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, func
 from database.models import Conversation, Message, User, message_reads
 from database.session import SessionLocal
 
@@ -229,7 +229,6 @@ class ChatService:
         db = SessionLocal()
         try:
             # Count messages not read by this user
-            from sqlalchemy import func
             unread = db.query(func.count(Message.id)).filter(
                 and_(
                     Message.conversation_id == conversation_id,
@@ -284,7 +283,7 @@ class ChatService:
                     User.id.in_([user_id_1, user_id_2])
                 )
             ).group_by(Conversation.id).having(
-                db.func.count(User.id) == 2
+                func.count(User.id) == 2
             ).first()
 
             if conversation:
