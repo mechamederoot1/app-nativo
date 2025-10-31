@@ -99,7 +99,7 @@ async def message_read(sid, data):
 
 
 @sio.event
-async def message_delete(sid, data):
+async def delete_message(sid, data):
     """Handle message deletion"""
     try:
         user_id = connection_service.user_by_session.get(sid)
@@ -161,6 +161,61 @@ async def message_edit(sid, data):
     except Exception as e:
         print(f"Error handling message edit: {e}")
         await sio.emit('error', {'message': str(e)}, to=sid)
+
+
+@sio.event
+async def message_reaction(sid, data):
+    """Handle message reaction"""
+    try:
+        user_id = connection_service.user_by_session.get(sid)
+        if not user_id:
+            return
+
+        from database.session import SessionLocal
+        db = SessionLocal()
+        message = db.query(Message).filter(Message.id == data.get("message_id")).first()
+        db.close()
+
+        if not message:
+            return
+
+        reaction_data = {
+            "message_id": data.get("message_id"),
+            "user_id": user_id,
+            "emoji": data.get("emoji"),
+            "conversation_id": message.conversation_id,
+        }
+
+        await chat_handler.emit_message_to_conversation(
+            conversation_id=message.conversation_id,
+            message_data=reaction_data,
+            exclude_sid=None
+        )
+    except Exception as e:
+        print(f"Error handling message reaction: {e}")
+
+
+@sio.event
+async def mark_as_read(sid, data):
+    """Handle marking message as read"""
+    try:
+        user_id = connection_service.user_by_session.get(sid)
+        if not user_id:
+            return
+
+        message_id = data.get("message_id")
+        conversation_id = data.get("conversation_id")
+
+        read_data = await chat_handler.handle_message_read(message_id, user_id)
+
+        await chat_handler.emit_message_read_to_conversation(
+            conversation_id=conversation_id,
+            read_data=read_data,
+        )
+
+        await sio.emit('message_read_confirmed', read_data, to=sid)
+    except Exception as e:
+        print(f"Error handling mark as read: {e}")
 
 
 @sio.event
