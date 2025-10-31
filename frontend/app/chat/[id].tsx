@@ -25,6 +25,10 @@ import {
 } from '../../utils/api';
 import { getSocket } from '../../utils/websocket';
 import * as ImagePicker from 'expo-image-picker';
+import AudioRecorder from '../../components/AudioRecorder';
+import AudioPicker from '../../components/AudioPicker';
+import VideoRecorder from '../../components/VideoRecorder';
+import VideoPicker from '../../components/VideoPicker';
 
 const getDimensions = () => {
   if (Platform.OS === 'web') {
@@ -528,6 +532,146 @@ export default function ChatScreen() {
     }
   };
 
+  const handleAudioRecorded = async (uri: string, duration: number) => {
+    try {
+      setIsSending(true);
+
+      const uploadData = await uploadChatFile({
+        uri,
+        type: 'audio/m4a',
+        name: `audio_${Date.now()}.m4a`,
+      });
+
+      const messageData = {
+        conversation_id: parseInt(id as string),
+        content: `🎙️ Áudio (${Math.floor(duration)}s)`,
+        content_type: 'audio',
+        media_url: uploadData.media_url,
+      };
+
+      if (socket) {
+        socket.emit('chat_message', messageData);
+      } else {
+        await sendChatMessage(
+          parseInt(id as string),
+          messageData.content,
+          'audio',
+          uploadData.media_url,
+        );
+      }
+    } catch (error) {
+      console.error('Error sending audio:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleAudioSelected = async (
+    uri: string,
+    duration: number,
+    filename: string,
+  ) => {
+    try {
+      setIsSending(true);
+
+      const uploadData = await uploadChatFile({
+        uri,
+        type: 'audio/mpeg',
+        name: filename,
+      });
+
+      const messageData = {
+        conversation_id: parseInt(id as string),
+        content: `🎵 ${filename.replace(/\.[^/.]+$/, '')} (${Math.floor(duration)}s)`,
+        content_type: 'audio',
+        media_url: uploadData.media_url,
+      };
+
+      if (socket) {
+        socket.emit('chat_message', messageData);
+      } else {
+        await sendChatMessage(
+          parseInt(id as string),
+          messageData.content,
+          'audio',
+          uploadData.media_url,
+        );
+      }
+    } catch (error) {
+      console.error('Error sending audio:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleVideoRecorded = async (uri: string, duration: number) => {
+    try {
+      setIsSending(true);
+
+      const uploadData = await uploadChatFile({
+        uri,
+        type: 'video/mp4',
+        name: `video_${Date.now()}.mp4`,
+      });
+
+      const messageData = {
+        conversation_id: parseInt(id as string),
+        content: `🎥 Vídeo (${Math.floor(duration)}s)`,
+        content_type: 'image',
+        media_url: uploadData.media_url,
+      };
+
+      if (socket) {
+        socket.emit('chat_message', messageData);
+      } else {
+        await sendChatMessage(
+          parseInt(id as string),
+          messageData.content,
+          'image',
+          uploadData.media_url,
+        );
+      }
+    } catch (error) {
+      console.error('Error sending video:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleVideoSelected = async (uri: string, duration: number) => {
+    try {
+      setIsSending(true);
+
+      const uploadData = await uploadChatFile({
+        uri,
+        type: 'video/mp4',
+        name: `video_${Date.now()}.mp4`,
+      });
+
+      const messageData = {
+        conversation_id: parseInt(id as string),
+        content: `🎥 Vídeo (${Math.floor(duration)}s)`,
+        content_type: 'image',
+        media_url: uploadData.media_url,
+      };
+
+      if (socket) {
+        socket.emit('chat_message', messageData);
+      } else {
+        await sendChatMessage(
+          parseInt(id as string),
+          messageData.content,
+          'image',
+          uploadData.media_url,
+        );
+      }
+    } catch (error) {
+      console.error('Error sending video:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const handleAddReaction = (emoji: string, messageId: number) => {
     if (!socket) return;
     socket.emit('message_reaction', {
@@ -667,7 +811,7 @@ export default function ChatScreen() {
               </TouchableOpacity>
             </View>
           )}
-          <View style={styles.inputRow}>
+          <View style={styles.mediaBar}>
             <TouchableOpacity
               onPress={() => handleAddMedia('image')}
               style={styles.mediaButton}
@@ -676,6 +820,13 @@ export default function ChatScreen() {
               <Plus size={20} color="#3b82f6" strokeWidth={2} />
             </TouchableOpacity>
 
+            <AudioRecorder onAudioRecorded={handleAudioRecorded} />
+            <AudioPicker onAudioSelected={handleAudioSelected} />
+            <VideoRecorder onVideoRecorded={handleVideoRecorded} />
+            <VideoPicker onVideoSelected={handleVideoSelected} />
+          </View>
+
+          <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
               placeholder={
@@ -704,11 +855,11 @@ export default function ChatScreen() {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                onPress={() => handleAddMedia('audio')}
                 style={styles.micButton}
                 activeOpacity={0.7}
+                disabled
               >
-                <Mic size={20} color="#3b82f6" strokeWidth={2} />
+                <Mic size={20} color="#cbd5e1" strokeWidth={2} />
               </TouchableOpacity>
             )}
           </View>
@@ -932,6 +1083,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: '#f1f5f9',
+  },
+  mediaBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
   },
   inputRow: {
     flexDirection: 'row',
