@@ -18,14 +18,12 @@ import { ChevronLeft, Send, Plus, Smile, Mic, X } from 'lucide-react-native';
 import {
   getCurrentUser,
   getConversationMessages,
-  sendChatMessage,
-  markMessageAsRead,
-  deleteMessage,
-  editMessage,
+  uploadChatFile,
+  API_BASE_URL,
+  getToken,
 } from '../../utils/api';
 import { getSocket } from '../../utils/websocket';
 import * as ImagePicker from 'expo-image-picker';
-import * as DocumentPicker from 'expo-document-picker';
 
 const getDimensions = () => {
   if (Platform.OS === 'web') {
@@ -196,6 +194,10 @@ export default function ChatScreen() {
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
   const [editingContent, setEditingContent] = useState('');
   const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [reactionTargetId, setReactionTargetId] = useState<number | null>(null);
+
+  const emojis = ['👍', '❤️', '😂', '😢', '😱', '👎', '🔥', '⭐', '🎉', '💯'];
 
   // Get current user
   useEffect(() => {
@@ -404,38 +406,22 @@ export default function ChatScreen() {
           const asset = result.assets[0];
           const filename = asset.fileName || 'image.jpg';
 
-          const form = new FormData();
-          form.append('file', {
+          const uploadData = await uploadChatFile({
             uri: asset.uri,
             type: asset.type || 'image/jpeg',
             name: filename,
-          } as any);
+          });
 
-          const uploadResponse = await fetch(
-            `${(typeof process !== 'undefined' && (process as any).env && (process as any).env.EXPO_PUBLIC_API_URL) || 'http://localhost:8000'}/chat/upload`,
-            {
-              method: 'POST',
-              headers: {
-                Authorization: `Bearer ${(await fetch('')).headers.get('Authorization') || ''}`,
-              },
-              body: form,
-            }
-          );
-
-          if (uploadResponse.ok) {
-            const uploadData = await uploadResponse.json();
-            const messageData = {
-              conversation_id: parseInt(id as string),
-              content: 'Imagem',
-              content_type: 'image',
-              media_url: uploadData.media_url,
-            };
-            socket.emit('chat_message', messageData);
-          }
+          const messageData = {
+            conversation_id: parseInt(id as string),
+            content: '📷 Imagem',
+            content_type: 'image',
+            media_url: uploadData.media_url,
+          };
+          socket.emit('chat_message', messageData);
         }
       } else if (type === 'audio') {
-        // For audio, just show a placeholder message for now
-        // Full implementation would require recording audio with expo-av
+        // For audio, show a simple message for now
         const messageData = {
           conversation_id: parseInt(id as string),
           content: '🎙️ Mensagem de áudio',
@@ -448,6 +434,16 @@ export default function ChatScreen() {
     } finally {
       setIsSending(false);
     }
+  };
+
+  const handleAddReaction = (emoji: string, messageId: number) => {
+    if (!socket) return;
+    socket.emit('message_reaction', {
+      message_id: messageId,
+      emoji: emoji,
+    });
+    setShowEmojiPicker(false);
+    setReactionTargetId(null);
   };
 
   const handleEditMessage = (message: Message) => {
