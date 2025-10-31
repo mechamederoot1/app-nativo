@@ -532,6 +532,146 @@ export default function ChatScreen() {
     }
   };
 
+  const handleAudioRecorded = async (uri: string, duration: number) => {
+    try {
+      setIsSending(true);
+
+      const uploadData = await uploadChatFile({
+        uri,
+        type: 'audio/m4a',
+        name: `audio_${Date.now()}.m4a`,
+      });
+
+      const messageData = {
+        conversation_id: parseInt(id as string),
+        content: `🎙️ Áudio (${Math.floor(duration)}s)`,
+        content_type: 'audio',
+        media_url: uploadData.media_url,
+      };
+
+      if (socket) {
+        socket.emit('chat_message', messageData);
+      } else {
+        await sendChatMessage(
+          parseInt(id as string),
+          messageData.content,
+          'audio',
+          uploadData.media_url,
+        );
+      }
+    } catch (error) {
+      console.error('Error sending audio:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleAudioSelected = async (
+    uri: string,
+    duration: number,
+    filename: string,
+  ) => {
+    try {
+      setIsSending(true);
+
+      const uploadData = await uploadChatFile({
+        uri,
+        type: 'audio/mpeg',
+        name: filename,
+      });
+
+      const messageData = {
+        conversation_id: parseInt(id as string),
+        content: `🎵 ${filename.replace(/\.[^/.]+$/, '')} (${Math.floor(duration)}s)`,
+        content_type: 'audio',
+        media_url: uploadData.media_url,
+      };
+
+      if (socket) {
+        socket.emit('chat_message', messageData);
+      } else {
+        await sendChatMessage(
+          parseInt(id as string),
+          messageData.content,
+          'audio',
+          uploadData.media_url,
+        );
+      }
+    } catch (error) {
+      console.error('Error sending audio:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleVideoRecorded = async (uri: string, duration: number) => {
+    try {
+      setIsSending(true);
+
+      const uploadData = await uploadChatFile({
+        uri,
+        type: 'video/mp4',
+        name: `video_${Date.now()}.mp4`,
+      });
+
+      const messageData = {
+        conversation_id: parseInt(id as string),
+        content: `🎥 Vídeo (${Math.floor(duration)}s)`,
+        content_type: 'image',
+        media_url: uploadData.media_url,
+      };
+
+      if (socket) {
+        socket.emit('chat_message', messageData);
+      } else {
+        await sendChatMessage(
+          parseInt(id as string),
+          messageData.content,
+          'image',
+          uploadData.media_url,
+        );
+      }
+    } catch (error) {
+      console.error('Error sending video:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleVideoSelected = async (uri: string, duration: number) => {
+    try {
+      setIsSending(true);
+
+      const uploadData = await uploadChatFile({
+        uri,
+        type: 'video/mp4',
+        name: `video_${Date.now()}.mp4`,
+      });
+
+      const messageData = {
+        conversation_id: parseInt(id as string),
+        content: `🎥 Vídeo (${Math.floor(duration)}s)`,
+        content_type: 'image',
+        media_url: uploadData.media_url,
+      };
+
+      if (socket) {
+        socket.emit('chat_message', messageData);
+      } else {
+        await sendChatMessage(
+          parseInt(id as string),
+          messageData.content,
+          'image',
+          uploadData.media_url,
+        );
+      }
+    } catch (error) {
+      console.error('Error sending video:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const handleAddReaction = (emoji: string, messageId: number) => {
     if (!socket) return;
     socket.emit('message_reaction', {
