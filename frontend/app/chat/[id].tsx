@@ -811,7 +811,7 @@ export default function ChatScreen() {
               </TouchableOpacity>
             </View>
           )}
-          <View style={styles.inputRow}>
+          <View style={styles.mediaBar}>
             <TouchableOpacity
               onPress={() => handleAddMedia('image')}
               style={styles.mediaButton}
@@ -820,6 +820,13 @@ export default function ChatScreen() {
               <Plus size={20} color="#3b82f6" strokeWidth={2} />
             </TouchableOpacity>
 
+            <AudioRecorder onAudioRecorded={handleAudioRecorded} />
+            <AudioPicker onAudioSelected={handleAudioSelected} />
+            <VideoRecorder onVideoRecorded={handleVideoRecorded} />
+            <VideoPicker onVideoSelected={handleVideoSelected} />
+          </View>
+
+          <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
               placeholder={
@@ -848,11 +855,11 @@ export default function ChatScreen() {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                onPress={() => handleAddMedia('audio')}
                 style={styles.micButton}
                 activeOpacity={0.7}
+                disabled
               >
-                <Mic size={20} color="#3b82f6" strokeWidth={2} />
+                <Mic size={20} color="#cbd5e1" strokeWidth={2} />
               </TouchableOpacity>
             )}
           </View>
