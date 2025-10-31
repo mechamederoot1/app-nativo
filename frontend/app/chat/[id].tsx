@@ -15,8 +15,17 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, Send, Plus, Smile, Mic, X } from 'lucide-react-native';
-import { getCurrentUser, getConversationMessages } from '../../utils/api';
+import {
+  getCurrentUser,
+  getConversationMessages,
+  sendChatMessage,
+  markMessageAsRead,
+  deleteMessage,
+  editMessage,
+} from '../../utils/api';
 import { getSocket } from '../../utils/websocket';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 
 const getDimensions = () => {
   if (Platform.OS === 'web') {
@@ -57,15 +66,25 @@ interface Conversation {
 const MessageBubble = ({
   message,
   isOwn,
+  onEdit,
+  onDelete,
+  isSelected,
+  onSelect,
 }: {
   message: Message;
   isOwn: boolean;
+  onEdit?: (message: Message) => void;
+  onDelete?: (messageId: number) => void;
+  isSelected?: boolean;
+  onSelect?: () => void;
 }) => {
   const messageTime = new Date(message.created_at);
   const timeStr = messageTime.toLocaleTimeString('pt-BR', {
     hour: '2-digit',
     minute: '2-digit',
   });
+
+  const [showActions, setShowActions] = useState(false);
 
   return (
     <View
@@ -85,7 +104,15 @@ const MessageBubble = ({
         />
       )}
 
-      <View style={[styles.messageBubble, isOwn && styles.messageBubbleOwn]}>
+      <TouchableOpacity
+        style={[
+          styles.messageBubble,
+          isOwn && styles.messageBubbleOwn,
+          isSelected && styles.messageBubbleSelected,
+        ]}
+        onLongPress={() => setShowActions(!showActions)}
+        activeOpacity={0.8}
+      >
         {message.content_type === 'text' && (
           <Text style={[styles.messageText, isOwn && styles.messageTextOwn]}>
             {message.content}
@@ -120,7 +147,34 @@ const MessageBubble = ({
         <Text style={[styles.messageTime, isOwn && styles.messageTimeOwn]}>
           {timeStr}
         </Text>
-      </View>
+
+        {showActions && isOwn && (
+          <View style={styles.messageActions}>
+            {onEdit && (
+              <TouchableOpacity
+                style={styles.actionBtn}
+                onPress={() => {
+                  onEdit(message);
+                  setShowActions(false);
+                }}
+              >
+                <Text style={styles.actionBtnText}>Editar</Text>
+              </TouchableOpacity>
+            )}
+            {onDelete && (
+              <TouchableOpacity
+                style={[styles.actionBtn, styles.actionBtnDelete]}
+                onPress={() => {
+                  onDelete(message.id);
+                  setShowActions(false);
+                }}
+              >
+                <Text style={styles.actionBtnTextDelete}>Deletar</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+      </TouchableOpacity>
     </View>
   );
 };
@@ -139,12 +193,15 @@ export default function ChatScreen() {
   const flatListRef = useRef<FlatList>(null);
   const socket = getSocket();
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+  const [editingContent, setEditingContent] = useState('');
+  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
 
   // Get current user
   useEffect(() => {
     (async () => {
       try {
-        const user = await api.getCurrentUser();
+        const user = await getCurrentUser();
         if (user) {
           setCurrentUserId(user.id);
         }
@@ -265,13 +322,26 @@ export default function ChatScreen() {
 
     try {
       setIsSending(true);
-      const messageData = {
-        conversation_id: parseInt(id as string),
-        content: inputText,
-        content_type: 'text',
-      };
 
-      socket.emit('chat_message', messageData);
+      if (editingMessageId) {
+        // Edit existing message
+        const messageData = {
+          message_id: editingMessageId,
+          content: inputText,
+        };
+        socket.emit('edit_message', messageData);
+        setEditingMessageId(null);
+        setEditingContent('');
+      } else {
+        // Send new message
+        const messageData = {
+          conversation_id: parseInt(id as string),
+          content: inputText,
+          content_type: 'text',
+        };
+        socket.emit('chat_message', messageData);
+      }
+
       setInputText('');
       setIsTyping(false);
     } catch (error) {
@@ -317,8 +387,67 @@ export default function ChatScreen() {
   };
 
   const handleAddMedia = async (type: 'image' | 'audio' | 'gif') => {
-    // TODO: Implementar seleção de mídia
-    console.log('Add media:', type);
+    if (!socket) return;
+
+    try {
+      setIsSending(true);
+
+      if (type === 'image') {
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [4, 3],
+          quality: 0.8,
+        });
+
+        if (!result.canceled && result.assets[0]) {
+          const asset = result.assets[0];
+          const filename = asset.fileName || 'image.jpg';
+
+          const form = new FormData();
+          form.append('file', {
+            uri: asset.uri,
+            type: asset.type || 'image/jpeg',
+            name: filename,
+          } as any);
+
+          const uploadResponse = await fetch(
+            `${(typeof process !== 'undefined' && (process as any).env && (process as any).env.EXPO_PUBLIC_API_URL) || 'http://localhost:8000'}/chat/upload`,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${(await fetch('')).headers.get('Authorization') || ''}`,
+              },
+              body: form,
+            }
+          );
+
+          if (uploadResponse.ok) {
+            const uploadData = await uploadResponse.json();
+            const messageData = {
+              conversation_id: parseInt(id as string),
+              content: 'Imagem',
+              content_type: 'image',
+              media_url: uploadData.media_url,
+            };
+            socket.emit('chat_message', messageData);
+          }
+        }
+      } else if (type === 'audio') {
+        // For audio, just show a placeholder message for now
+        // Full implementation would require recording audio with expo-av
+        const messageData = {
+          conversation_id: parseInt(id as string),
+          content: '🎙️ Mensagem de áudio',
+          content_type: 'audio',
+        };
+        socket.emit('chat_message', messageData);
+      }
+    } catch (error) {
+      console.error('Error adding media:', error);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const getConversationTitle = useMemo(() => {
