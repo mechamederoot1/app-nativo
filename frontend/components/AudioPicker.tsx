@@ -34,9 +34,10 @@ export default function AudioPicker({ onAudioSelected }: AudioPickerProps) {
     try {
       setIsLoading(true);
 
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'audio/*',
-        copyToCacheDirectory: true,
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Audio,
+        allowsEditing: false,
+        quality: 1,
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
@@ -53,16 +54,16 @@ export default function AudioPicker({ onAudioSelected }: AudioPickerProps) {
           console.warn('Could not get audio duration:', e);
         }
 
+        const filename = asset.fileName || 'audio.mp3';
+
         setSelectedAudio({
           uri: asset.uri,
-          name: asset.name || 'audio.mp3',
+          name: filename,
           duration,
         });
       }
     } catch (error) {
-      if (error && typeof error === 'object' && 'message' in error) {
-        console.log('Document picker error:', error.message);
-      }
+      console.error('Error picking audio:', error);
       Alert.alert('Erro', 'Falha ao selecionar áudio');
     } finally {
       setIsLoading(false);
