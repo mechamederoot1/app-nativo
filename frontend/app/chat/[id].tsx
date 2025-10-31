@@ -724,12 +724,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#dbeafe',
   },
   messageActions: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: 8,
     marginTop: 8,
     paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: 'rgba(0,0,0,0.1)',
+  },
+  emojiRow: {
+    flexDirection: 'row',
+    gap: 4,
+    justifyContent: 'center',
+  },
+  emojiBtn: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 6,
+    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+  },
+  emoji: {
+    fontSize: 18,
   },
   actionBtn: {
     paddingHorizontal: 12,
