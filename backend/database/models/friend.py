@@ -1,11 +1,15 @@
 from __future__ import annotations
 from datetime import datetime
-from sqlalchemy import Integer, String, DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import Integer, String, DateTime, ForeignKey, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..session import Base
 
 class FriendRequest(Base):
     __tablename__ = "friend_requests"
+    __table_args__ = (
+        Index('ix_friend_requests_receiver_status', 'receiver_id', 'status'),
+        Index('ix_friend_requests_sender_status', 'sender_id', 'status'),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     sender_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)

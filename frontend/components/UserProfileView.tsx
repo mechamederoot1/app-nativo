@@ -518,9 +518,6 @@ export default function UserProfileView({
       setUserData((prev) => ({ ...prev, avatar: profilePhotoUrl }));
       setEditorVisible(false);
       setSelectedImageUri(null);
-      try {
-        await postImageToFeed(profilePhotoUrl, 'Atualizou a foto de perfil');
-      } catch {}
       Alert.alert(
         'Sucesso',
         `Foto de perfil atualizada${caption ? ` com legenda: "${caption}"` : ''}!`,
@@ -1368,12 +1365,6 @@ export default function UserProfileView({
               setCoverTransform({ scale, offsetX, offsetY });
               setCoverEditorVisible(false);
               setEditingCoverPhoto(null);
-              try {
-                await postImageToFeed(
-                  coverPhotoUrl,
-                  'Atualizou a foto de capa',
-                );
-              } catch {}
               Alert.alert('Sucesso', 'Foto de capa atualizada!');
             } catch (error: any) {
               console.error('Erro ao salvar foto de capa:', error);

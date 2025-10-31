@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime
-import asyncio
 
 from database.session import get_db
 from dependencies import get_current_user
@@ -13,7 +12,7 @@ from core.websocket import emit_friend_request_notification, emit_friend_request
 router = APIRouter()
 
 @router.post("/requests", response_model=FriendRequestOut)
-def send_request(payload: FriendRequestCreate, current: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def send_request(payload: FriendRequestCreate, current: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if payload.user_id == current.id:
         raise HTTPException(status_code=400, detail="Não é possível enviar convite para si mesmo")
 
@@ -40,15 +39,16 @@ def send_request(payload: FriendRequestCreate, current: User = Depends(get_curre
     db.commit()
     db.refresh(fr)
 
-    # Emit websocket notification
-    asyncio.create_task(
-        emit_friend_request_notification(
+    try:
+        await emit_friend_request_notification(
             receiver_id=target.id,
             sender_id=current.id,
             sender_name=f"{current.first_name} {current.last_name}".strip() or current.username,
             sender_avatar=current.profile_photo
         )
-    )
+    except Exception as e:
+        import logging
+        logging.warning(f"Failed to emit friend request notification: {str(e)}")
 
     return fr
 
@@ -103,7 +103,7 @@ def get_status(user_id: int, current: User = Depends(get_current_user), db: Sess
     return FriendStatusOut(status="none", request_id=None)
 
 @router.post("/requests/{request_id}/accept", response_model=FriendRequestOut)
-def accept_request(request_id: int, current: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def accept_request(request_id: int, current: User = Depends(get_current_user), db: Session = Depends(get_db)):
     req = db.query(FriendRequest).filter(FriendRequest.id == request_id).first()
     if not req or req.status != "pending":
         raise HTTPException(status_code=404, detail="Convite não encontrado")
@@ -140,14 +140,16 @@ def accept_request(request_id: int, current: User = Depends(get_current_user), d
 
     # Emit websocket notification to the request sender
     if sender:
-        asyncio.create_task(
-            emit_friend_request_accepted(
+        try:
+            await emit_friend_request_accepted(
                 requester_id=req.sender_id,
                 accepter_id=current.id,
                 accepter_name=f"{current.first_name} {current.last_name}".strip() or current.username,
                 accepter_avatar=current.profile_photo
             )
-        )
+        except Exception as e:
+            import logging
+            logging.warning(f"Failed to emit friend request accepted notification: {str(e)}")
 
     return req
 

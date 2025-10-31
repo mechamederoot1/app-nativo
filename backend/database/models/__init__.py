@@ -7,7 +7,7 @@ from .friend import FriendRequest, Friendship
 from .visit import Visit
 from .notification import Notification
 from .conversation import Conversation
-from .message import Message
+from .message import Message, message_reads
 
 __all__ = [
     "User",
@@ -23,4 +23,5 @@ __all__ = [
     "Notification",
     "Conversation",
     "Message",
+    "message_reads",
 ]

@@ -9,6 +9,11 @@ import TopBar from '../../components/TopBar';
 import { formatPostTime } from '../../utils/time';
 import { useRouter } from 'expo-router';
 import { subscribe, toggleLike, Post as StorePost } from '../../store/posts';
+import { useUnread } from '../../contexts/UnreadContext';
+import {
+  getUnreadVisitCount,
+  getUnreadNotificationsCount,
+} from '../../utils/api';
 
 type Post = StorePost;
 
@@ -16,6 +21,7 @@ export default function FeedScreen() {
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const { setUnreadVisits, setUnreadNotifications } = useUnread();
 
   useEffect(() => {
     const load = async () => {
@@ -39,11 +45,22 @@ export default function FeedScreen() {
         // fallback: keep empty if backend unavailable
         setPosts([]);
       }
+
+      // Load unread counts when feed mounts
+      try {
+        const visitResult = await getUnreadVisitCount();
+        setUnreadVisits(visitResult.unread_visits);
+
+        const notifResult = await getUnreadNotificationsCount();
+        setUnreadNotifications(notifResult.unread_count);
+      } catch (e) {
+        // Silently fail if not authenticated
+      }
     };
     load();
     const unsub = subscribe(() => {});
     return unsub;
-  }, []);
+  }, [setUnreadVisits, setUnreadNotifications]);
 
   const onRefresh = useCallback(() => {
     (async () => {

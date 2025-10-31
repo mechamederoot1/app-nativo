@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getUnreadVisitCount, getUnreadNotificationsCount } from '../utils/api';
+import {
+  getUnreadVisitCount,
+  getUnreadNotificationsCount,
+  getToken,
+} from '../utils/api';
 import { onNotification, NotificationEvents } from '../utils/websocket';
 
 type UnreadContextType = {
@@ -23,16 +27,28 @@ export function UnreadProvider({ children }: { children: React.ReactNode }) {
   const [unreadNotifications, setUnreadNotificationsState] =
     useState<number>(0);
 
-  // Load unread counts on mount
+  // Load unread counts on mount and when token changes
   useEffect(() => {
     const loadCounts = async () => {
       try {
+        const token = getToken();
+        if (!token) {
+          setUnreadVisitsState(0);
+          setUnreadNotificationsState(0);
+          return;
+        }
+
         const visitResult = await getUnreadVisitCount();
         setUnreadVisitsState(visitResult.unread_visits);
 
         const notifResult = await getUnreadNotificationsCount();
         setUnreadNotificationsState(notifResult.unread_count);
       } catch (error) {
+        // Silently fail for unauthenticated requests
+        const token = getToken();
+        if (!token) {
+          return;
+        }
         console.error('Error loading unread counts:', error);
       }
     };
@@ -44,14 +60,17 @@ export function UnreadProvider({ children }: { children: React.ReactNode }) {
     // Subscribe to WebSocket notifications to update counts in real-time
     const unsubscribers: Array<() => void> = [];
 
-    Object.values(NotificationEvents).forEach((eventType) => {
-      const unsubscribe = onNotification(eventType, () => {
-        setUnreadNotificationsState((prev) => prev + 1);
+    const token = getToken();
+    if (token) {
+      Object.values(NotificationEvents).forEach((eventType) => {
+        const unsubscribe = onNotification(eventType, () => {
+          setUnreadNotificationsState((prev) => prev + 1);
+        });
+        if (unsubscribe) {
+          unsubscribers.push(unsubscribe);
+        }
       });
-      if (unsubscribe) {
-        unsubscribers.push(unsubscribe);
-      }
-    });
+    }
 
     return () => {
       clearInterval(interval);
