@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Integer, String, DateTime, ForeignKey, Text, Boolean, Table, Column
+from sqlalchemy import Integer, String, DateTime, ForeignKey, Text, Boolean, Table, Column, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..session import Base
 
@@ -14,6 +14,9 @@ message_reads = Table(
 
 class Message(Base):
     __tablename__ = "messages"
+    __table_args__ = (
+        Index('ix_messages_conversation_created', 'conversation_id', 'created_at'),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     conversation_id: Mapped[int] = mapped_column(Integer, ForeignKey("conversations.id"), nullable=False, index=True)
