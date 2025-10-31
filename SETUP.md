@@ -42,10 +42,10 @@ Resumo
   pip install fastapi uvicorn sqlalchemy python-dotenv pydantic passlib[bcrypt] python-jose python-multipart
 
 - Rodar o backend (a partir da raiz do projeto):
-  uvicorn backend.main:app --reload --host 0.0.0.0 --port 5050
+  uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 
 - Verificar que está rodando:
-  curl http://localhost:5050/
+  curl http://localhost:8000/
 
   # deve retornar {"status":"ok","message":"Backend running"}
 
@@ -65,11 +65,11 @@ Resumo
 
   # Unix/macOS (define a URL do backend temporariamente):
 
-  EXPO_PUBLIC_API_URL=http://localhost:5050 npm run dev
+  EXPO_PUBLIC_API_URL=http://localhost:8000 npm run dev
 
   # Windows (PowerShell):
 
-  $env:EXPO_PUBLIC_API_URL = "http://localhost:5050"; npm run dev
+  $env:EXPO_PUBLIC_API_URL = "http://localhost:8000"; npm run dev
 
 - Comandos usados no projeto (package.json -> scripts):
   npm run dev # executa: EXPO_NO_TELEMETRY=1 expo start
@@ -113,24 +113,24 @@ Resumo
 python3 -m venv backend/venv
 source backend/venv/bin/activate
 pip install -r backend/requirements.txt # ou instale pacotes mínimos
-uvicorn backend.main:app --reload --host 0.0.0.0 --port 5050
+uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 
 # Frontend (Unix/macOS)
 
 cd frontend
 npm install
-EXPO_PUBLIC_API_URL=http://localhost:5050 npm run dev
+EXPO_PUBLIC_API_URL=http://localhost:8000 npm run dev
 
 # Frontend (Windows PowerShell)
 
 cd frontend
 npm install
-$env:EXPO_PUBLIC_API_URL = "http://localhost:5050"; npm run dev
+$env:EXPO_PUBLIC_API_URL = "http://localhost:8000"; npm run dev
 
 10. Próximo passo opcional (posso automatizar para você)
 
 - Criar backend/requirements.txt e adicionar um script no package.json raiz para rodar o backend:
-  "backend:dev": "uvicorn backend.main:app --reload --port 5050"
+  "backend:dev": "uvicorn backend.main:app --reload --port 8000"
 - Implementar o formulário de edição de perfil no frontend e conectar ao endpoint PUT /users/me/profile
 
 Se quiser, atualizo o arquivo SETUP.md com exemplos de .env prontos, adiciono scripts ao package.json raiz, ou implemento o formulário de edição do perfil no frontend agora. Escolha a próxima ação.
