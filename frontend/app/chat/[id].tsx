@@ -41,6 +41,11 @@ interface User {
   profile_photo?: string;
 }
 
+interface Reaction {
+  emoji: string;
+  users: User[];
+}
+
 interface Message {
   id: number;
   conversation_id: number;
@@ -50,6 +55,7 @@ interface Message {
   is_read: boolean;
   created_at: string;
   sender: User;
+  reactions?: Reaction[];
 }
 
 interface Conversation {
@@ -153,6 +159,17 @@ const MessageBubble = ({
         <Text style={[styles.messageTime, isOwn && styles.messageTimeOwn]}>
           {timeStr}
         </Text>
+
+        {message.reactions && message.reactions.length > 0 && (
+          <View style={styles.reactionsContainer}>
+            {message.reactions.map((reaction, idx) => (
+              <View key={idx} style={styles.reactionBubble}>
+                <Text style={styles.reactionEmoji}>{reaction.emoji}</Text>
+                <Text style={styles.reactionCount}>{reaction.users.length}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         {showActions && (
           <View style={styles.messageActions}>
@@ -323,16 +340,53 @@ export default function ChatScreen() {
       }
     };
 
+    const handleMessageReaction = (data: any) => {
+      if (data.conversation_id === parseInt(id as string)) {
+        setMessages((prev) =>
+          prev.map((msg) => {
+            if (msg.id === data.message_id) {
+              const reactions = msg.reactions || [];
+              const existingReaction = reactions.find((r) => r.emoji === data.emoji);
+              if (existingReaction) {
+                existingReaction.users.push({
+                  id: data.user_id,
+                  username: '',
+                  first_name: '',
+                  last_name: '',
+                });
+              } else {
+                reactions.push({
+                  emoji: data.emoji,
+                  users: [
+                    {
+                      id: data.user_id,
+                      username: '',
+                      first_name: '',
+                      last_name: '',
+                    },
+                  ],
+                });
+              }
+              return { ...msg, reactions };
+            }
+            return msg;
+          })
+        );
+      }
+    };
+
     socket.on('chat_message', handleNewMessage);
     socket.on('message_sent', handleMessageSent);
     socket.on('typing_start', handleTypingStart);
     socket.on('typing_stop', handleTypingStop);
+    socket.on('message_reaction', handleMessageReaction);
 
     return () => {
       socket.off('chat_message', handleNewMessage);
       socket.off('message_sent', handleMessageSent);
       socket.off('typing_start', handleTypingStart);
       socket.off('typing_stop', handleTypingStop);
+      socket.off('message_reaction', handleMessageReaction);
     };
   }, [socket, id]);
 
@@ -779,6 +833,29 @@ const styles = StyleSheet.create({
   editingText: {
     fontSize: 12,
     color: '#92400e',
+    fontWeight: '600',
+  },
+  reactionsContainer: {
+    flexDirection: 'row',
+    gap: 4,
+    marginTop: 6,
+    flexWrap: 'wrap',
+  },
+  reactionBubble: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: 12,
+  },
+  reactionEmoji: {
+    fontSize: 14,
+  },
+  reactionCount: {
+    fontSize: 11,
+    color: '#64748b',
     fontWeight: '600',
   },
   messageText: {
