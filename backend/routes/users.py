@@ -97,10 +97,6 @@ async def update_profile_photo(
         media_url = f"/media/{unique_filename}"
         current.profile_photo = media_url
         db.add(current)
-
-        post = Post(user_id=current.id, content=caption or "Atualizou a foto de perfil", media_url=media_url)
-        db.add(post)
-
         db.commit()
         db.refresh(current)
 
@@ -108,7 +104,6 @@ async def update_profile_photo(
             "success": True,
             "profile_photo": media_url,
             "message": "Profile photo updated successfully",
-            "post_id": post.id,
         }
     except Exception as e:
         db.rollback()
