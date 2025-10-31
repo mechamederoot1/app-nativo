@@ -204,9 +204,7 @@ export default function VideoRecorder({ onVideoRecorded }: VideoRecorderProps) {
                   <Text style={styles.durationText}>
                     {formatDuration(recordingDuration)} / 00:20
                   </Text>
-                  {isRecording && (
-                    <View style={styles.recordingDot} />
-                  )}
+                  {isRecording && <View style={styles.recordingDot} />}
                 </View>
 
                 <TouchableOpacity
@@ -214,15 +212,16 @@ export default function VideoRecorder({ onVideoRecorded }: VideoRecorderProps) {
                     styles.recordButton,
                     isRecording && styles.recordButtonActive,
                   ]}
-                  onPress={
-                    isRecording
-                      ? stopRecording
-                      : startRecording
-                  }
+                  onPress={isRecording ? stopRecording : startRecording}
                   disabled={recordingDuration >= 20}
                 >
                   {isRecording ? (
-                    <Square size={32} color="#fff" strokeWidth={2} fill="#ef4444" />
+                    <Square
+                      size={32}
+                      color="#fff"
+                      strokeWidth={2}
+                      fill="#ef4444"
+                    />
                   ) : (
                     <VideoIcon size={32} color="#fff" strokeWidth={2} />
                   )}

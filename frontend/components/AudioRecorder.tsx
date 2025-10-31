@@ -202,7 +202,9 @@ export default function AudioRecorder({ onAudioRecorded }: AudioRecorderProps) {
 
                 {isRecording && (
                   <View style={styles.recordingIndicator}>
-                    <View style={[styles.recordingDot, styles.recordingDotActive]} />
+                    <View
+                      style={[styles.recordingDot, styles.recordingDotActive]}
+                    />
                     <Text style={styles.recordingText}>Gravando...</Text>
                   </View>
                 )}
@@ -215,7 +217,12 @@ export default function AudioRecorder({ onAudioRecorded }: AudioRecorderProps) {
                   onPress={isRecording ? stopRecording : startRecording}
                 >
                   {isRecording ? (
-                    <Square size={32} color="#fff" strokeWidth={2} fill="#ef4444" />
+                    <Square
+                      size={32}
+                      color="#fff"
+                      strokeWidth={2}
+                      fill="#ef4444"
+                    />
                   ) : (
                     <Mic size={32} color="#fff" strokeWidth={2} />
                   )}
