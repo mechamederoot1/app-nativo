@@ -25,6 +25,10 @@ import {
 } from '../../utils/api';
 import { getSocket } from '../../utils/websocket';
 import * as ImagePicker from 'expo-image-picker';
+import AudioRecorder from '../../components/AudioRecorder';
+import AudioPicker from '../../components/AudioPicker';
+import VideoRecorder from '../../components/VideoRecorder';
+import VideoPicker from '../../components/VideoPicker';
 
 const getDimensions = () => {
   if (Platform.OS === 'web') {
