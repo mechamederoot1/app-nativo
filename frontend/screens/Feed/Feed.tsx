@@ -91,7 +91,7 @@ export default function FeedScreen() {
           (typeof process !== 'undefined' &&
             (process as any).env &&
             (process as any).env.EXPO_PUBLIC_API_URL) ||
-          'http://localhost:5050';
+          'http://localhost:8000';
         const abs = (u?: string | null) =>
           u ? (u.startsWith('http') ? u : `${BASE_URL}${u}`) : undefined;
         const newPost: Post = {
