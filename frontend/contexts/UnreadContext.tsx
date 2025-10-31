@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getUnreadVisitCount, getUnreadNotificationsCount, getToken } from '../utils/api';
+import {
+  getUnreadVisitCount,
+  getUnreadNotificationsCount,
+  getToken,
+} from '../utils/api';
 import { onNotification, NotificationEvents } from '../utils/websocket';
 
 type UnreadContextType = {
