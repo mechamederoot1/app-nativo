@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime
-import asyncio
 
 from database.session import get_db
 from dependencies import get_current_user
@@ -13,7 +12,7 @@ from core.websocket import emit_friend_request_notification, emit_friend_request
 router = APIRouter()
 
 @router.post("/requests", response_model=FriendRequestOut)
-def send_request(payload: FriendRequestCreate, current: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def send_request(payload: FriendRequestCreate, current: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if payload.user_id == current.id:
         raise HTTPException(status_code=400, detail="Não é possível enviar convite para si mesmo")
 
@@ -40,15 +39,16 @@ def send_request(payload: FriendRequestCreate, current: User = Depends(get_curre
     db.commit()
     db.refresh(fr)
 
-    # Emit websocket notification
-    asyncio.create_task(
-        emit_friend_request_notification(
+    try:
+        await emit_friend_request_notification(
             receiver_id=target.id,
             sender_id=current.id,
             sender_name=f"{current.first_name} {current.last_name}".strip() or current.username,
             sender_avatar=current.profile_photo
         )
-    )
+    except Exception as e:
+        import logging
+        logging.warning(f"Failed to emit friend request notification: {str(e)}")
 
     return fr
 
