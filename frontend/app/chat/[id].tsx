@@ -66,15 +66,23 @@ const MessageBubble = ({
   isOwn,
   onEdit,
   onDelete,
+  onReact,
   isSelected,
   onSelect,
+  showEmojiPicker,
+  onShowEmojiPicker,
+  emojis,
 }: {
   message: Message;
   isOwn: boolean;
   onEdit?: (message: Message) => void;
   onDelete?: (messageId: number) => void;
+  onReact?: (emoji: string, messageId: number) => void;
   isSelected?: boolean;
   onSelect?: () => void;
+  showEmojiPicker?: boolean;
+  onShowEmojiPicker?: (messageId: number | null) => void;
+  emojis?: string[];
 }) => {
   const messageTime = new Date(message.created_at);
   const timeStr = messageTime.toLocaleTimeString('pt-BR', {
@@ -146,9 +154,25 @@ const MessageBubble = ({
           {timeStr}
         </Text>
 
-        {showActions && isOwn && (
+        {showActions && (
           <View style={styles.messageActions}>
-            {onEdit && (
+            {onReact && (
+              <View style={styles.emojiRow}>
+                {emojis?.slice(0, 5).map((emoji) => (
+                  <TouchableOpacity
+                    key={emoji}
+                    style={styles.emojiBtn}
+                    onPress={() => {
+                      onReact(emoji, message.id);
+                      setShowActions(false);
+                    }}
+                  >
+                    <Text style={styles.emoji}>{emoji}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+            {isOwn && onEdit && (
               <TouchableOpacity
                 style={styles.actionBtn}
                 onPress={() => {
@@ -159,7 +183,7 @@ const MessageBubble = ({
                 <Text style={styles.actionBtnText}>Editar</Text>
               </TouchableOpacity>
             )}
-            {onDelete && (
+            {isOwn && onDelete && (
               <TouchableOpacity
                 style={[styles.actionBtn, styles.actionBtnDelete]}
                 onPress={() => {
