@@ -1,25 +1,10 @@
 type LoginResponse = { access_token: string; token_type: string };
 
-function getAPIBaseURL(): string {
-  // 1. Check for explicit environment variable
-  if (typeof process !== 'undefined' &&
+export const API_BASE_URL =
+  (typeof process !== 'undefined' &&
     (process as any).env &&
-    (process as any).env.EXPO_PUBLIC_API_URL) {
-    return (process as any).env.EXPO_PUBLIC_API_URL;
-  }
-
-  // 2. In browser, use relative path for same-origin requests
-  if (typeof window !== 'undefined') {
-    // For deployed environments, use /api proxy path
-    // For local development with backend on different port, user must set EXPO_PUBLIC_API_URL
-    return '/api';
-  }
-
-  // 3. Default fallback for local development
-  return 'http://localhost:5050';
-}
-
-export const API_BASE_URL = getAPIBaseURL();
+    (process as any).env.EXPO_PUBLIC_API_URL) ||
+  'http://localhost:5050';
 
 let memoryToken: string | null = null;
 
