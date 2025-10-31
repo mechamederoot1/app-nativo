@@ -4,7 +4,7 @@ export const API_BASE_URL =
   (typeof process !== 'undefined' &&
     (process as any).env &&
     (process as any).env.EXPO_PUBLIC_API_URL) ||
-  'http://localhost:5050';
+  'http://localhost:8000';
 
 let memoryToken: string | null = null;
 
@@ -549,6 +549,65 @@ export async function searchConversations(
   return request(
     `/chat/conversations/search?q=${encodeURIComponent(query)}&limit=${limit}`,
   );
+}
+
+export async function sendChatMessage(
+  conversationId: number,
+  content: string,
+  contentType: string = 'text',
+  mediaUrl?: string,
+): Promise<any> {
+  return request('/chat/messages', {
+    method: 'POST',
+    body: JSON.stringify({
+      conversation_id: conversationId,
+      content,
+      content_type: contentType,
+      media_url: mediaUrl,
+    }),
+  });
+}
+
+export async function markMessageAsRead(messageId: number): Promise<any> {
+  return request(`/chat/messages/${messageId}/read`, { method: 'POST' });
+}
+
+export async function editMessage(
+  messageId: number,
+  content: string,
+): Promise<any> {
+  return request(`/chat/messages/${messageId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ content }),
+  });
+}
+
+export async function deleteMessage(messageId: number): Promise<any> {
+  return request(`/chat/messages/${messageId}`, { method: 'DELETE' });
+}
+
+export async function reactToMessage(
+  messageId: number,
+  emoji: string,
+): Promise<any> {
+  return request(`/chat/messages/${messageId}/react`, {
+    method: 'POST',
+    body: JSON.stringify({ emoji }),
+  });
+}
+
+export async function uploadChatFile(file: {
+  uri: string;
+  type: string;
+  name?: string;
+}): Promise<{ media_url: string }> {
+  const form = new FormData();
+  form.append('file', {
+    uri: file.uri,
+    type: file.type,
+    name: file.name || 'file',
+  } as any);
+  return request('/chat/upload', { method: 'POST', body: form });
 }
 
 export function logout() {

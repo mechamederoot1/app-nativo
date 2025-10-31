@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
 from sqlalchemy.orm import Session
 from database.session import get_db
 from database.models import User, Conversation, Message
@@ -9,6 +9,9 @@ from schemas.conversation import (
 from schemas.message import MessageBase, MessageCreate, MessageUpdate
 from websocket.services import ChatService
 from dependencies import get_current_user
+import os
+import uuid
+from datetime import datetime
 
 router = APIRouter()
 
@@ -386,7 +389,7 @@ async def get_or_create_dm(
             user_id_1=current_user.id,
             user_id_2=user_id
         )
-        
+
         participants = [
             {
                 "id": p.id,
@@ -397,7 +400,7 @@ async def get_or_create_dm(
             }
             for p in conversation.participants
         ]
-        
+
         return {
             "id": conversation.id,
             "name": conversation.name,
@@ -406,5 +409,115 @@ async def get_or_create_dm(
             "created_at": conversation.created_at.isoformat(),
             "updated_at": conversation.updated_at.isoformat(),
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/upload")
+async def upload_chat_file(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+):
+    """Upload a file for chat"""
+    try:
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        MEDIA_DIR = os.path.join(BASE_DIR, "media", "chat")
+        os.makedirs(MEDIA_DIR, exist_ok=True)
+
+        filename = f"{uuid.uuid4()}_{int(datetime.utcnow().timestamp())}_{file.filename}"
+        filepath = os.path.join(MEDIA_DIR, filename)
+
+        with open(filepath, "wb") as buffer:
+            buffer.write(await file.read())
+
+        media_url = f"/media/chat/{filename}"
+
+        return {
+            "media_url": media_url,
+            "filename": file.filename,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload error: {str(e)}")
+
+
+@router.post("/messages/{message_id}/react")
+async def react_to_message(
+    message_id: int,
+    emoji: str = Query(..., min_length=1, max_length=10),
+    current_user: User = Depends(get_current_user),
+):
+    """Add a reaction to a message"""
+    try:
+        from database.session import SessionLocal
+        db = SessionLocal()
+        message = db.query(Message).filter(Message.id == message_id).first()
+        db.close()
+
+        if not message:
+            raise HTTPException(status_code=404, detail="Message not found")
+
+        # Check if user is a participant of the conversation
+        conversation = chat_service.get_conversation(message.conversation_id)
+        participant_ids = [p.id for p in conversation.participants]
+        if current_user.id not in participant_ids:
+            raise HTTPException(status_code=403, detail="Not a participant of this conversation")
+
+        return {
+            "message_id": message_id,
+            "user_id": current_user.id,
+            "emoji": emoji,
+            "reacted_at": datetime.utcnow().isoformat(),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/messages")
+async def create_message(
+    data: MessageCreate,
+    current_user: User = Depends(get_current_user),
+):
+    """Create a new message via REST (used as fallback if WebSocket fails)"""
+    try:
+        conversation = chat_service.get_conversation(data.conversation_id)
+        if not conversation:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        # Check if user is a participant
+        participant_ids = [p.id for p in conversation.participants]
+        if current_user.id not in participant_ids:
+            raise HTTPException(status_code=403, detail="Not a participant of this conversation")
+
+        message = chat_service.create_message(
+            conversation_id=data.conversation_id,
+            sender_id=current_user.id,
+            content=data.content,
+            content_type=data.content_type or "text",
+            media_url=data.media_url,
+        )
+
+        read_by_ids = [u.id for u in message.read_by]
+        return {
+            "id": message.id,
+            "conversation_id": message.conversation_id,
+            "content": message.content,
+            "content_type": message.content_type,
+            "media_url": message.media_url,
+            "is_deleted": message.is_deleted,
+            "edited_at": message.edited_at.isoformat() if message.edited_at else None,
+            "created_at": message.created_at.isoformat(),
+            "read_by": read_by_ids,
+            "sender": {
+                "id": message.sender.id,
+                "username": message.sender.username,
+                "first_name": message.sender.first_name,
+                "last_name": message.sender.last_name,
+                "profile_photo": message.sender.profile_photo,
+            }
+        }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

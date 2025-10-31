@@ -13,6 +13,7 @@ class UserInfo(BaseModel):
         from_attributes = True
 
 class MessageCreate(BaseModel):
+    conversation_id: int
     content: str
     content_type: str = "text"
     media_url: Optional[str] = None

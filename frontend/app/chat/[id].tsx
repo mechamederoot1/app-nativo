@@ -15,8 +15,16 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, Send, Plus, Smile, Mic, X } from 'lucide-react-native';
-import { getCurrentUser, getConversationMessages } from '../../utils/api';
+import {
+  getCurrentUser,
+  getConversationMessages,
+  uploadChatFile,
+  API_BASE_URL,
+  getToken,
+  sendChatMessage,
+} from '../../utils/api';
 import { getSocket } from '../../utils/websocket';
+import * as ImagePicker from 'expo-image-picker';
 
 const getDimensions = () => {
   if (Platform.OS === 'web') {
@@ -34,6 +42,11 @@ interface User {
   profile_photo?: string;
 }
 
+interface Reaction {
+  emoji: string;
+  users: User[];
+}
+
 interface Message {
   id: number;
   conversation_id: number;
@@ -43,6 +56,7 @@ interface Message {
   is_read: boolean;
   created_at: string;
   sender: User;
+  reactions?: Reaction[];
 }
 
 interface Conversation {
@@ -57,15 +71,33 @@ interface Conversation {
 const MessageBubble = ({
   message,
   isOwn,
+  onEdit,
+  onDelete,
+  onReact,
+  isSelected,
+  onSelect,
+  showEmojiPicker,
+  onShowEmojiPicker,
+  emojis,
 }: {
   message: Message;
   isOwn: boolean;
+  onEdit?: (message: Message) => void;
+  onDelete?: (messageId: number) => void;
+  onReact?: (emoji: string, messageId: number) => void;
+  isSelected?: boolean;
+  onSelect?: () => void;
+  showEmojiPicker?: boolean;
+  onShowEmojiPicker?: (messageId: number | null) => void;
+  emojis?: string[];
 }) => {
   const messageTime = new Date(message.created_at);
   const timeStr = messageTime.toLocaleTimeString('pt-BR', {
     hour: '2-digit',
     minute: '2-digit',
   });
+
+  const [showActions, setShowActions] = useState(false);
 
   return (
     <View
@@ -85,7 +117,15 @@ const MessageBubble = ({
         />
       )}
 
-      <View style={[styles.messageBubble, isOwn && styles.messageBubbleOwn]}>
+      <TouchableOpacity
+        style={[
+          styles.messageBubble,
+          isOwn && styles.messageBubbleOwn,
+          isSelected && styles.messageBubbleSelected,
+        ]}
+        onLongPress={() => setShowActions(!showActions)}
+        activeOpacity={0.8}
+      >
         {message.content_type === 'text' && (
           <Text style={[styles.messageText, isOwn && styles.messageTextOwn]}>
             {message.content}
@@ -120,7 +160,63 @@ const MessageBubble = ({
         <Text style={[styles.messageTime, isOwn && styles.messageTimeOwn]}>
           {timeStr}
         </Text>
-      </View>
+
+        {message.reactions && message.reactions.length > 0 && (
+          <View style={styles.reactionsContainer}>
+            {message.reactions.map((reaction, idx) => (
+              <View key={idx} style={styles.reactionBubble}>
+                <Text style={styles.reactionEmoji}>{reaction.emoji}</Text>
+                <Text style={styles.reactionCount}>
+                  {reaction.users.length}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {showActions && (
+          <View style={styles.messageActions}>
+            {onReact && (
+              <View style={styles.emojiRow}>
+                {emojis?.slice(0, 5).map((emoji) => (
+                  <TouchableOpacity
+                    key={emoji}
+                    style={styles.emojiBtn}
+                    onPress={() => {
+                      onReact(emoji, message.id);
+                      setShowActions(false);
+                    }}
+                  >
+                    <Text style={styles.emoji}>{emoji}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+            {isOwn && onEdit && (
+              <TouchableOpacity
+                style={styles.actionBtn}
+                onPress={() => {
+                  onEdit(message);
+                  setShowActions(false);
+                }}
+              >
+                <Text style={styles.actionBtnText}>Editar</Text>
+              </TouchableOpacity>
+            )}
+            {isOwn && onDelete && (
+              <TouchableOpacity
+                style={[styles.actionBtn, styles.actionBtnDelete]}
+                onPress={() => {
+                  onDelete(message.id);
+                  setShowActions(false);
+                }}
+              >
+                <Text style={styles.actionBtnTextDelete}>Deletar</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+      </TouchableOpacity>
     </View>
   );
 };
@@ -139,12 +235,21 @@ export default function ChatScreen() {
   const flatListRef = useRef<FlatList>(null);
   const socket = getSocket();
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+  const [editingContent, setEditingContent] = useState('');
+  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(
+    null,
+  );
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [reactionTargetId, setReactionTargetId] = useState<number | null>(null);
+
+  const emojis = ['👍', '❤️', '😂', '😢', '😱', '👎', '🔥', '⭐', '🎉', '💯'];
 
   // Get current user
   useEffect(() => {
     (async () => {
       try {
-        const user = await api.getCurrentUser();
+        const user = await getCurrentUser();
         if (user) {
           setCurrentUserId(user.id);
         }
@@ -240,16 +345,55 @@ export default function ChatScreen() {
       }
     };
 
+    const handleMessageReaction = (data: any) => {
+      if (data.conversation_id === parseInt(id as string)) {
+        setMessages((prev) =>
+          prev.map((msg) => {
+            if (msg.id === data.message_id) {
+              const reactions = msg.reactions || [];
+              const existingReaction = reactions.find(
+                (r) => r.emoji === data.emoji,
+              );
+              if (existingReaction) {
+                existingReaction.users.push({
+                  id: data.user_id,
+                  username: '',
+                  first_name: '',
+                  last_name: '',
+                });
+              } else {
+                reactions.push({
+                  emoji: data.emoji,
+                  users: [
+                    {
+                      id: data.user_id,
+                      username: '',
+                      first_name: '',
+                      last_name: '',
+                    },
+                  ],
+                });
+              }
+              return { ...msg, reactions };
+            }
+            return msg;
+          }),
+        );
+      }
+    };
+
     socket.on('chat_message', handleNewMessage);
     socket.on('message_sent', handleMessageSent);
     socket.on('typing_start', handleTypingStart);
     socket.on('typing_stop', handleTypingStop);
+    socket.on('message_reaction', handleMessageReaction);
 
     return () => {
       socket.off('chat_message', handleNewMessage);
       socket.off('message_sent', handleMessageSent);
       socket.off('typing_start', handleTypingStart);
       socket.off('typing_stop', handleTypingStop);
+      socket.off('message_reaction', handleMessageReaction);
     };
   }, [socket, id]);
 
@@ -261,17 +405,37 @@ export default function ChatScreen() {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!inputText.trim() || !socket || isSending) return;
+    if (!inputText.trim() || isSending) return;
 
     try {
       setIsSending(true);
-      const messageData = {
-        conversation_id: parseInt(id as string),
-        content: inputText,
-        content_type: 'text',
-      };
 
-      socket.emit('chat_message', messageData);
+      if (editingMessageId) {
+        // Edit existing message
+        if (socket) {
+          const messageData = {
+            message_id: editingMessageId,
+            content: inputText,
+          };
+          socket.emit('edit_message', messageData);
+        }
+        setEditingMessageId(null);
+        setEditingContent('');
+      } else {
+        // Send new message via WebSocket or fallback to REST
+        if (socket) {
+          const messageData = {
+            conversation_id: parseInt(id as string),
+            content: inputText,
+            content_type: 'text',
+          };
+          socket.emit('chat_message', messageData);
+        } else {
+          // Fallback to REST API
+          await sendChatMessage(parseInt(id as string), inputText, 'text');
+        }
+      }
+
       setInputText('');
       setIsTyping(false);
     } catch (error) {
@@ -317,8 +481,77 @@ export default function ChatScreen() {
   };
 
   const handleAddMedia = async (type: 'image' | 'audio' | 'gif') => {
-    // TODO: Implementar seleção de mídia
-    console.log('Add media:', type);
+    if (!socket) return;
+
+    try {
+      setIsSending(true);
+
+      if (type === 'image') {
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [4, 3],
+          quality: 0.8,
+        });
+
+        if (!result.canceled && result.assets[0]) {
+          const asset = result.assets[0];
+          const filename = asset.fileName || 'image.jpg';
+
+          const uploadData = await uploadChatFile({
+            uri: asset.uri,
+            type: asset.type || 'image/jpeg',
+            name: filename,
+          });
+
+          const messageData = {
+            conversation_id: parseInt(id as string),
+            content: '📷 Imagem',
+            content_type: 'image',
+            media_url: uploadData.media_url,
+          };
+          socket.emit('chat_message', messageData);
+        }
+      } else if (type === 'audio') {
+        // For audio, show a simple message for now
+        const messageData = {
+          conversation_id: parseInt(id as string),
+          content: '🎙️ Mensagem de áudio',
+          content_type: 'audio',
+        };
+        socket.emit('chat_message', messageData);
+      }
+    } catch (error) {
+      console.error('Error adding media:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleAddReaction = (emoji: string, messageId: number) => {
+    if (!socket) return;
+    socket.emit('message_reaction', {
+      message_id: messageId,
+      emoji: emoji,
+    });
+    setShowEmojiPicker(false);
+    setReactionTargetId(null);
+  };
+
+  const handleEditMessage = (message: Message) => {
+    setEditingMessageId(message.id);
+    setEditingContent(message.content);
+    setInputText(message.content);
+  };
+
+  const handleDeleteMessage = async (messageId: number) => {
+    if (!socket) return;
+    try {
+      socket.emit('delete_message', { message_id: messageId });
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    } catch (error) {
+      console.error('Error deleting message:', error);
+    }
   };
 
   const getConversationTitle = useMemo(() => {
@@ -387,6 +620,14 @@ export default function ChatScreen() {
             <MessageBubble
               message={item}
               isOwn={item.sender.id === currentUserId}
+              onEdit={handleEditMessage}
+              onDelete={handleDeleteMessage}
+              onReact={handleAddReaction}
+              isSelected={selectedMessageId === item.id}
+              onSelect={() => setSelectedMessageId(item.id)}
+              showEmojiPicker={showEmojiPicker && reactionTargetId === item.id}
+              onShowEmojiPicker={setReactionTargetId}
+              emojis={emojis}
             />
           )}
           contentContainerStyle={styles.messagesList}
@@ -412,6 +653,20 @@ export default function ChatScreen() {
 
         {/* Input */}
         <View style={styles.inputContainer}>
+          {editingMessageId && (
+            <View style={styles.editingIndicator}>
+              <Text style={styles.editingText}>Editando mensagem...</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setEditingMessageId(null);
+                  setEditingContent('');
+                  setInputText('');
+                }}
+              >
+                <X size={20} color="#64748b" strokeWidth={2} />
+              </TouchableOpacity>
+            </View>
+          )}
           <View style={styles.inputRow}>
             <TouchableOpacity
               onPress={() => handleAddMedia('image')}
@@ -423,7 +678,11 @@ export default function ChatScreen() {
 
             <TextInput
               style={styles.input}
-              placeholder="Escreva uma mensagem..."
+              placeholder={
+                editingMessageId
+                  ? 'Edite a mensagem...'
+                  : 'Escreva uma mensagem...'
+              }
               placeholderTextColor="#94a3b8"
               value={inputText}
               onChangeText={handleTyping}
@@ -532,6 +791,90 @@ const styles = StyleSheet.create({
   },
   messageBubbleOwn: {
     backgroundColor: '#3b82f6',
+  },
+  messageBubbleSelected: {
+    backgroundColor: '#dbeafe',
+  },
+  messageActions: {
+    flexDirection: 'column',
+    gap: 8,
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.1)',
+  },
+  emojiRow: {
+    flexDirection: 'row',
+    gap: 4,
+    justifyContent: 'center',
+  },
+  emojiBtn: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 6,
+    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+  },
+  emoji: {
+    fontSize: 18,
+  },
+  actionBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    borderRadius: 6,
+  },
+  actionBtnDelete: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+  },
+  actionBtnText: {
+    fontSize: 12,
+    color: '#3b82f6',
+    fontWeight: '600',
+  },
+  actionBtnTextDelete: {
+    fontSize: 12,
+    color: '#ef4444',
+    fontWeight: '600',
+  },
+  editingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#fef3c7',
+    borderBottomWidth: 1,
+    borderBottomColor: '#fcd34d',
+  },
+  editingText: {
+    fontSize: 12,
+    color: '#92400e',
+    fontWeight: '600',
+  },
+  reactionsContainer: {
+    flexDirection: 'row',
+    gap: 4,
+    marginTop: 6,
+    flexWrap: 'wrap',
+  },
+  reactionBubble: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: 12,
+  },
+  reactionEmoji: {
+    fontSize: 14,
+  },
+  reactionCount: {
+    fontSize: 11,
+    color: '#64748b',
+    fontWeight: '600',
   },
   messageText: {
     fontSize: 15,
