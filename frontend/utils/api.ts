@@ -4,7 +4,7 @@ export const API_BASE_URL =
   (typeof process !== 'undefined' &&
     (process as any).env &&
     (process as any).env.EXPO_PUBLIC_API_URL) ||
-  'http://localhost:5050';
+  'http://localhost:8000';
 
 let memoryToken: string | null = null;
 
