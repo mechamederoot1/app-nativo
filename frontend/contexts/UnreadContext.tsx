@@ -27,6 +27,11 @@ export function UnreadProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadCounts = async () => {
       try {
+        const token = getToken();
+        if (!token) {
+          return;
+        }
+
         const visitResult = await getUnreadVisitCount();
         setUnreadVisitsState(visitResult.unread_visits);
 
