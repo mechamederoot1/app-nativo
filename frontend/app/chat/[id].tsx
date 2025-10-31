@@ -21,6 +21,7 @@ import {
   uploadChatFile,
   API_BASE_URL,
   getToken,
+  sendChatMessage,
 } from '../../utils/api';
 import { getSocket } from '../../utils/websocket';
 import * as ImagePicker from 'expo-image-picker';
@@ -398,28 +399,39 @@ export default function ChatScreen() {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!inputText.trim() || !socket || isSending) return;
+    if (!inputText.trim() || isSending) return;
 
     try {
       setIsSending(true);
 
       if (editingMessageId) {
         // Edit existing message
-        const messageData = {
-          message_id: editingMessageId,
-          content: inputText,
-        };
-        socket.emit('edit_message', messageData);
+        if (socket) {
+          const messageData = {
+            message_id: editingMessageId,
+            content: inputText,
+          };
+          socket.emit('edit_message', messageData);
+        }
         setEditingMessageId(null);
         setEditingContent('');
       } else {
-        // Send new message
-        const messageData = {
-          conversation_id: parseInt(id as string),
-          content: inputText,
-          content_type: 'text',
-        };
-        socket.emit('chat_message', messageData);
+        // Send new message via WebSocket or fallback to REST
+        if (socket) {
+          const messageData = {
+            conversation_id: parseInt(id as string),
+            content: inputText,
+            content_type: 'text',
+          };
+          socket.emit('chat_message', messageData);
+        } else {
+          // Fallback to REST API
+          await sendChatMessage(
+            parseInt(id as string),
+            inputText,
+            'text'
+          );
+        }
       }
 
       setInputText('');
