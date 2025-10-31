@@ -6,13 +6,11 @@ import {
   SafeAreaView,
   View,
   Text,
-  FlatList,
   ActivityIndicator,
   Alert,
   Platform,
 } from 'react-native';
-import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
+import * as ImagePicker from 'expo-image-picker';
 import { Music, X, Send, Play, Pause } from 'lucide-react-native';
 import { Audio } from 'expo-av';
 
