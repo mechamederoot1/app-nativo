@@ -103,7 +103,7 @@ def get_status(user_id: int, current: User = Depends(get_current_user), db: Sess
     return FriendStatusOut(status="none", request_id=None)
 
 @router.post("/requests/{request_id}/accept", response_model=FriendRequestOut)
-def accept_request(request_id: int, current: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def accept_request(request_id: int, current: User = Depends(get_current_user), db: Session = Depends(get_db)):
     req = db.query(FriendRequest).filter(FriendRequest.id == request_id).first()
     if not req or req.status != "pending":
         raise HTTPException(status_code=404, detail="Convite não encontrado")
@@ -140,14 +140,16 @@ def accept_request(request_id: int, current: User = Depends(get_current_user), d
 
     # Emit websocket notification to the request sender
     if sender:
-        asyncio.create_task(
-            emit_friend_request_accepted(
+        try:
+            await emit_friend_request_accepted(
                 requester_id=req.sender_id,
                 accepter_id=current.id,
                 accepter_name=f"{current.first_name} {current.last_name}".strip() or current.username,
                 accepter_avatar=current.profile_photo
             )
-        )
+        except Exception as e:
+            import logging
+            logging.warning(f"Failed to emit friend request accepted notification: {str(e)}")
 
     return req
 
