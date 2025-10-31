@@ -568,9 +568,7 @@ export async function sendChatMessage(
   });
 }
 
-export async function markMessageAsRead(
-  messageId: number,
-): Promise<any> {
+export async function markMessageAsRead(messageId: number): Promise<any> {
   return request(`/chat/messages/${messageId}/read`, { method: 'POST' });
 }
 
@@ -584,9 +582,7 @@ export async function editMessage(
   });
 }
 
-export async function deleteMessage(
-  messageId: number,
-): Promise<any> {
+export async function deleteMessage(messageId: number): Promise<any> {
   return request(`/chat/messages/${messageId}`, { method: 'DELETE' });
 }
 
@@ -600,9 +596,11 @@ export async function reactToMessage(
   });
 }
 
-export async function uploadChatFile(
-  file: { uri: string; type: string; name?: string },
-): Promise<{ media_url: string }> {
+export async function uploadChatFile(file: {
+  uri: string;
+  type: string;
+  name?: string;
+}): Promise<{ media_url: string }> {
   const form = new FormData();
   form.append('file', {
     uri: file.uri,

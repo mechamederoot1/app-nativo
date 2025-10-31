@@ -166,7 +166,9 @@ const MessageBubble = ({
             {message.reactions.map((reaction, idx) => (
               <View key={idx} style={styles.reactionBubble}>
                 <Text style={styles.reactionEmoji}>{reaction.emoji}</Text>
-                <Text style={styles.reactionCount}>{reaction.users.length}</Text>
+                <Text style={styles.reactionCount}>
+                  {reaction.users.length}
+                </Text>
               </View>
             ))}
           </View>
@@ -235,7 +237,9 @@ export default function ChatScreen() {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
   const [editingContent, setEditingContent] = useState('');
-  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
+  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(
+    null,
+  );
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [reactionTargetId, setReactionTargetId] = useState<number | null>(null);
 
@@ -347,7 +351,9 @@ export default function ChatScreen() {
           prev.map((msg) => {
             if (msg.id === data.message_id) {
               const reactions = msg.reactions || [];
-              const existingReaction = reactions.find((r) => r.emoji === data.emoji);
+              const existingReaction = reactions.find(
+                (r) => r.emoji === data.emoji,
+              );
               if (existingReaction) {
                 existingReaction.users.push({
                   id: data.user_id,
@@ -371,7 +377,7 @@ export default function ChatScreen() {
               return { ...msg, reactions };
             }
             return msg;
-          })
+          }),
         );
       }
     };
@@ -426,11 +432,7 @@ export default function ChatScreen() {
           socket.emit('chat_message', messageData);
         } else {
           // Fallback to REST API
-          await sendChatMessage(
-            parseInt(id as string),
-            inputText,
-            'text'
-          );
+          await sendChatMessage(parseInt(id as string), inputText, 'text');
         }
       }
 
@@ -676,7 +678,11 @@ export default function ChatScreen() {
 
             <TextInput
               style={styles.input}
-              placeholder={editingMessageId ? 'Edite a mensagem...' : 'Escreva uma mensagem...'}
+              placeholder={
+                editingMessageId
+                  ? 'Edite a mensagem...'
+                  : 'Escreva uma mensagem...'
+              }
               placeholderTextColor="#94a3b8"
               value={inputText}
               onChangeText={handleTyping}
