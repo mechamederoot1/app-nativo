@@ -9,6 +9,8 @@ import TopBar from '../../components/TopBar';
 import { formatPostTime } from '../../utils/time';
 import { useRouter } from 'expo-router';
 import { subscribe, toggleLike, Post as StorePost } from '../../store/posts';
+import { useUnread } from '../../contexts/UnreadContext';
+import { getUnreadVisitCount, getUnreadNotificationsCount } from '../../utils/api';
 
 type Post = StorePost;
 
